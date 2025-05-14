@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "tailwindcss-primeui";
+@import "./primevue.css";
+
+body {
+  @apply bg-(--p-surface-100) text-(--p-surface-950);
+  @apply dark:bg-(--p-surface-950) dark:text-(--p-surface-100);
+}
