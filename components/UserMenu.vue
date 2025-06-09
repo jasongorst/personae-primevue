@@ -14,9 +14,9 @@
 
     <Menu
       id="user_menu"
-      ref="menu"
       :model="menuItems"
       :popup="true"
+      ref="menu"
     >
       <template #item="{ item, props }">
         <!--suppress HtmlUnknownTarget -->
@@ -51,37 +51,54 @@
 </template>
 
 <script setup>
-const isLoggedIn = ref(true)
-const user = ref({ email: "foo@example.com" })
+const toast = useToast()
+const showSignIn = useState("showSignIn")
+const { status, data: user, signOut } = useAuth()
+const menu = useTemplateRef("menu")
 
-const menu = ref()
+const isLoggedIn = computed(() => status.value === "authenticated")
 
 const menuItems = computed(() => {
   if (isLoggedIn.value) {
+    // noinspection JSUnresolvedReference
     return [{
       label: user.value.email,
       items: [
         { label: "Dashboard", route: "/dashboard/account" },
-        { label: "Sign Out", command: () => signOut() }
+        { label: "Sign Out", command: () => doSignOut() }
       ]
     }]
   } else {
     return [
-      { label: "Sign In", command: () => showSignInDialog() }
+      { label: "Sign In", command: () => doSignIn() }
     ]
   }
 })
+
+async function doSignOut() {
+  await signOut({ redirect: false })
+
+  toast.add({
+    severity: "success",
+    summary: "Success.",
+    detail: "You've been signed out."
+  })
+
+  closeMenu()
+}
+
+function doSignIn() {
+  closeMenu()
+  showSignIn.value = true
+}
 
 function toggleMenu(event) {
   menu.value.toggle(event)
 }
 
-function signOut() {
-  isLoggedIn.value = false
-}
-
-function showSignInDialog() {
-  isLoggedIn.value = true
+function closeMenu(_) {
+  // noinspection JSUnresolvedReference
+  menu.value.hide()
 }
 </script>
 

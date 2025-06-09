@@ -1,42 +1,31 @@
-<!--suppress HtmlUnknownBooleanAttribute -->
 <template>
   <DataTable
-    v-model:filters="filters"
     :value="characters"
-    @filter="handleFilter"
     dataKey="id"
-    :filterDisplay="showFilters ? 'row' : ''"
+    v-model:selection="selected"
+    selectionMode="single"
+    @rowSelect="showDetail(selected)"
+    v-model:filters="filters"
+    @filter="handleFilter"
+    :filterDisplay="showFilters ? 'row' : null"
     removableSort
+    scrollable
+    scrollHeight="calc(100vw - 88px)"
     size="small"
-    striped-rows
+    stripedRows
     rowHover
-    :pt="{
-      thead: { class: '*:nth-of-type-2:align-top *:nth-of-type-2:*:px-2' }
-    }"
+    pt:header="pb-0!"
+    pt:thead="*:nth-of-type-2:align-top *:nth-of-type-2:*:px-2"
   >
     <template #header>
-      <template
+      <FilterChips
         v-if="hasFilter && !showFilters"
-        v-for="attribute in categoryAttributes"
-        :key="attribute"
-      >
-        <Chip
-          v-for="value in filters[attribute].value"
-          :label="value"
-          removable
-        >
-          <template #removeicon="{ removeCallback, keydownCallback }">
-            <Icon
-              name="ph:x-bold"
-              class="p-0.5 rounded-full hover:bg-surface-200 dark:hover:bg-surface-600"
-              size="1.25em"
-              @click="removeFilter(attribute, value)"
-            />
-          </template>
-        </Chip>
-      </template>
+        :filters="filters"
+        @remove="removeFilter"
+      />
     </template>
 
+    <!--suppress HtmlUnknownBooleanAttribute -->
     <Column
       v-for="attribute in listAttributes"
       :field="attribute"
@@ -52,13 +41,10 @@
           @change="filterCallback()"
           multiple
           checkmark
-          scrollHeight="100vw"
-          :pt="{
-            root: { class: 'border-0 text-sm' },
-            option: { class: 'py-1.5!' }
-          }"
+          pt:root="border-0 text-sm"
+          pt:option="py-1.5!"
         >
-          <template #option="{ option, selected, index }">
+          <template #option="{ option, index }">
             <li
               :id="`filter_${attribute}_${index}`"
               :class="!isValueInFilter(attribute, option) && 'text-surface-400! dark:text-surface-500!'"
@@ -81,43 +67,31 @@
 </template>
 
 <script setup>
-import { FilterMatchMode } from "@primevue/core/api"
+const toast = useToast()
+
 const query = useState("query")
 const showFilters = useState("showFilters")
-
-const initialFilters = _fromPairs(
-  _map(
-    listAttributes,
-    (attribute) => [ attribute, {
-      value: null,
-      matchMode: _includes(categoryAttributes, attribute) ? FilterMatchMode.IN : FilterMatchMode.STARTS_WITH }
-    ]
-  )
-)
-
 const filters = useState("filters", () => initialFilters)
 
 const filtered = ref([])
+const selected = ref()
 
-const { data: characters, status, refresh: loadCharacters } = await useApi(
+const { data: characters } = await useApi(
   "/characters", {
-    // manual: true,
     query: { q: query },
     transform: (data) => deepParseTimestamps(deepConvertKeys(data, _camelCase)),
 
-    // onRequestError: () => alert.add(
-    //   "Couldn't load characters. The server cannot be reached.", {
-    //     severity: "error",
-    //     dismissOnLeave: true
-    //   }
-    // ),
-    //
-    // onResponseError: () => alert.add(
-    //   "Couldn't load characters. Something is wrong with the server.", {
-    //     severity: "error",
-    //     dismissOnLeave: true
-    //   }
-    // )
+    onRequestError: () => toast.add({
+      severity: "error",
+      summary: "Nope.",
+      detail: "Couldn't load characters. The server cannot be reached."
+    }),
+
+    onResponseError: () => toast.add({
+      severity: "error",
+      summary: "Nope.",
+      detail: "Couldn't load characters. Something is wrong with the server.",
+    })
   }
 )
 
@@ -143,8 +117,6 @@ function filteredValues(attribute) {
 }
 
 function removeFilter(attribute, value) {
-  console.log(`[[removeFilter]] ${attribute}: ${value}`)
-  console.log()
   filters.value[attribute].value = _without(filters.value[attribute].value, value)
 }
 
@@ -153,6 +125,10 @@ function hasFilter() {
     filters.value,
     (value) => isPresent(value.value)
   )
+}
+
+async function showDetail({ id }) {
+  await navigateTo({ path: `/show-${id}` })
 }
 </script>
 

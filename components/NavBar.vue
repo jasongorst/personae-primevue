@@ -1,12 +1,20 @@
 <template>
   <Toolbar
-    class="mb-4"
-    pt:start="flex-none"
-    pt:center="grow"
-    pt:end="flex-none"
+    pt:root="
+      flex items-center justify-between flex-wrap p-3 gap-2
+      bg-primary-0 dark:bg-primary-900 text-surface-700 dark:text-surface-0
+      rounded-md mb-2 lg:mb-4
+    "
+    pt:start="flex items-center grow gap-2"
+    pt:center="hidden"
+    pt:end="flex items-center flex-none"
+    :ptOptions="{ mergeProps: false }"
   >
     <template #start>
-      <Button variant="text">
+      <Button
+        variant="text"
+        :ptOptions="{ mergeProps: true }"
+      >
         <NuxtLink
           class="whitespace-nowrap text-lg font-bold"
           data-testid="title"
@@ -17,6 +25,8 @@
           Dramatis Personae
         </NuxtLink>
       </Button>
+
+      <SearchField />
 
       <Button
         variant="text"
@@ -36,10 +46,6 @@
 
         Filters
       </Button>
-    </template>
-
-    <template #center>
-      <SearchField />
     </template>
 
     <template #end>

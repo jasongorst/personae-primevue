@@ -1,0 +1,41 @@
+@layer components {
+  .trix-content {
+    & a[href] {
+      @apply link link-secondary;
+    }
+
+    & pre {
+      @apply bg-base-200 text-base-content;
+    }
+
+    .attachment__caption {
+      @apply text-base-content/60;
+    }
+
+    .attachment--preview {
+      .attachment__caption {
+        @apply text-base-content/60;
+      }
+    }
+
+    .attachment--file {
+      @apply text-base-content/40 border border-base-content/40;
+    }
+
+    .attachment-gallery {
+      > action-text-attachment,
+      > .attachment {
+        @apply py-0 px-2 max-w-[33%];
+        flex: 1 0 33%;
+      }
+
+      &.attachment-gallery--2,
+      &.attachment-gallery--4 {
+        > action-text-attachment,
+        > .attachment {
+          @apply basis-1/2 max-w-[50%];
+        }
+      }
+    }
+  }
+}

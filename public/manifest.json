@@ -1,0 +1,13 @@
+{
+  "name": "personae",
+  "short_name": "personae",
+  "icons": [
+    {
+      "src": "google-touch-icon.png",
+      "sizes": "512x512"
+    }
+  ],
+  "background_color": "#ffffff",
+  "theme_color": "#6e0b75",
+  "display": "fullscreen"
+}

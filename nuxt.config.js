@@ -1,6 +1,27 @@
 import tailwindcss from "@tailwindcss/vite"
 
+const mockAuthModule = process.env.VITEST ? [ "./test/mocks/setup.js" ] : []
+
 export default defineNuxtConfig({
+  app: {
+    head: {
+      link: [
+        { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+        { rel: "icon", href: "/theater-masks-solid.svg" },
+        { rel: "manifest", href: "/manifest.json" },
+        { rel: "mask-icon", href: "/theater-masks-solid.svg", color: "#6e0b75" }
+      ],
+
+      meta: [
+        { charset: "UTF-8" },
+        { name: "theme-color", content: "#6e0b75" },
+        { name: "viewport", content: "width=device-width, initial-scale=1.0" }
+      ],
+
+      title: "Dramatis Personae"
+    }
+  },
+
   compatibilityDate: '2024-11-01',
 
   css: [ "~/assets/css/main.css" ],
@@ -17,11 +38,14 @@ export default defineNuxtConfig({
   modules: [
     "@nuxt/icon",
     "@primevue/nuxt-module",
-    "nuxt-lodash"
+    "@sidebase/nuxt-auth",
+    "nuxt-lodash",
+    ...mockAuthModule
   ],
 
   runtimeConfig: {
     // placeholders to be overridden by env vars
+    auth: { baseUrl: "" },
     public: {
       useApi: { baseURL: "" },
       api: { baseURL: "" }
@@ -30,6 +54,54 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [ tailwindcss() ]
+  },
+
+  // module configs
+  auth: {
+    isEnabled: true,
+
+    globalAppMiddleware: {
+      unauthenticatedOnly: false,
+      navigateAuthenticatedTo: "/",
+      navigateUnauthenticatedTo: "/",
+      addDefaultCallbackUrl: false
+    },
+
+    originEnvKey: "NUXT_AUTH_BASE_URL",
+
+    provider: {
+      type: "local",
+      pages: { login: "/" },
+
+      endpoints: {
+        signUp: false,
+        signIn: { path: "/login", method: "post" },
+        signOut: { path: "/logout", method: "post" },
+        getSession: { path: "/session", method: "get" }
+      },
+
+      token: {
+        headerName: "Authorization",
+        type: "Bearer",
+        signInResponseTokenPointer: "/access_token"
+      },
+
+      refresh: {
+        isEnabled: true,
+        endpoint: {
+          path: "/jwt-refresh",
+          method: "post"
+        },
+
+        refreshOnlyToken: false,
+
+        token: {
+          signInResponseRefreshTokenPointer: "/refresh_token",
+          refreshResponseTokenPointer: "/access_token",
+          refreshRequestTokenPointer: "/refresh_token"
+        }
+      }
+    }
   },
 
   icon: {
@@ -55,6 +127,9 @@ export default defineNuxtConfig({
   },
 
   primevue: {
+    directives: {
+      include: [ "Tooltip" ]
+    },
     importPT: { from: "@@/passthrough/customPT.js" },
     options: {
       ptOptions: {

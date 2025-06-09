@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tailwindcss-primeui";
 @import "./primevue.css";
+@import "./theme.css";
+@source "../../passthrough/customPT.js";
 
 body {
   @apply bg-(--p-surface-100) text-(--p-surface-950);

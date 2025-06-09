@@ -25,10 +25,18 @@
       type="search"
     >
 
-    <span class="flex items-center justify-center border-y border-e border-surface-300 dark:border-surface-700 rounded-e-md overflow-hidden">
+    <span
+      class="
+        flex items-center justify-center overflow-hidden
+        border-y border-e rounded-e-md
+        border-surface-300 dark:border-surface-700
+        bg-surface-0 dark:bg-surface-950
+      "
+    >
       <Button
         variant="text"
         pt:root="rounded-none"
+        :ptOptions="{ mergeProps: true }"
       >
         <Icon name="ph:magnifying-glass-bold" />
       </Button>

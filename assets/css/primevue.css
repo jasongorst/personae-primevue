@@ -1,28 +1,28 @@
 /* Primary and Surface Palettes */
 :root {
-  --p-primary-50: #ecfdf5;
-  --p-primary-100: #d1fae5;
-  --p-primary-200: #a7f3d0;
-  --p-primary-300: #6ee7b7;
-  --p-primary-400: #34d399;
-  --p-primary-500: #10b981;
-  --p-primary-600: #059669;
-  --p-primary-700: #047857;
-  --p-primary-800: #065f46;
-  --p-primary-900: #064e3b;
-  --p-primary-950: #022c22;
-  --p-surface-0: #ffffff;
-  --p-surface-50: #fafafa;
-  --p-surface-100: #f4f4f5;
-  --p-surface-200: #e4e4e7;
-  --p-surface-300: #d4d4d8;
-  --p-surface-400: #a1a1aa;
-  --p-surface-500: #71717a;
-  --p-surface-600: #52525b;
-  --p-surface-700: #3f3f46;
-  --p-surface-800: #27272a;
-  --p-surface-900: #18181b;
-  --p-surface-950: #09090b;
+  --p-primary-50: oklch(0.99 0.141 139.549);
+  --p-primary-100: oklch(0.95289 0.141 139.549);
+  --p-primary-200: oklch(0.93 0.141 139.549);
+  --p-primary-300: oklch(0.90711 0.141 139.549);
+  --p-primary-400: oklch(0.88422 0.141 139.549);
+  --p-primary-500: oklch(0.86133 0.141 139.549);
+  --p-primary-600: oklch(0.741 0.141 139.549);
+  --p-primary-700: oklch(0.62067 0.141 139.549);
+  --p-primary-800: oklch(0.50033 0.141 139.549);
+  --p-primary-900: oklch(0.38 0.141 139.549);
+  --p-primary-950: oklch(0.25967 0.141 139.549);
+  --p-surface-0: oklch(1 0 360);
+  --p-surface-50: oklch(0.9851 0.018 262.177);
+  --p-surface-100: oklch(0.9674 0.018 262.177);
+  --p-surface-200: oklch(0.9197 0.018 262.177);
+  --p-surface-300: oklch(0.8711 0.018 262.177);
+  --p-surface-400: oklch(0.7118 0.018 262.177);
+  --p-surface-500: oklch(0.5517 0.018 262.177);
+  --p-surface-600: oklch(0.4419 0.018 262.177);
+  --p-surface-700: oklch(0.30857 0.018 262.177);
+  --p-surface-800: oklch(0.28036 0.018 262.177);
+  --p-surface-900: oklch(0.26346 0.018 262.177);
+  --p-surface-950: oklch(0.1408 0.018 262.177);
   --p-content-border-radius: 6px;
 }
 
@@ -62,10 +62,10 @@
     --p-content-border-color: var(--p-surface-700);
     --p-content-hover-background: var(--p-surface-800);
     --p-content-hover-color: var(--p-surface-0);
-    --p-highlight-background: color-mix(in srgb, var(--p-primary-400), transparent 84%);
-    --p-highlight-color: rgba(255, 255, 255, 0.87);
-    --p-highlight-focus-background: color-mix(in srgb, var(--p-primary-400), transparent 76%);
-    --p-highlight-focus-color: rgba(255, 255, 255, 0.87);
+    --p-highlight-background: color-mix(in oklch, var(--p-primary-400), transparent 84%);
+    --p-highlight-color: oklch(1 0 360 / 87%);
+    --p-highlight-focus-background: color-mix(in oklch, var(--p-primary-400), transparent 76%);
+    --p-highlight-focus-color: oklch(1 0 360 / 87%);
     --p-text-color: var(--p-surface-0);
     --p-text-hover-color: var(--p-surface-0);
     --p-text-muted-color: var(--p-surface-400);
