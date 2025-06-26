@@ -35,6 +35,13 @@ export default defineNuxtConfig({
 
   future: { compatibilityVersion: 4 },
 
+  imports: {
+    presets: [ {
+      from: "tailwind-merge",
+      imports: [ "twJoin", "twMerge" ]
+    } ]
+  },
+
   modules: [
     "@nuxt/icon",
     "@primevue/nuxt-module",
@@ -53,7 +60,15 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    plugins: [ tailwindcss() ]
+    plugins: [ tailwindcss() ],
+
+    vue: {
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.startsWith("trix-") || tag.startsWith("action-text-")
+        }
+      }
+    }
   },
 
   // module configs
