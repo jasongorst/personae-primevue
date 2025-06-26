@@ -45,6 +45,11 @@ const customPT = {
     }
   },
 
+  buttongroup: {
+    root: `*:rounded-none *:first:rounded-s-md *:last:rounded-e-md
+        *:focus-visible:relative *:focus-visible:z-10 *:not-last:border-r-0`
+  },
+
   card:{
     root: `flex flex-col rounded-xl
         bg-surface-0 dark:bg-surface-900 
@@ -205,8 +210,8 @@ const customPT = {
 
   dialog: {
     root: `max-h-[90%] max-w-screen rounded-xl
-          border border-surface-200 dark:border-surface-700
-          bg-surface-0 dark:bg-surface-900
+          border border-surface-100 dark:border-surface-800
+          bg-surface-200 dark:bg-surface-700
           text-surface-700 dark:text-surface-0 shadow-lg
           p-maximized:w-screen p-maximized:h-screen p-maximized:top-0 p-maximized:start-0p-maximized: max-h-full p-maximized:rounded-none`,
     header: `flex items-center justify-between shrink-0 p-5`,
@@ -296,24 +301,25 @@ const customPT = {
   },
 
   menu: {
-    root: `bg-surface-0 dark:bg-surface-900 
-        text-surface-700 dark:text-surface-0 
-        border border-surface-200 dark:border-surface-700
+    root: `bg-primary-0 dark:bg-primary-900
+        text-primary dark:text-primary
         rounded-md min-w-52
         p-popup:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)]`,
-    list: `m-0 p-1 list-none outline-none flex flex-col gap-[2px]`,
+    list: `mx-1 mb-1 list-none outline-none flex flex-col gap-0.5`,
     item: `p-disabled:opacity-60 p-disabled:pointer-events-none`,
-    itemContent: `group transition-colors duration-200 rounded-sm text-surface-700 dark:text-surface-0
-        p-focus:bg-surface-100 dark:p-focus:bg-surface-800 p-focus:text-surface-800 dark:p-focus:text-surface-0
-        hover:bg-surface-100 dark:hover:bg-surface-800 hover:text-surface-800 dark:hover:text-surface-0`,
+    itemContent: `group transition-colors duration-200 rounded-sm
+        p-focus:bg-primary-50 dark:p-focus:bg-primary/5
+        p-focus:text-primary dark:p-focus:text-primary
+        hover:bbg-primary-50 dark:hover:bg-primary/5
+        hover:text-primary dark:hover:text-primary`,
     itemLink: `cursor-pointer flex items-center no-underline overflow-hidden relative text-inherit
-        px-3 py-2 gap-2 select-none outline-none`,
-    itemIcon: `text-surface-400 dark:text-surface-500
-        p-focus:text-surface-500 dark:p-focus:text-surface-400
-        group-hover:text-surface-500 dark:group-hover:text-surface-400`,
+        px-4 py-2 gap-2 select-none outline-none`,
+    itemIcon: `text-primary dark:text-primary
+        p-focus:text-primary dark:p-focus:text-primary
+        group-hover:text-primary dark:group-hover:text-primary`,
     itemLabel: ``,
-    submenuLabel: `bg-transparent px-3 py-2 text-surface-500 dark:text-surface-400 font-semibold`,
-    separator: `border-t border-surface-200 dark:border-surface-700`,
+    submenuLabel: `bg-transparent px-4 py-2 text-primary dark:text-primary font-semibold`,
+    separator: `border-t border-primary dark:border-primary`,
     transition: {
       enterFromClass: 'opacity-0 scale-y-75',
       enterActiveClass: 'transition duration-120 ease-[cubic-bezier(0,0,0.2,1)]',
@@ -433,6 +439,25 @@ const customPT = {
       leaveActiveClass: 'transition-opacity duration-100 ease-linear',
       leaveToClass: 'opacity-0'
     }
+  },
+
+  textarea: {
+    root: `appearance-none rounded-md outline-hidden
+        bg-surface-0 dark:bg-surface-950
+        p-filled:bg-surface-50 dark:p-filled:bg-surface-800
+        text-surface-700 dark:text-surface-0
+        placeholder:text-surface-500 dark:placeholder:text-surface-400
+        border border-surface-300 dark:border-surface-700
+        enabled:hover:border-surface-400 dark:enabled:hover:border-surface-600
+        enabled:focus:border-primary
+        disabled:bg-surface-200 disabled:text-surface-500
+        dark:disabled:bg-surface-700 dark:disabled:text-surface-400
+        p-invalid:border-red-400 dark:p-invalid:border-red-300
+        p-invalid:placeholder:text-red-600 dark:p-invalid:placeholder:text-red-400
+        px-3 py-2 p-fluid:w-full
+        p-small:text-sm p-small:px-[0.625rem] p-small:py-[0.375rem]
+        p-large:text-lg p-large:px-[0.875rem] p-large:py-[0.625rem]
+        transition-colors duration-200 shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]`
   },
 
   toast: {
