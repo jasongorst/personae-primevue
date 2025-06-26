@@ -325,3 +325,9 @@
     @slot;
   }
 }
+
+@custom-variant active {
+  &:where(&:active, [data-trix-active]) {
+    @slot;
+  }
+}
