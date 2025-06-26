@@ -2,9 +2,9 @@
   <div>
     <Button
       variant="text"
-      @click="toggleMenu"
       aria-haspopup="true"
       aria-controls="user_menu"
+      @click="toggleMenu"
     >
       <Icon
         :name="isLoggedIn ? 'ph:user-circle-fill' : 'ph:user-circle-light'"
@@ -13,11 +13,18 @@
     </Button>
 
     <Menu
+      class="mt-2"
       id="user_menu"
       :model="menuItems"
       :popup="true"
       ref="menu"
     >
+      <template v-if="isLoggedIn" #start>
+        <div class="bg-transparent px-5 py-2 mb-0.5 text-primary/60 dark:text-primary/60 font-semibold">
+          {{ user.email }}
+        </div>
+      </template>
+
       <template #item="{ item, props }">
         <!--suppress HtmlUnknownTarget -->
         <NuxtLink
@@ -40,8 +47,6 @@
           :href="item.url"
           :target="item.target"
           v-bind="props.action"
-          target="_self"
-          rel="noopener noreferrer"
         >
           {{ item.label }}
         </a>
@@ -61,13 +66,10 @@ const isLoggedIn = computed(() => status.value === "authenticated")
 const menuItems = computed(() => {
   if (isLoggedIn.value) {
     // noinspection JSUnresolvedReference
-    return [{
-      label: user.value.email,
-      items: [
-        { label: "Dashboard", route: "/dashboard/account" },
-        { label: "Sign Out", command: () => doSignOut() }
-      ]
-    }]
+    return [
+      { label: "Dashboard", route: "/" },
+      { label: "Sign Out", command: () => onSignOut() }
+    ]
   } else {
     return [
       { label: "Sign In", command: () => doSignIn() }
@@ -75,12 +77,12 @@ const menuItems = computed(() => {
   }
 })
 
-async function doSignOut() {
+async function onSignOut() {
   await signOut({ redirect: false })
 
   toast.add({
     severity: "success",
-    summary: "Success.",
+    summary: "Signed Out.",
     detail: "You've been signed out."
   })
 
