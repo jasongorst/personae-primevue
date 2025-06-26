@@ -1,7 +1,5 @@
 <template>
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
+  <slot />
 </template>
 
 <script setup>
