@@ -4,9 +4,7 @@
     dataKey="id"
     v-model:selection="selected"
     selectionMode="single"
-    @rowSelect="showDetail(selected)"
     v-model:filters="filters"
-    @filter="handleFilter"
     :filterDisplay="showFilters ? 'row' : null"
     removableSort
     scrollable
@@ -14,8 +12,12 @@
     size="small"
     stripedRows
     rowHover
+    stateStorage="session"
+    stateKey="datatable-state-characters"
     pt:header="pb-0!"
     pt:thead="*:nth-of-type-2:align-top *:nth-of-type-2:*:px-2"
+    @filter="onFilter"
+    @rowSelect="onRowSelect"
   >
     <template #header>
       <FilterChips
@@ -38,16 +40,16 @@
           v-if="categoryAttributes.includes(attribute)"
           v-model="filterModel.value"
           :options="uniqValues(characters, attribute)"
-          @change="filterCallback()"
           multiple
           checkmark
           pt:root="border-0 text-sm"
           pt:option="py-1.5!"
+          @change="filterCallback()"
         >
           <template #option="{ option, index }">
             <li
               :id="`filter_${attribute}_${index}`"
-              :class="!isValueInFilter(attribute, option) && 'text-surface-400! dark:text-surface-500!'"
+              :class="!valueIsInFilter(attribute, option) && 'text-surface-400! dark:text-surface-500!'"
             >
               {{ option }}
             </li>
@@ -58,8 +60,8 @@
           v-else
           v-model="filterModel.value"
           type="search"
-          @input="filterCallback()"
           placeholder="Filter"
+          @input="filterCallback()"
         />
       </template>
     </Column>
@@ -68,10 +70,13 @@
 
 <script setup>
 const toast = useToast()
+const { status } = useAuth()
 
 const query = useState("query")
 const showFilters = useState("showFilters")
 const filters = useState("filters", () => initialFilters)
+
+const isLoggedIn = computed(() => status.value === "authenticated")
 
 const filtered = ref([])
 const selected = ref()
@@ -96,19 +101,18 @@ const { data: characters } = await useApi(
 )
 
 watch(
-  characters,
-  (newCharacters) => {
+  characters, (newCharacters) => {
     filters.value = initialFilters
     // noinspection JSValidateTypes
     filtered.value = newCharacters
   }
 )
 
-function handleFilter({ filteredValue }) {
+function onFilter({ filteredValue }) {
   filtered.value = filteredValue
 }
 
-function isValueInFilter(attribute, value) {
+function valueIsInFilter(attribute, value) {
   return _includes(filteredValues(attribute), value)
 }
 
@@ -127,8 +131,18 @@ function hasFilter() {
   )
 }
 
-async function showDetail({ id }) {
-  await navigateTo({ path: `/show-${id}` })
+function onRowSelect() {
+  const id = selected.value.id
+  selected.value = null
+  showDetail(id)
+}
+
+async function showDetail(id) {
+  if (isLoggedIn.value) {
+    await navigateTo({ path: `/edit-${id}` })
+  } else {
+    await navigateTo({ path: `/show-${id}` })
+  }
 }
 </script>
 
