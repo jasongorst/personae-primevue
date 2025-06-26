@@ -28,6 +28,7 @@
 
 /* Light */
 :root {
+  --p-surface-color: var(--p-surface-0);
   --p-primary-color: var(--p-primary-500);
   --p-primary-contrast-color: var(--p-surface-0);
   --p-primary-hover-color: var(--p-primary-600);
@@ -55,6 +56,7 @@
 */
 @media (prefers-color-scheme: dark) {
   :root {
+    --p-surface-color: var(--p-surface-950);
     --p-primary-color: var(--p-primary-400);
     --p-primary-contrast-color: var(--p-surface-900);
     --p-primary-hover-color: var(--p-primary-300);
@@ -71,4 +73,8 @@
     --p-text-muted-color: var(--p-surface-400);
     --p-text-hover-muted-color: var(--p-surface-300);
   }
+}
+
+@theme inline {
+  --color-surface: var(--p-surface-color);
 }
