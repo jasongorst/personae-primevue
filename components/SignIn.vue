@@ -1,19 +1,18 @@
 <template>
   <Dialog
-    :visible="visible"
-    modal
+    v-model:visible="visible"
     pt:root="w-11/12 max-w-128"
     :ptOptions="{ mergeProps: ptViewMerge }"
   >
     <template #container>
       <Form
+        class="flex flex-col gap-2 p-5"
         v-slot="$form"
         :initialValues="initialValues"
         :resolver="resolver"
-        :validateOnValueUpdate="false"
+        :validateOnValueUpdate="true"
         :validateOnBlur="true"
         @submit="onFormSubmit"
-        class="flex flex-col gap-2 p-5"
       >
         <div class="flex flex-col">
           <label
@@ -30,7 +29,6 @@
             type="email"
             placeholder="Email address"
             autocomplete="email"
-            required
           />
 
           <Message
@@ -56,26 +54,25 @@
             :feedback="false"
             fluid
             toggleMask
-            id="signin_password"
+            inputId="signin_password"
             placeholder="Password"
             autocomplete="password"
-            required
           >
             <!--suppress VueUnrecognizedSlot -->
             <template #maskicon="{ toggleCallback }">
               <Icon
+                class="end-3 text-surface-500 dark:text-surface-400 absolute top-1/2 -mt-2 w-4 h-4"
                 name="ph:eye-slash-bold"
                 @click="toggleCallback"
-                class="end-3 text-surface-500 dark:text-surface-400 absolute top-1/2 -mt-2 w-4 h-4"
               />
             </template>
 
             <!--suppress VueUnrecognizedSlot -->
             <template #unmaskicon="{ toggleCallback }">
               <Icon
+                class="end-3 text-surface-500 dark:text-surface-400 absolute top-1/2 -mt-2 w-4 h-4"
                 name="ph:eye-bold"
                 @click="toggleCallback"
-                class="end-3 text-surface-500 dark:text-surface-400 absolute top-1/2 -mt-2 w-4 h-4"
               />
             </template>
           </Password>
@@ -104,8 +101,8 @@
 
           <template #loadingicon>
             <Icon
-              name="ph:circle-notch-bold"
               class="animate-spin"
+              name="ph:circle-notch-bold"
             />
           </template>
         </Button>
@@ -117,8 +114,15 @@
 <script setup>
 import { Form } from "@primevue/forms"
 // noinspection JSUnresolvedReference
-import { zodResolver } from "@primevue/forms/resolvers/zod"
-import { z } from "zod"
+import { yupResolver } from "@primevue/forms/resolvers/yup"
+import * as yup from "yup"
+
+const props = defineProps({
+  visible: {
+    type: Boolean,
+    required: true
+  }
+})
 
 const visible = defineModel("visible", { required: true })
 
@@ -126,10 +130,10 @@ const toast = useToast()
 const { status, signIn } = useAuth()
 const isLoading = computed(() => status.value === "loading")
 
-const resolver = ref(zodResolver(
-  z.object({
-    email: z.string().email({ message: "Invalid email address." }),
-    password: z.string().min(1, { message: "Password is required." })
+const resolver = ref(yupResolver(
+  yup.object().shape({
+    email: yup.string().email("Not a valid email address.").required("Email Address can't be blank."),
+    password: yup.string().required("Password can't be blank.")
   })
 ))
 
@@ -150,15 +154,17 @@ async function signInWithPassword(values) {
     closeDialog()
 
     toast.add({
+      severity: "success",
+      summary: "Signed In.",
       detail: "You are now signed in.",
-      severity: "success"
     })
   } catch (error) {
     console.log(error)
 
     toast.add({
-      detail: error.data?.message || error.message,
       severity: "error",
+      summary: "Not Signed In.",
+      detail: error.data?.message || error.message,
       closeable: false
     })
   }
