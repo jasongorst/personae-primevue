@@ -14,7 +14,7 @@
             name="ph:x-bold"
             class="p-0.5 rounded-full hover:bg-surface-200 dark:hover:bg-surface-600"
             size="1.25em"
-            @click="$emit('remove', attribute, value)"
+            @click="emit('remove', attribute, value)"
           />
         </template>
       </Chip>
