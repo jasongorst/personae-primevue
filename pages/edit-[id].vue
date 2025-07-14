@@ -1,167 +1,181 @@
 <template>
-  <!--suppress JSValidateTypes -->
-  <Form
-    v-slot="$form"
-    :initialValues="character"
-    :resolver="resolver"
-    :validateOnValueUpdate="false"
-    :validateOnBlur="true"
-    @submit="onSubmit"
-    @reset="onReset"
-    ref="form"
-  >
-    <Card class="max-w-prose mx-auto">
-      <template #content>
-        <div class="flex flex-col gap-2">
-          <div
-            class="flex flex-col"
-            v-for="{ attribute, type } in apiAttributes"
-            :key="attribute"
+  <Card class="max-w-prose mx-auto">
+    <template #content>
+      <div class="flex flex-col gap-2">
+        <div
+          class="flex flex-col"
+          v-for="{ attribute, type } in apiAttributes"
+          :key="attribute"
+        >
+          <label
+            :for="attribute"
+            class="ml-1 text-primary dark:text-primary text-sm"
           >
-            <label
-              :for="attribute"
-              class="ml-1 text-primary dark:text-primary text-sm"
-            >
-              {{ _startCase(attribute) }}
-            </label>
+            {{ _startCase(attribute) }}
+          </label>
 
-            <Swap
-              v-if="type === 'richText'"
-              @active="focusInput(attribute)"
-            >
-              <div
-                class="px-3 py-2 border border-transparent trix-content"
-                v-html="$form[attribute]?.value || '&nbsp;'"
+          <Swap
+            v-if="type === 'richText'"
+            @active="focusInputTrix(attribute)"
+          >
+            <div
+              class="px-3 py-2 border border-transparent trix-content"
+              v-html="(character?.[attribute]) || '&nbsp;'"
+            />
+
+            <template #active="{ close }">
+              <InputTrix
+                v-model="character[attribute]"
+                :id="attribute"
+                @blur="onBlur(close)"
+                ref="trixEditors"
               />
-
-              <template #active="{ close }">
-                <InputTrix
-                  :id="attribute"
-                  :name="attribute"
-                  @blur="onBlur(attribute, close)"
-                  ref="trixEditors"
-                />
-              </template>
-            </Swap>
-
-            <Swap
-              v-else
-              @active="focusInput(attribute)"
-            >
-              <div class="px-3 py-2 border border-transparent">
-                {{ $form[attribute]?.value || "&nbsp;" }}
-              </div>
-
-              <template #active="{ close }">
-                <InputText
-                  :id="attribute"
-                  :name="attribute"
-                  fluid
-                  @blur="onBlur(attribute, close)"
-                />
-              </template>
-            </Swap>
-
-            <!--suppress JSUnresolvedReference -->
-            <Message
-              v-if="$form[attribute]?.invalid"
-              severity="error"
-              size="small"
-              variant="simple"
-            >
-              {{ $form[attribute].error.message }}
-            </Message>
-          </div>
-        </div>
-      </template>
-
-      <template #footer>
-        <div class="mt-4 flex flex-row gap-3 justify-end">
-            <template v-if="anyAreDirty">
-              <Button
-                type="reset"
-                severity="warn"
-              >
-                Cancel
-              </Button>
-
-              <Button
-                type="submit"
-                :disabled="isInvalid || !isLoggedIn"
-              >
-                Save
-              </Button>
             </template>
+          </Swap>
 
-            <template v-else>
-              <Button>
-                <NuxtLink to="/">
-                  Back
-                </NuxtLink>
-              </Button>
+          <Swap
+            v-else-if="type === 'autocomplete'"
+            @active="focusInput(attribute)"
+          >
+            <div class="px-3 py-2 border border-transparent">
+              {{character?.[attribute] || "&nbsp;" }}
+            </div>
 
-              <Button
-                @click="confirmDelete"
-                :disabled="!isLoggedIn"
-                severity="danger"
-              >
-                Delete
-              </Button>
+            <template #active="{ close }">
+              <ComboBox
+                v-model="character[attribute]"
+                :inputId="attribute"
+                :suggestions="suggestions[attribute]"
+                :minLength="0"
+                :showEmptyMessage="false"
+                :completeOnFocus="true"
+                fluid
+                @complete="(event) => onComplete(attribute, event)"
+                @blur="onBlurAutoComplete(close)"
+                @optionSelect="onOptionSelect"
+              />
             </template>
+          </Swap>
+
+          <Swap
+            v-else
+            @active="focusInput(attribute)"
+          >
+            <div class="px-3 py-2 border border-transparent">
+              {{ character?.[attribute] || "&nbsp;" }}
+            </div>
+
+            <template #active="{ close }">
+              <InputText
+                v-model="character[attribute]"
+                :id="attribute"
+                fluid
+                @blur="onBlur(close)"
+              />
+            </template>
+          </Swap>
         </div>
-      </template>
-    </Card>
-  </Form>
+      </div>
+    </template>
+
+    <template #footer>
+      <div class="mt-4 flex flex-row gap-3 justify-end">
+          <template v-if="isUpdated">
+            <Button
+              type="reset"
+              severity="warn"
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="submit"
+              :disabled="!isLoggedIn"
+            >
+              Save
+            </Button>
+          </template>
+
+          <template v-else>
+            <Button>
+              <NuxtLink to="/">
+                Back
+              </NuxtLink>
+            </Button>
+
+            <Button
+              @click="confirmDelete"
+              :disabled="!isLoggedIn"
+              severity="danger"
+            >
+              Delete
+            </Button>
+          </template>
+      </div>
+    </template>
+  </Card>
 </template>
 
 <script setup>
-import { Form } from "@primevue/forms"
-// noinspection JSUnresolvedReference
-import { yupResolver } from "@primevue/forms/resolvers/yup"
-import * as yup from "yup"
-
 const route = useRoute()
 const router = useRouter()
 const confirm = useConfirm()
 const toast = useToast()
 const { status, token } = useAuth()
+const isLoggedIn = computed(() => status.value === "authenticated")
 
-const form = useTemplateRef("form")
 const trixEditors = useTemplateRef("trixEditors")
 
-const isLoggedIn = computed(() => status.value === "authenticated")
-const anyAreDirty = computed(() => _some(form.value?.states, "dirty"))
-const isInvalid = computed(() => form.value?.invalid)
-const editedFields = computed(() => _mapValues(_pickBy(form.value?.states, "dirty"), "value"))
+const updatedFields = new Set()
+const isUpdated = computed(() => isPresent(updatedFields))
+const updatedCharacter = computed(() => _pick(character, Array.from(updatedFields)))
 
-const resolver = ref(yupResolver(
-  yup.object().shape({
-    faeName: yup.string().nullable(),
-    mortalName: yup.string().nullable(),
-    player: yup.string().required("Player shouldn't be blank."),
-    kith: yup.string().nullable(),
-    house: yup.string().nullable(),
-    bannerhouse: yup.string().nullable(),
-    seeming: yup.string().nullable(),
-    rank: yup.string().nullable(),
-    location: yup.string().nullable(),
-    position: yup.string().nullable(),
-    description: yup.string().nullable(),
-    notes: yup.string().nullable()
-  })
-))
+const suggestions = ref()
+const { data: options } = await useApi("/characters/options", { watch: false })
+suggestions.value = _clone(options.value)
 
 async function focusInput(attribute) {
   await nextTick()
-  document.getElementById(attribute).focus()
+  const input = document.getElementById(attribute)
+  const length = _isNull(character.value?.[attribute]) ? 0 : character.value[attribute].length
+
+  console.log(input)
+
+  input?.focus()
+  input?.setSelectionRange(length, length)
 }
 
-async function onBlur(attribute, close) {
-  await form.value.validate()
+async function focusInputTrix(attribute) {
+  await nextTick()
+  const input = document.getElementById(attribute)
+  input.focus()
 
-  if (form.value.states[attribute].valid) {
-    close()
-  }
+  await nextTick()
+  const length = input.editor.getDocument().getLength()
+  input.editor.setSelectedRange(length - 1)
+}
+
+function onBlur(close) {
+  close()
+}
+
+function onBlurAutoComplete(close) {
+  console.log("[onBlur]")
+
+  // onBlur(close)
+}
+
+function onOptionSelect() {
+  console.log("[onOptionSelect]")
+}
+
+function onComplete(attribute, { query }) {
+  console.log("[onComplete]", attribute, query)
+
+  suggestions.value[attribute] = _filter(
+    options.value[attribute],
+    (option) => _startsWith(_lowerCase(option), _lowerCase(query))
+  )
 }
 
 async function onSubmit(event) {
@@ -211,7 +225,6 @@ function confirmDelete() {
 
 const { data: character, refresh: reloadCharacter } = await useApi(
   `/characters/${route.params.id}`, {
-
     onRequestError: () => toast.add({
       severity: "error",
       summary: "Sorry.",
@@ -231,7 +244,7 @@ const { execute: saveCharacter } = await useApi(
   `/characters/${route.params.id}`,
   {
     // values of edited attributes
-    body: { character: editedFields },
+    body: { character: updatedFields },
     method: "patch",
     token: token,
     manual: true,
