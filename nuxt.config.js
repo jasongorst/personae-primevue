@@ -44,6 +44,7 @@ export default defineNuxtConfig({
 
   modules: [
     "@nuxt/icon",
+    "@pinia/nuxt",
     "@primevue/nuxt-module",
     "@sidebase/nuxt-auth",
     "nuxt-lodash",
@@ -55,7 +56,8 @@ export default defineNuxtConfig({
     auth: { baseUrl: "" },
     public: {
       useApi: { baseURL: "" },
-      api: { baseURL: "" }
+      api: { baseURL: "" },
+      websocketHost: ""
     }
   },
 
