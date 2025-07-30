@@ -27,7 +27,7 @@
               <InputTrix
                 v-model="character[attribute]"
                 :id="attribute"
-                @blur="onBlur(close)"
+                @blur="close"
                 ref="trixEditors"
               />
             </template>
@@ -38,7 +38,7 @@
             @active="focusInput(attribute)"
           >
             <div class="px-3 py-2 border border-transparent">
-              {{character?.[attribute] || "&nbsp;" }}
+              {{ character?.[attribute] || "&nbsp;" }}
             </div>
 
             <template #active="{ close }">
@@ -50,9 +50,8 @@
                 :showEmptyMessage="false"
                 :completeOnFocus="true"
                 fluid
-                @complete="(event) => onComplete(attribute, event)"
-                @blur="onBlurAutoComplete(close)"
-                @optionSelect="onOptionSelect"
+                @complete="(event) => complete(attribute, event)"
+                @blur="onAutoCompleteBlur(close)"
               />
             </template>
           </Swap>
@@ -70,7 +69,7 @@
                 v-model="character[attribute]"
                 :id="attribute"
                 fluid
-                @blur="onBlur(close)"
+                @blur="close"
               />
             </template>
           </Swap>
@@ -80,37 +79,37 @@
 
     <template #footer>
       <div class="mt-4 flex flex-row gap-3 justify-end">
-          <template v-if="isUpdated">
-            <Button
-              type="reset"
-              severity="warn"
-            >
-              Cancel
-            </Button>
+        <template v-if="isUpdated">
+          <Button
+            @click="confirmRevert"
+            severity="warn"
+          >
+            Revert
+          </Button>
 
-            <Button
-              type="submit"
-              :disabled="!isLoggedIn"
-            >
-              Save
-            </Button>
-          </template>
+          <Button
+            type="submit"
+            :disabled="!isLoggedIn"
+          >
+            Save
+          </Button>
+        </template>
 
-          <template v-else>
-            <Button>
-              <NuxtLink to="/">
-                Back
-              </NuxtLink>
-            </Button>
+        <template v-else>
+          <Button>
+            <NuxtLink to="/">
+              Back
+            </NuxtLink>
+          </Button>
 
-            <Button
-              @click="confirmDelete"
-              :disabled="!isLoggedIn"
-              severity="danger"
-            >
-              Delete
-            </Button>
-          </template>
+          <Button
+            @click="confirmDelete"
+            :disabled="!isLoggedIn"
+            severity="danger"
+          >
+            Delete
+          </Button>
+        </template>
       </div>
     </template>
   </Card>
@@ -121,76 +120,122 @@ const route = useRoute()
 const router = useRouter()
 const confirm = useConfirm()
 const toast = useToast()
+const charactersStore = useCharactersStore()
+const trixEditors = useTemplateRef("trixEditors")
+
 const { status, token } = useAuth()
 const isLoggedIn = computed(() => status.value === "authenticated")
 
-const trixEditors = useTemplateRef("trixEditors")
+const suggestions = ref(_clone(charactersStore.options))
+const originalCharacter = ref(null)
+const character = ref(null)
 
-const updatedFields = new Set()
-const isUpdated = computed(() => isPresent(updatedFields))
-const updatedCharacter = computed(() => _pick(character, Array.from(updatedFields)))
+const updatedFields = computed(() => nonMatchingProperties(originalCharacter.value, character.value))
+const isUpdated = computed(() => isPresent(updatedFields.value))
 
-const suggestions = ref()
-const { data: options } = await useApi("/characters/options", { watch: false })
-suggestions.value = _clone(options.value)
+callOnce(() => loadCharacter())
 
 async function focusInput(attribute) {
+  // wait for Swap
   await nextTick()
+
+  // set focus to input for the attribute and place cursor after the content (if any)
   const input = document.getElementById(attribute)
   const length = _isNull(character.value?.[attribute]) ? 0 : character.value[attribute].length
-
-  console.log(input)
-
   input?.focus()
   input?.setSelectionRange(length, length)
 }
 
 async function focusInputTrix(attribute) {
+  // wait for Swap
   await nextTick()
+
+  // set focus to input of trix-editor for the attribute
   const input = document.getElementById(attribute)
   input.focus()
 
+  // wait again
   await nextTick()
+
+  // place cursor at the end of trix-editor
   const length = input.editor.getDocument().getLength()
   input.editor.setSelectedRange(length - 1)
 }
 
-function onBlur(close) {
+async function onAutoCompleteBlur(close) {
+  // wait for autoComplete animation to complete before closing
+  await sleep(200)
   close()
 }
 
-function onBlurAutoComplete(close) {
-  console.log("[onBlur]")
-
-  // onBlur(close)
-}
-
-function onOptionSelect() {
-  console.log("[onOptionSelect]")
-}
-
-function onComplete(attribute, { query }) {
-  console.log("[onComplete]", attribute, query)
-
+function complete(attribute, { query }) {
+  // suggestions shows options starting with current input content (ignoring case)
   suggestions.value[attribute] = _filter(
-    options.value[attribute],
+    charactersStore.options[attribute],
     (option) => _startsWith(_lowerCase(option), _lowerCase(query))
   )
 }
 
-async function onSubmit(event) {
+async function submit(event) {
   if (event.valid) {
     await saveCharacter()
-    await reloadCharacter()
-    await onReset()
+
+    // TODO: either directly update charactersStore data, or wait for the patch
+    //   to come over websockets and then maybe verify the change?
+
+    // reloadCharacter()
+    // await onReset()
   }
 }
 
-async function onReset() {
+async function reset() {
+  // reset the form
+  // noinspection JSUnresolvedReference
   form.value.reset()
+
+  // reset the trix-editors
   await nextTick()
   _forEach(trixEditors.value, async (trixEditor) => trixEditor.reset())
+
+  // reset the form again (?)
+  // noinspection JSUnresolvedReference
   form.value.reset()
+
+  // TODO: figure out why I needed to reset the form twice
+}
+
+function loadCharacter() {
+  originalCharacter.value = _clone(charactersStore.data[route.params.id])
+  character.value = _clone(originalCharacter.value)
+}
+
+function confirmRevert() {
+  confirm.require({
+    header: "Revert?",
+    icon: "ph:warning-bold",
+    message: "Do you want to revert the edits you made?",
+    defaultFocus: "reject",
+
+    acceptProps: {
+      label: "Revert",
+      severity: "warn"
+    },
+
+    rejectProps: {
+      label: "Cancel"
+    },
+
+    accept: () => {
+      reset()
+      loadCharacter()
+    },
+
+    reject: () => toast.add({
+      severity: "info",
+      summary: "Cancelled.",
+      detail: "Revert cancelled."
+    })
+  })
 }
 
 function confirmDelete() {
@@ -202,42 +247,22 @@ function confirmDelete() {
 
     acceptProps: {
       label: "Delete",
-      severity: "danger",
+      severity: "danger"
     },
 
     rejectProps: {
-      label: "Cancel",
+      label: "Cancel"
     },
 
-    accept: async () => {
-      await deleteCharacter()
-    },
+    accept: async () => await deleteCharacter(),
 
-    reject: () => {
-      toast.add({
-        severity: "info",
-        summary: "Cancelled.",
-        detail: "Delete cancelled."
-      })
-    }
+    reject: () => toast.add({
+      severity: "info",
+      summary: "Cancelled.",
+      detail: "Delete cancelled."
+    })
   })
 }
-
-const { data: character, refresh: reloadCharacter } = await useApi(
-  `/characters/${route.params.id}`, {
-    onRequestError: () => toast.add({
-      severity: "error",
-      summary: "Sorry.",
-      detail: "Couldn't load the character. The server cannot be reached."
-    }),
-
-    onResponseError: () => toast.add({
-      severity: "error",
-      summary: "Sorry.",
-      detail: "Couldn't load the character. Something is wrong with the server."
-    })
-  }
-)
 
 // save character
 const { execute: saveCharacter } = await useApi(
@@ -302,6 +327,15 @@ const { execute: deleteCharacter } = await useApi(
     })
   }
 )
+
+function nonMatchingProperties(source, target) {
+  return _compact(
+    _map(
+      toValue(source),
+      (value, key) => _isEqual(value, toValue(target)?.[key]) ? null : key
+    )
+  )
+}
 </script>
 
 <style scoped>
