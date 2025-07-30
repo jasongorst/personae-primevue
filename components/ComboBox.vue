@@ -6,8 +6,6 @@ export default {
   extends: AutoComplete,
   methods: {
     onFocus(event) {
-      console.log("[onFocus]")
-
       if (this.disabled) {
         // For ScreenReaders
         return
@@ -28,8 +26,6 @@ export default {
       this.$emit('focus', event)
     },
     onInput(event) {
-      console.log("[onInput]")
-
       if (this.typeahead) {
         if (this.searchTimeout) {
           clearTimeout(this.searchTimeout)
@@ -42,34 +38,28 @@ export default {
         }
 
         if (query.length === 0 && this.minLength > 0) {
-          console.log("[query.length === 0 && minLength > 0]")
-
           this.hide()
           this.$emit("clear")
         } else {
           if (query.length >= this.minLength) {
-            console.log("[query.length >= minLength]")
-
             this.focusedOptionIndex = -1
 
             this.searchTimeout = setTimeout(() => {
               this.search(event, query, "input")
             }, this.delay)
           } else {
-            console.log("[query.length < minLength]")
-
             this.hide()
           }
         }
       }
     },
-    search(event, query, source) {
-      console.log("[search]")
-
+    search(event, query, _) {
       //allow empty string but not undefined or null
       if (query === undefined || query === null) {
         return
       }
+
+      // CHANGED: **DO** search blank values on input change
 
       //do not search blank values on input change
       // if (source === 'input' && query.trim().length === 0) {
