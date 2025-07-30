@@ -86,6 +86,8 @@
     </template>
   </ConfirmDialog>
 
+  <DynamicDialog />
+
   <SignIn
     class="z-90"
     v-model:visible="showSignIn"
