@@ -142,21 +142,21 @@ const initialValues = ref({
   password: ""
 })
 
-function onFormSubmit({ valid, values }) {
+async function onFormSubmit({ valid, values }) {
   if (valid) {
-    signInWithPassword(values)
+    await signInWithPassword(values)
+    closeDialog()
   }
 }
 
 async function signInWithPassword(values) {
   try {
     await signIn(values, { redirect: false })
-    closeDialog()
 
     toast.add({
       severity: "success",
       summary: "Signed In.",
-      detail: "You are now signed in.",
+      detail: "You are now signed in."
     })
   } catch (error) {
     console.log(error)
