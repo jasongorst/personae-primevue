@@ -69,7 +69,7 @@ export function useApi(
   }
 
   if (isPresent(token)) {
-    useFetchOptions.headers = useFetchOptions.headers || {}
+    useFetchOptions.headers = useFetchOptions.headers ?? {}
     useFetchOptions.headers.Authorization = toValue(token)
   }
 

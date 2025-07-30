@@ -1,4 +1,4 @@
-export default defineNuxtPlugin((event) => {
+export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
   const token = useCookie("auth.token", { watch: false})
 
