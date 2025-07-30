@@ -96,10 +96,10 @@ const customPT = {
         p-large:text-[1.125rem] p-large:px-[0.875rem] p-large:py-[0.625rem]
         p-raised:shadow-sm p-rounded:rounded-[2rem]
         p-outlined:bg-transparent enabled:hover:p-outlined:bg-primary-50 enabled:active:p-outlined:bg-primary-100
-        p-outlined:border-primary-200 enabled:hover:p-outlined:border-primary-200 enabled:active:p-outlined:border-primary-200
+        p-outlined:border-primary-200 enabled:hover:p-outlined:border-primary-300 enabled:active:p-outlined:border-primary-400
         p-outlined:text-primary enabled:hover:p-outlined:text-primary enabled:active:p-outlined:text-primary
         dark:p-outlined:bg-transparent dark:enabled:hover:p-outlined:bg-primary/5 dark:enabled:active:p-outlined:bg-primary/15
-        dark:p-outlined:border-primary-700 dark:enabled:hover:p-outlined:border-primary-700 dark:enabled:active:p-outlined:border-primary-700
+        dark:p-outlined:border-primary-700 dark:enabled:hover:p-outlined:border-primary-600 dark:enabled:active:p-outlined:border-primary-500
         dark:p-outlined:text-primary dark:enabled:hover:p-outlined:text-primary dark:enabled:active:p-outlined:text-primary
         p-text:bg-transparent enabled:hover:p-text:bg-primary-50 enabled:active:p-text:bg-primary-100
         p-text:border-transparent enabled:hover:p-text:border-transparent enabled:active:p-text:border-transparent
@@ -259,7 +259,7 @@ const customPT = {
   datatable: {
     root: `relative p-flex-scrollable:flex p-flex-scrollable:flex-col p-flex-scrollable:h-full whitespace-nowrap text-sm`,
     tableContainer: `p-scrollable:relative p-flex-scrollable:flex p-flex-scrollable:flex-col p-flex-scrollable:flex-1 p-flex-scrollable:h-full`,
-    header: `pb-2 px-4 border-b border-surface-200 dark:border-surface-700
+    header: `border-b border-surface-200 dark:border-surface-700
         bg-surface-50 dark:bg-surface-950
         text-surface-700 dark:text-surface-100`,
     table: `border-spacing-0 w-full border-separate`,
