@@ -1,18 +1,28 @@
 import { FilterMatchMode } from "@primevue/core/api"
 
-export default  _reduce(listAttributes, (acc, attribute) => {
-  if (_includes(categoryAttributes, attribute)) {
-    // category attribute
-    acc[attribute] = {
-      value: [],
-      matchMode: FilterMatchMode.IN
+export default _reduce(
+  listAttributes,
+  (filters, attribute) => {
+    if (_includes(categoryAttributes, attribute)) {
+      // category attribute
+      filters[attribute] = {
+        value: [],
+        matchMode: FilterMatchMode.IN
+      }
+    } else {
+      filters[attribute] = {
+        value: "",
+        matchMode: FilterMatchMode.STARTS_WITH
+      }
     }
-  } else {
-    acc[attribute] = {
-      value: "",
-      matchMode: FilterMatchMode.STARTS_WITH
-    }
-  }
 
-  return acc
-}, {})
+    // add global field
+    filters['global'] = {
+      value: null,
+      matchMode: FilterMatchMode.CONTAINS
+    }
+
+    return filters
+  },
+  {}
+)
