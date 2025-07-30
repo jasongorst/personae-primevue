@@ -25,27 +25,6 @@
           Dramatis Personae
         </NuxtLink>
       </Button>
-
-      <SearchField />
-
-      <Button
-        variant="text"
-        @click="toggleShowFilters"
-      >
-        <Icon
-          v-if="showFilters"
-          name="ph:funnel-simple-x-bold"
-          size="1.25rem"
-        />
-
-        <Icon
-          v-else
-          name="ph:funnel-simple-bold"
-          size="1.25rem"
-        />
-
-        Filters
-      </Button>
     </template>
 
     <template #end>
@@ -55,11 +34,7 @@
 </template>
 
 <script setup>
-const showFilters = useState("showFilters", () => false)
 
-function toggleShowFilters() {
-  showFilters.value = !showFilters.value
-}
 </script>
 
 <style scoped>
