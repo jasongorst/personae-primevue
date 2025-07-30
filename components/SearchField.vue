@@ -1,13 +1,15 @@
 <template>
-  <div class="
-  flex items-stretch flex-auto group rounded-md
-  border border-surface-300 dark:border-surface-700
-  has-enabled:has-hover:border-surface-400 dark:has-enabled:has-hover:border-surface-600
-  has-enabled:has-focus:border-primary
-  has-p-invalid:border-danger-300 dark:has-p-invalid:border-danger-700
-  has-enabled:has-hover:has-p-invalid:border-danger-400 dark:has-enabled:has-hover:has-p-invalid:border-danger-600
-  has-enabled:has-focus:has-p-invalid:border-danger
-">
+  <div
+    class="
+      flex items-stretch flex-auto group rounded-md
+      border border-surface-300 dark:border-surface-700
+      has-enabled:has-hover:border-surface-400 dark:has-enabled:has-hover:border-surface-600
+      has-enabled:has-focus:border-primary
+      has-p-invalid:border-danger-300 dark:has-p-invalid:border-danger-700
+      has-enabled:has-hover:has-p-invalid:border-danger-400 dark:has-enabled:has-hover:has-p-invalid:border-danger-600
+      has-enabled:has-focus:has-p-invalid:border-danger
+    "
+  >
     <input
       v-model.lazy.trim="query"
       class="
@@ -45,7 +47,8 @@
 </template>
 
 <script setup>
-const query = useState("query")
+const charactersStore = useCharactersStore()
+const { query } = storeToRefs(charactersStore)
 </script>
 
 <style scoped>
