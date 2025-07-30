@@ -1,30 +1,108 @@
 <template>
+  <Dialog
+    v-if="charactersStore.loading"
+    :visible="true"
+    modal
+    :showHeader="false"
+    pt:root:class="bg-transparent! border-0"
+    pt:content:class="p-0!"
+  >
+    <ProgressSpinner :unstyled="false" />
+  </Dialog>
+
   <DataTable
-    :value="characters"
-    dataKey="id"
-    v-model:selection="selected"
+    v-else
+    :value="charactersStore.characters"
+    v-model:selection="selectedCharacter"
     selectionMode="single"
     v-model:filters="filters"
+    :globalFilterFields="apiAttributesList"
     :filterDisplay="showFilters ? 'row' : null"
     removableSort
     scrollable
-    scrollHeight="calc(100vw - 88px)"
+    scrollHeight="calc(100vh - 180px)"
     size="small"
     stripedRows
     rowHover
     stateStorage="session"
     stateKey="datatable-state-characters"
-    pt:header="pb-0!"
-    pt:thead="*:nth-of-type-2:align-top *:nth-of-type-2:*:px-2"
-    @filter="onFilter"
+    :pt="{
+      header: 'pb-0!',
+      thead: '*:nth-of-type-2:align-top *:nth-of-type-2:*:px-2 *:nth-of-type-2:*:py-2'
+    }"
     @rowSelect="onRowSelect"
+    ref="dataTable"
   >
     <template #header>
+      <div class="mb-2 flex gap-4 justify-between">
+        <InputThing>
+          <template #start>
+            <Icon name="ph:magnifying-glass-bold" />
+          </template>
+
+          <InputText
+            v-model="filters['global'].value"
+            placeholder="Search"
+            type="search"
+            fluid
+          />
+        </InputThing>
+
+        <Button
+          variant="outlined"
+          :disabled="!charactersStore.hasAnyFilter"
+          @click="charactersStore.resetFilters"
+          class="px-4"
+        >
+          <Icon
+            name="ph:funnel-simple-x-bold"
+            size="1.25rem"
+            class="min-w-[1.25rem]"
+          />
+
+          Clear All
+        </Button>
+
+        <Button
+          variant="outlined"
+          @click="toggleShowFilters"
+          class="px-4"
+        >
+          <Icon
+            name="ph:funnel-simple-bold"
+            size="1.25rem"
+            class="min-w-[1.25rem]"
+          />
+
+          <div class="flex flex-col">
+            <div :class="!showFilters && 'invisible h-0'">Hide</div>
+            <div :class="showFilters && 'invisible h-0'">Show</div>
+          </div>
+        </Button>
+      </div>
+
       <FilterChips
-        v-if="hasFilter && !showFilters"
+        v-if="charactersStore.hasAnyAttributeFilter && !showFilters"
         :filters="filters"
-        @remove="removeFilter"
+        class="mb-2"
+        @remove="charactersStore.removeFilter"
       />
+    </template>
+
+    <template #empty>
+      <div class="text-2xl text-center">
+        <template v-if="charactersStore.hasGlobalFilter && !charactersStore.hasAnyAttributeFilter">
+          No characters matching &ldquo;<span class="italic">{{ filters['global'].value }}</span>&rdquo;.
+        </template>
+
+        <template v-else-if="charactersStore.hasGlobalFilter && charactersStore.hasAnyAttributeFilter">
+          No characters matching &ldquo;<span class="italic">{{ filters['global'].value }}</span>&rdquo; with the current filters.
+        </template>
+
+        <template v-else>
+          No characters matching the current filters.
+        </template>
+      </div>
     </template>
 
     <!--suppress HtmlUnknownBooleanAttribute -->
@@ -36,26 +114,43 @@
       sortable
     >
       <template #filter="{ filterModel, filterCallback }">
-        <Listbox
+<!--        min-height: listbox (14rem) + gap-2 (--spacing(2) + small button (1.25rem line-height + 2 * 0.375rem padding + 2 * 1px borders)-->
+        <div
           v-if="categoryAttributes.includes(attribute)"
-          v-model="filterModel.value"
-          :options="uniqValues(characters, attribute)"
-          multiple
-          checkmark
-          pt:root="border-0 text-sm"
-          pt:option="py-1.5!"
-          @change="filterCallback()"
+          class="flex flex-col justify-between gap-2 min-h-[calc(--spacing(2)+16rem+2px)]"
         >
-          <template #option="{ option, index }">
-            <li
-              :id="`filter_${attribute}_${index}`"
-              :class="!valueIsInFilter(attribute, option) && 'text-surface-400! dark:text-surface-500!'"
-            >
-              {{ option }}
-            </li>
-          </template>
-        </Listbox>
+<!--          category attribute -->
+          <Listbox
+            v-model="filterModel.value"
+            :options="uniqValues(charactersStore.characters, attribute)"
+            multiple
+            checkmark
+            pt:root="border-0 text-sm"
+            pt:option="py-1!"
+            @change="filterCallback"
+          >
+            <template #option="{ option, index }">
+              <li
+                :id="`filter_${attribute}_${index}`"
+                :class="!valueIncludedInFiltered(attribute, option) && 'text-surface-400! dark:text-surface-500!'"
+              >
+                {{ option }}
+              </li>
+            </template>
+          </Listbox>
 
+          <Button
+            variant="outlined"
+            size="small"
+            fluid
+            :disabled="!charactersStore.hasFilterFor(attribute)"
+            @click="charactersStore.resetFilterFor(attribute)"
+          >
+            Clear
+          </Button>
+        </div>
+
+<!--        non-category attribute (i.e., a name) -->
         <InputText
           v-else
           v-model="filterModel.value"
@@ -71,81 +166,47 @@
 <script setup>
 const toast = useToast()
 const { status } = useAuth()
-
-const query = useState("query")
-const showFilters = useState("showFilters")
-const filters = useState("filters", () => initialFilters)
-
 const isLoggedIn = computed(() => status.value === "authenticated")
+const charactersStore = useCharactersStore()
+const { filters } = storeToRefs(charactersStore)
+const showFilters = useState("showFilters")
+const dataTable = useTemplateRef("dataTable")
+const selectedCharacter = ref()
 
-const filtered = ref([])
-const selected = ref()
-
-const { data: characters } = await useApi(
-  "/characters", {
-    query: { q: query },
-    transform: (data) => deepParseTimestamps(deepConvertKeys(data, _camelCase)),
-
-    onRequestError: () => toast.add({
-      severity: "error",
-      summary: "Nope.",
-      detail: "Couldn't load characters. The server cannot be reached."
-    }),
-
-    onResponseError: () => toast.add({
-      severity: "error",
-      summary: "Nope.",
-      detail: "Couldn't load characters. Something is wrong with the server.",
-    })
-  }
-)
-
-watch(
-  characters, (newCharacters) => {
-    filters.value = initialFilters
-    // noinspection JSValidateTypes
-    filtered.value = newCharacters
-  }
-)
-
-function onFilter({ filteredValue }) {
-  filtered.value = filteredValue
+function valueIncludedInFiltered(attribute, value) {
+  return _includes(valuesFromFiltered(attribute), value)
 }
 
-function valueIsInFilter(attribute, value) {
-  return _includes(filteredValues(attribute), value)
-}
-
-function filteredValues(attribute) {
-  return uniqValues(filtered.value, attribute)
-}
-
-function removeFilter(attribute, value) {
-  filters.value[attribute].value = _without(filters.value[attribute].value, value)
-}
-
-function hasFilter() {
-  return _some(
-    filters.value,
-    (value) => isPresent(value.value)
-  )
+function valuesFromFiltered(attribute) {
+  // noinspection JSUnresolvedReference
+  return uniqValues(dataTable.value.processedData, attribute)
 }
 
 function onRowSelect() {
-  const id = selected.value.id
-  selected.value = null
-  showDetail(id)
+  const id = selectedCharacter.value.id
+  selectedCharacter.value = null
+  naviagateToCharacter(id)
 }
 
-async function showDetail(id) {
+async function naviagateToCharacter(id) {
   if (isLoggedIn.value) {
     await navigateTo({ path: `/edit-${id}` })
   } else {
     await navigateTo({ path: `/show-${id}` })
   }
 }
+
+function toggleShowFilters() {
+  showFilters.value = !showFilters.value
+}
 </script>
 
 <style scoped>
-
+/*noinspection CssUnusedSymbol*/
+.p-progressspinner {
+  --p-progressspinner-color-one: var(--color-primary-400);
+  --p-progressspinner-color-two: var(--color-primary-900);
+  --p-progressspinner-color-three: var(--color-primary-400);
+  --p-progressspinner-color-four: var(--color-primary-100);
+}
 </style>
