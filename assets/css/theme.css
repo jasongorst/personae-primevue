@@ -1,5 +1,6 @@
 /* theme settings */
 :root {
+  --theme-primary: oklch(88.422% 0.141 139.549);
   --theme-secondary: oklch(73.375% 0.165 35.353);
   --theme-success: oklch(86.171% 0.142 166.534);
   --theme-info: oklch(86.078% 0.142 206.182);
