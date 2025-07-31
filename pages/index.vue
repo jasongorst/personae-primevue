@@ -28,7 +28,10 @@
     stateKey="datatable-state-characters"
     :pt="{
       header: 'pb-0!',
-      thead: '*:nth-of-type-2:align-top *:nth-of-type-2:*:px-2 *:nth-of-type-2:*:py-2'
+      thead: '*:nth-of-type-2:align-top *:nth-of-type-2:*:px-2 *:nth-of-type-2:*:py-2',
+      column: {
+        headerCell: ''
+      }
     }"
     @rowSelect="onRowSelect"
     ref="dataTable"
@@ -124,16 +127,29 @@
             v-model="filterModel.value"
             :options="uniqValues(charactersStore.characters, attribute)"
             multiple
-            checkmark
+            scrollHeight="14rem"
             pt:root="border-0 text-sm"
-            pt:option="py-1!"
+            pt:list="p-0!"
+            pt:option="p-0!"
             @change="filterCallback"
           >
-            <template #option="{ option, index }">
+            <template #option="{ option, selected, index }">
               <li
                 :id="`filter_${attribute}_${index}`"
+                class="flex flex-row items-center gap-1"
                 :class="!valueIncludedInFiltered(attribute, option) && 'text-surface-400! dark:text-surface-500!'"
               >
+                <Icon
+                  v-if="selected"
+                  name="ph:check-bold"
+                  size="1em"
+                />
+
+                <div
+                  v-else
+                  class="size-[1em]"
+                />
+
                 {{ option }}
               </li>
             </template>
