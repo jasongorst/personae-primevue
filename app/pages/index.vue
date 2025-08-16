@@ -1,36 +1,34 @@
 <template>
-  <Dialog
-    v-if="charactersStore.loading"
+  <SpinnerModal
+    v-if="!isLoaded"
     :visible="true"
-    modal
-    :showHeader="false"
-    pt:root:class="bg-transparent! border-0"
-    pt:content:class="p-0!"
-  >
-    <ProgressSpinner :unstyled="false" />
-  </Dialog>
+  />
 
+  <!-- navbar text-[1.25rem] [1.25rem]; line-height 1.5 [1.875rem]; py-2 [2 * --spacing(2) = --spacing(4) = 16px]; mb-4 [--spacing(4) = 16px] -->
+  <!-- line-height 1.25 [1.25rem]; py-2 [2 * --spacing(2) = --spacing(4) = 8px]; border [2 * 1px = 2px]; mb-2 [--spacing(2) = 8px] -->
+  <!-- scrollHeight="calc(100vh - 3.125rem - 56px)" -->
   <DataTable
     v-else
-    :value="charactersStore.characters"
+    :value="characters"
     v-model:selection="selectedCharacter"
-    selectionMode="single"
     v-model:filters="filters"
-    :globalFilterFields="apiAttributesList"
     :filterDisplay="showFilters ? 'row' : null"
+    :globalFilterFields="apiAttributesList"
     removableSort
-    scrollable
-    scrollHeight="calc(100vh - 180px)"
-    size="small"
-    stripedRows
     rowHover
+    scrollHeight="calc(100vh - 3.125rem - 62px)"
+    scrollable
+    selectionMode="single"
+    size="small"
+    stateKey="datatable-state"
     stateStorage="session"
-    stateKey="datatable-state-characters"
+    stripedRows
     :pt="{
       header: 'pb-0!',
-      thead: '*:nth-of-type-2:align-top *:nth-of-type-2:*:px-2 *:nth-of-type-2:*:py-2',
+      thead: 'bg-surface-0! dark:bg-surface-950!',
+      headerRow: 'first-of-type:bg-surface-0 dark:first-of-type:bg-surface-900 nth-of-type-2:align-top nth-of-type-2:*:px-1 nth-of-type-2:*:py-2',
       column: {
-        headerCell: ''
+        headerCell: 'bg-transparent!'
       }
     }"
     @rowSelect="onRowSelect"
@@ -53,8 +51,8 @@
 
         <Button
           variant="outlined"
-          :disabled="!charactersStore.hasAnyFilter"
-          @click="charactersStore.resetFilters"
+          :disabled="!hasAnyFilter"
+          @click="resetFilters"
           class="px-4"
         >
           <Icon
@@ -85,25 +83,25 @@
       </div>
 
       <FilterChips
-        v-if="charactersStore.hasAnyAttributeFilter && !showFilters"
+        v-if="hasAnyAttributeFilter && !showFilters"
         :filters="filters"
         class="mb-2"
-        @remove="charactersStore.removeFilter"
+        @remove="removeFilter"
       />
     </template>
 
     <template #empty>
       <div class="text-2xl text-center">
-        <template v-if="charactersStore.hasGlobalFilter && !charactersStore.hasAnyAttributeFilter">
+        <template v-if="hasGlobalFilter && !hasAnyAttributeFilter">
           No characters matching &ldquo;<span class="italic">{{ filters['global'].value }}</span>&rdquo;.
         </template>
 
-        <template v-else-if="charactersStore.hasGlobalFilter && charactersStore.hasAnyAttributeFilter">
+        <template v-else-if="hasGlobalFilter && hasAnyAttributeFilter">
           No characters matching &ldquo;<span class="italic">{{ filters['global'].value }}</span>&rdquo; with the current filters.
         </template>
 
         <template v-else>
-          No characters matching the current filters.
+          No characters match the current filters.
         </template>
       </div>
     </template>
@@ -117,27 +115,29 @@
       sortable
     >
       <template #filter="{ filterModel, filterCallback }">
-<!--        min-height: listbox (14rem) + gap-2 (--spacing(2) + small button (1.25rem line-height + 2 * 0.375rem padding + 2 * 1px borders)-->
+        <!-- min-height: listbox scrollHeight [12rem] + gap-2 [--spacing(2)] + small button [1.25rem line-height + 2 * py-0.5 [--spacing(0.5)] + 2 * 1px borders] -->
+        <!--   = 12em + --spacing() + 1.25rem + --spacing(1) + 2px -->
+        <!--   = --spacing(3) + 13.25rem + 2px -->
         <div
           v-if="categoryAttributes.includes(attribute)"
-          class="flex flex-col justify-between gap-2 min-h-[calc(--spacing(2)+16rem+2px)]"
+          class="flex flex-col justify-between gap-2 min-h-[calc(--spacing(3)+13.25rem+2px)]"
         >
-<!--          category attribute -->
+          <!-- category attribute -->
           <Listbox
             v-model="filterModel.value"
-            :options="uniqValues(charactersStore.characters, attribute)"
+            :options="uniqValues(characters, attribute)"
             multiple
-            scrollHeight="14rem"
-            pt:root="border-0 text-sm"
+            scrollHeight="12rem"
+            pt:root="text-sm"
             pt:list="p-0!"
-            pt:option="p-0!"
+            pt:option="pl-2 pr-3 py-1!"
             @change="filterCallback"
           >
             <template #option="{ option, selected, index }">
-              <li
+              <div
                 :id="`filter_${attribute}_${index}`"
                 class="flex flex-row items-center gap-1"
-                :class="!valueIncludedInFiltered(attribute, option) && 'text-surface-400! dark:text-surface-500!'"
+                :class="!isFilteredValue(attribute, option) && 'text-surface-400! dark:text-surface-500!'"
               >
                 <Icon
                   v-if="selected"
@@ -151,28 +151,29 @@
                 />
 
                 {{ option }}
-              </li>
+              </div>
             </template>
           </Listbox>
 
           <Button
+            class="py-0.5!"
             variant="outlined"
             size="small"
             fluid
-            :disabled="!charactersStore.hasFilterFor(attribute)"
-            @click="charactersStore.resetFilterFor(attribute)"
+            :disabled="!hasFilterFor(attribute)"
+            @click="resetFilterFor(attribute)"
           >
             Clear
           </Button>
         </div>
 
-<!--        non-category attribute (i.e., a name) -->
+        <!-- non-category attribute (i.e., a name) -->
         <InputText
           v-else
           v-model="filterModel.value"
           type="search"
           placeholder="Filter"
-          @input="filterCallback()"
+          @input="filterCallback"
         />
       </template>
     </Column>
@@ -181,30 +182,34 @@
 
 <script setup>
 const toast = useToast()
-const { status } = useAuth()
-const isLoggedIn = computed(() => status.value === "authenticated")
-const charactersStore = useCharactersStore()
-const { filters } = storeToRefs(charactersStore)
 const showFilters = useState("showFilters")
 const dataTable = useTemplateRef("dataTable")
-const selectedCharacter = ref()
 
-function valueIncludedInFiltered(attribute, value) {
-  return _includes(valuesFromFiltered(attribute), value)
-}
+const { status } = useAuth()
+const isLoggedIn = computed(() => status.value === "authenticated")
 
-function valuesFromFiltered(attribute) {
+const charactersStore = useCharactersStore()
+const { characters, filters, hasAnyAttributeFilter, hasAnyFilter, hasGlobalFilter, isLoaded } = storeToRefs(charactersStore)
+const { hasFilterFor, load, removeFilter, resetFilterFor, resetFilters } = charactersStore
+
+const selectedCharacter = ref(null)
+
+function filteredValues(attribute) {
   // noinspection JSUnresolvedReference
   return uniqValues(dataTable.value.processedData, attribute)
+}
+
+function isFilteredValue(attribute, value) {
+  return _includes(filteredValues(attribute), value)
 }
 
 function onRowSelect() {
   const id = selectedCharacter.value.id
   selectedCharacter.value = null
-  naviagateToCharacter(id)
+  navigateToCharacter(id)
 }
 
-async function naviagateToCharacter(id) {
+async function navigateToCharacter(id) {
   if (isLoggedIn.value) {
     await navigateTo({ path: `/edit-${id}` })
   } else {
@@ -218,11 +223,5 @@ function toggleShowFilters() {
 </script>
 
 <style scoped>
-/*noinspection CssUnusedSymbol*/
-.p-progressspinner {
-  --p-progressspinner-color-one: var(--color-primary-400);
-  --p-progressspinner-color-two: var(--color-primary-900);
-  --p-progressspinner-color-three: var(--color-primary-400);
-  --p-progressspinner-color-four: var(--color-primary-100);
-}
+
 </style>

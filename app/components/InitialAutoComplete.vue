@@ -2,7 +2,7 @@
 import AutoComplete from "primevue/autocomplete"
 
 export default {
-  name: "ComboBox",
+  name: "InitialAutoComplete",
   extends: AutoComplete,
   methods: {
     onFocus(event) {
@@ -12,7 +12,7 @@ export default {
       }
 
       if (!this.dirty && this.completeOnFocus) {
-        this.search(event, event.target.value, 'focus')
+        this.search(event, event.target.value, "focus")
       }
 
       this.dirty = true
@@ -23,7 +23,7 @@ export default {
         this.scrollInView(this.focusedOptionIndex)
       }
 
-      this.$emit('focus', event)
+      this.$emit("focus", event)
     },
     onInput(event) {
       if (this.typeahead) {
@@ -62,12 +62,12 @@ export default {
       // CHANGED: **DO** search blank values on input change
 
       //do not search blank values on input change
-      // if (source === 'input' && query.trim().length === 0) {
+      // if (source === "input" && query.trim().length === 0) {
       //   return
       // }
 
       this.searching = true
-      this.$emit('complete', { originalEvent: event, query })
+      this.$emit("complete", { originalEvent: event, query })
     }
   }
 }

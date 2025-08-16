@@ -22,6 +22,8 @@ export default defineNuxtConfig({
     }
   },
 
+  srcDir: "app/",
+
   compatibilityDate: '2025-07-31',
 
   css: [ "~/assets/css/main.css" ],
@@ -32,8 +34,6 @@ export default defineNuxtConfig({
     enabled: true,
     timeline: { enabled: true }
   },
-
-  future: { compatibilityVersion: 4 },
 
   imports: {
     presets: [ {
@@ -147,7 +147,7 @@ export default defineNuxtConfig({
     directives: {
       include: [ "Tooltip" ]
     },
-    importPT: { from: "@@/passthrough/customPT.js" },
+    importPT: { from: "~/passthrough/customPT.js" },
     options: {
       ptOptions: {
         mergeSections: true,

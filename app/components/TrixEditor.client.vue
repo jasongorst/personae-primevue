@@ -7,10 +7,10 @@
     />
 
     <trix-editor
-      :class="trixEditorClass"
+      v-bind="$attrs"
+      class="trix-content"
       :id="id"
       :input="`${id}_input`"
-      :autofocus="autofocus"
       @trix-change="onTrixChange"
       @trix-focus="onTrixFocus"
       @trix-blur="onTrixBlur"
@@ -29,30 +29,30 @@
 <script setup>
 import Trix from "trix"
 
+defineOptions({
+  inheritAttrs: false
+})
+
+const trixEditor = useTemplateRef("trixEditor")
 const model = defineModel()
 
 const props = defineProps({
-  // class of trix-editor element
-  class: {
-    type: [ Array, String ],
-    default: () => ""
-  },
   id: {
     type: String,
-    required: true
-  },
-  // focus editor when attached
-  autofocus: {
-    type: Boolean,
     required: false,
-    default: false
+    default: () => uuid()
   },
+
   // override default editor config
   config: {
     type: Object,
     required: false,
     default: () => {}
   }
+})
+
+defineExpose({
+  reset() { reset() }
 })
 
 const emit = defineEmits([
@@ -69,16 +69,9 @@ const emit = defineEmits([
   "trix-focus",
   "trix-initialize",
   "trix-paste",
-  "trix-selection-change",
+  "trix-selection-change"
 ])
 
-defineExpose({
-  id: props.id,
-  value: model.value,
-  reset() { reset() }
-})
-
-const trixEditor = useTemplateRef("trixEditor")
 const initialValue = ref(model.value)
 
 const defaultClass = [ "trix-content" ]
@@ -97,40 +90,33 @@ function onTrixChange(event) {
 
   emit("change", event)
   emit("input", event)
-  // noinspection JSUnresolvedReference
   emit("trix-change", event)
 }
 
 function onTrixInitialize(event) {
-  // noinspection JSUnresolvedReference
   emit("trix-initialize", event)
 }
 
 // just re-emitting these
 function onTrixFocus(event) {
   emit("focus", event)
-  // noinspection JSUnresolvedReference
   emit("trix-focus", event)
 }
 
 function onTrixBlur(event) {
   emit("blur", event)
-  // noinspection JSUnresolvedReference
   emit("trix-blur", event)
 }
 
 function onTrixBeforeInitialize(event) {
-  // noinspection JSUnresolvedReference
   emit("trix-before-initialize", event)
 }
 
 function onTrixPaste(event) {
-  // noinspection JSUnresolvedReference
   emit("trix-paste", event)
 }
 
 function onTrixSelectionChange(event) {
-  // noinspection JSUnresolvedReference
   emit("trix-selection-change", event)
 }
 
@@ -152,7 +138,9 @@ function onTrixAttachmentRemove(file) {
 
 trix-editor {
   /* textarea.root */
-  @apply appearance-none rounded-md outline-hidden
+  /* min-height: py-2 [--spacing(4)] + border [2 * 1px = 2px] + line-height [1.5rem] */
+  @apply min-h-[calc(--spacing(4)+2px+1.5rem)]
+  appearance-none rounded-md outline-hidden
   bg-surface-0 dark:bg-surface-950
   p-filled:bg-surface-50 dark:p-filled:bg-surface-800
   text-surface-700 dark:text-surface-0

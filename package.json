@@ -12,33 +12,36 @@
     "preview": "nuxt preview -p 4001"
   },
   "dependencies": {
-    "nuxt": "^3.18.0",
+    "nuxt": "^4.0.3",
     "vue": "^3.5.18"
   },
   "devDependencies": {
     "@iconify-json/fa6-solid": "^1.2.4",
     "@iconify-json/ph": "^1.2.2",
     "@nuxt/devtools": "^2.6.2",
-    "@nuxt/icon": "^1.15.0",
+    "@nuxt/icon": "^2.0.0",
     "@pinia/nuxt": "^0.11.2",
-    "@primevue/core": "^4.3.6",
-    "@primevue/forms": "^4.3.6",
-    "@primevue/nuxt-module": "^4.3.6",
-    "@sidebase/nuxt-auth": "^1.0.0",
-    "@tailwindcss/language-server": "^0.14.25",
+    "@primevue/core": "^4.3.7",
+    "@primevue/forms": "^4.3.7",
+    "@primevue/nuxt-module": "^4.3.7",
+    "@sidebase/nuxt-auth": "^1.0.1",
+    "@tailwindcss/language-server": "^0.14.26",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.11",
-    "@vue/language-server": "^3.0.4",
+    "@vue/language-server": "^3.0.5",
     "actioncable-vue": "^3.1.2",
     "fast-json-patch": "^3.1.1",
-    "nuxt-lodash": "^2.5.3",
+    "lodash-es": "^4.17.21",
+    "nuxt-lodash": "github:jasongorst/nuxt-lodash",
     "pinia": "^3.0.3",
-    "primevue": "^4.3.6",
+    "primevue": "^4.3.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
     "tailwindcss-primeui": "^0.6.1",
     "trix": "^2.1.15",
-    "vite": "^7.0.6",
-    "yup": "^1.6.1"
-  }
+    "uuid": "^11.1.0",
+    "vite": "^7.1.2",
+    "yup": "^1.7.0"
+  },
+  "packageManager": "pnpm@10.14.0+sha512.ad27a79641b49c3e481a16a805baa71817a04bbe06a38d17e60e2eaee83f6a146c6a688125f5792e48dd5ba30e7da52a5cda4c3992b9ccf333f9ce223af84748"
 }

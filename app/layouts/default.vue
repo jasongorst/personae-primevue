@@ -1,5 +1,5 @@
 <template>
-  <Toast class="z-100">
+  <Toast class="top-14!">
     <!--suppress VueUnrecognizedSlot -->
     <template #messageicon="{ class: messageIconClass }">
       <div :class="messageIconClass">

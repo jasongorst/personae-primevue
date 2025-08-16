@@ -13,7 +13,7 @@
     </Button>
 
     <Menu
-      class="mt-2"
+      class="mt-0"
       id="user_menu"
       :model="menuItems"
       :popup="true"

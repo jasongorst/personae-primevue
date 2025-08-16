@@ -1,5 +1,8 @@
 <template>
-  <Card class="max-w-prose mx-auto">
+  <Card
+    v-if="isLoaded"
+    class="max-w-prose mx-auto"
+  >
     <template #content>
       <div class="flex flex-col gap-2">
         <div
@@ -16,7 +19,7 @@
 
           <Swap
             v-if="type === 'richText'"
-            @active="focusInputTrix(attribute)"
+            @active="focusTrixEditor(attribute)"
           >
             <div
               class="px-3 py-2 border border-transparent trix-content"
@@ -24,7 +27,7 @@
             />
 
             <template #active="{ close }">
-              <InputTrix
+              <TrixEditor
                 v-model="character[attribute]"
                 :id="attribute"
                 @blur="close"
@@ -46,11 +49,6 @@
                 v-model="character[attribute]"
                 :inputId="attribute"
                 :suggestions="suggestions[attribute]"
-                :minLength="0"
-                :showEmptyMessage="false"
-                :completeOnFocus="true"
-                fluid
-                @complete="(event) => complete(attribute, event)"
                 @blur="onAutoCompleteBlur(close)"
               />
             </template>
@@ -81,15 +79,15 @@
       <div class="mt-4 flex flex-row gap-3 justify-end">
         <template v-if="isUpdated">
           <Button
-            @click="confirmRevert"
             severity="warn"
+            @click="confirmRevert"
           >
             Revert
           </Button>
 
           <Button
-            type="submit"
             :disabled="!isLoggedIn"
+            @click="saveCharacter"
           >
             Save
           </Button>
@@ -103,9 +101,9 @@
           </Button>
 
           <Button
-            @click="confirmDelete"
             :disabled="!isLoggedIn"
             severity="danger"
+            @click="confirmDelete"
           >
             Delete
           </Button>
@@ -117,23 +115,25 @@
 
 <script setup>
 const route = useRoute()
-const router = useRouter()
 const confirm = useConfirm()
 const toast = useToast()
-const charactersStore = useCharactersStore()
 const trixEditors = useTemplateRef("trixEditors")
 
 const { status, token } = useAuth()
 const isLoggedIn = computed(() => status.value === "authenticated")
 
-const suggestions = ref(_clone(charactersStore.options))
+const charactersStore = useCharactersStore()
+const { data, options, isLoaded } = storeToRefs(charactersStore)
+const { update, destroy } = charactersStore
+
+const suggestions = ref(_clone(options.value))
 const originalCharacter = ref(null)
 const character = ref(null)
 
-const updatedFields = computed(() => nonMatchingProperties(originalCharacter.value, character.value))
-const isUpdated = computed(() => isPresent(updatedFields.value))
+const updatedFields = computed(() => findDifferences(originalCharacter.value, character.value))
+const isUpdated = computed(() => !_isEmpty(updatedFields.value))
 
-callOnce(() => loadCharacter())
+loadCharacter()
 
 async function focusInput(attribute) {
   // wait for Swap
@@ -146,7 +146,7 @@ async function focusInput(attribute) {
   input?.setSelectionRange(length, length)
 }
 
-async function focusInputTrix(attribute) {
+async function focusTrixEditor(attribute) {
   // wait for Swap
   await nextTick()
 
@@ -168,45 +168,34 @@ async function onAutoCompleteBlur(close) {
   close()
 }
 
-function complete(attribute, { query }) {
-  // suggestions shows options starting with current input content (ignoring case)
-  suggestions.value[attribute] = _filter(
-    charactersStore.options[attribute],
-    (option) => _startsWith(_lowerCase(option), _lowerCase(query))
-  )
-}
-
-async function submit(event) {
-  if (event.valid) {
-    await saveCharacter()
-
-    // TODO: either directly update charactersStore data, or wait for the patch
-    //   to come over websockets and then maybe verify the change?
-
-    // reloadCharacter()
-    // await onReset()
-  }
-}
-
 async function reset() {
-  // reset the form
-  // noinspection JSUnresolvedReference
-  form.value.reset()
+  // reload character
+  loadCharacter()
 
   // reset the trix-editors
   await nextTick()
-  _forEach(trixEditors.value, async (trixEditor) => trixEditor.reset())
 
-  // reset the form again (?)
-  // noinspection JSUnresolvedReference
-  form.value.reset()
-
-  // TODO: figure out why I needed to reset the form twice
+  _forEach(
+    trixEditors.value,
+    async (trixEditor) => trixEditor.reset()
+  )
 }
 
 function loadCharacter() {
-  originalCharacter.value = _clone(charactersStore.data[route.params.id])
+  originalCharacter.value = _clone(data.value[route.params.id])
   character.value = _clone(originalCharacter.value)
+}
+
+async function saveCharacter() {
+  await update(route.params.id, updatedFields.value, token)
+
+  // TODO: add toast, redirect to index
+}
+
+async function deleteCharacter() {
+  await destroy(route.params.id, token)
+
+  // TODO: add toast, redirect to index
 }
 
 function confirmRevert() {
@@ -225,10 +214,7 @@ function confirmRevert() {
       label: "Cancel"
     },
 
-    accept: () => {
-      reset()
-      loadCharacter()
-    },
+    accept: () => reset(),
 
     reject: () => toast.add({
       severity: "info",
@@ -262,79 +248,6 @@ function confirmDelete() {
       detail: "Delete cancelled."
     })
   })
-}
-
-// save character
-const { execute: saveCharacter } = await useApi(
-  `/characters/${route.params.id}`,
-  {
-    // values of edited attributes
-    body: { character: updatedFields },
-    method: "patch",
-    token: token,
-    manual: true,
-
-    onRequestError: () => toast.add({
-      severity: "error",
-      summary: "Sorry.",
-      detail: "The character couldn't be updated. The server cannot be reached."
-    }),
-
-    onResponse: () => toast.add({
-      severity: "success",
-      summary: "Updated.",
-      detail: "The character has been updated.",
-      life: 4000
-    }),
-
-    onResponseError: () => toast.add({
-      severity: "error",
-      summary: "Sorry.",
-      detail: "The character couldn't be updated. Something is wrong with the server."
-    })
-  }
-)
-
-// delete character
-const { execute: deleteCharacter } = await useApi(
-  `/characters/${route.params.id}`,
-  {
-    method: "delete",
-    token: token,
-    manual: true,
-
-    onRequestError: () => toast.add({
-      severity: "error",
-      summary: "Sorry.",
-      detail: "The character couldn't be deleted. The server cannot be reached."
-    }),
-
-    onResponse: async () => {
-      toast.add({
-        severity: "success",
-        summary: "Deleted.",
-        detail: "The character has been deleted.",
-        life: 4000
-      })
-
-      await router.push("/")
-    },
-
-    onResponseError: () => toast.add({
-      severity: "error",
-      summary: "Sorry.",
-      detail: "The character couldn't be deleted. Something is wrong with the server."
-    })
-  }
-)
-
-function nonMatchingProperties(source, target) {
-  return _compact(
-    _map(
-      toValue(source),
-      (value, key) => _isEqual(value, toValue(target)?.[key]) ? null : key
-    )
-  )
 }
 </script>
 

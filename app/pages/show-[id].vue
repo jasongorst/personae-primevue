@@ -1,5 +1,8 @@
 <template>
-  <Card class="max-w-prose mx-auto">
+  <Card
+    v-if="isLoaded"
+    class="max-w-prose mx-auto"
+  >
     <template #content>
       <!--suppress JSValidateTypes -->
       <div class="flex flex-col gap-2">
@@ -45,25 +48,10 @@
 
 <script setup>
 const route = useRoute()
-const router = useRouter()
-const toast = useToast()
+const charactersStore = useCharactersStore()
+const { data, isLoaded } = storeToRefs(charactersStore)
 
-const { data: character } = await useApi(
-  `/characters/${route.params.id}`, {
-
-    onRequestError: () => toast.add({
-      severity: "error",
-      summary: "Sorry.",
-      detail: "Couldn't load characters. The server cannot be reached."
-    }),
-
-    onResponseError: () => toast.add({
-      severity: "error",
-      summary: "Sorry.",
-      detail: "Couldn't load characters. Something is wrong with the server."
-    })
-  }
-)
+const character = data.value[route.params.id]
 </script>
 
 <style scoped>
