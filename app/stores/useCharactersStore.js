@@ -82,17 +82,25 @@ export const useCharactersStore = defineStore("characters", () => {
   }
 
   async function load() {
-    const { response, error } = await apiFetch("get")
+    const { response, error } = await apiFetch( {
+      method: "get"
+    })
 
     if (error) {
       error.value = error
+      return false
     } else {
       data.value = response
+      return response
     }
   }
 
   async function create(character, token) {
-    const { response, error } = await apiFetch("post", character, token)
+    const { response, error } = await apiFetch({
+      method: "post",
+      character: character,
+      token: token
+    })
 
     if (error) {
       error.value = error
@@ -109,7 +117,11 @@ export const useCharactersStore = defineStore("characters", () => {
   }
 
   async function destroy(id, token) {
-    const { error } = await apiFetch("delete", { character: { id: id }}, token)
+    const { error } = await apiFetch({
+      method: "delete",
+      id: id,
+      token: token
+    })
 
     if (error) {
       error.value = error
@@ -120,27 +132,30 @@ export const useCharactersStore = defineStore("characters", () => {
     }
   }
 
-  async function update(id, updates, token) {
-    const character = {
-      character: {
-        id: id,
-        ...updates
-      }
-    }
-
-    const { response, error } = await apiFetch("patch", character, token)
+  async function update(id, character, token) {
+    const { response, error } = await apiFetch({
+      method: "patch",
+      id: id,
+      character: character,
+      token: token
+    })
 
     if (error) {
       error.value = error
       return false
     } else {
-      _assign(data.value[id], toValue(updates))
+      _assign(data.value[id], toValue(character))
       return response
     }
   }
 
   // private
-  async function apiFetch(method = "get", character = null, token = null) {
+  async function apiFetch({
+      method = "get",
+      id = null,
+      character = null,
+      token = null
+    } = {}) {
     let response, error
     let url = "/characters"
 
@@ -149,12 +164,15 @@ export const useCharactersStore = defineStore("characters", () => {
       method: method
     }
 
-    if (_has(character, "id")) {
-      url = `/characters/${character.id}`
+    if (toValue(id)) {
+      url += `/${toValue(id)}`
     }
 
-    if (_includes(["post", "put", "patch"], method)) {
-      _set(options, "headers.Authorizaton", toValue(token))
+    if (toValue(token)) {
+      _set(options, "headers.Authorization", toValue(token))
+    }
+
+    if (toValue(character)) {
       _set(options, "body.character", deepConvertKeys(toValue(character), _snakeCase))
     }
 
