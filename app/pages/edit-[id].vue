@@ -87,7 +87,7 @@
 
           <Button
             :disabled="!isLoggedIn"
-            @click="saveCharacter"
+            @click="updateCharacter"
           >
             Save
           </Button>
@@ -186,16 +186,46 @@ function loadCharacter() {
   character.value = _clone(originalCharacter.value)
 }
 
-async function saveCharacter() {
-  await update(route.params.id, updatedFields.value, token)
+async function updateCharacter() {
+  const result = await update(route.params.id, updatedFields.value, token)
 
-  // TODO: add toast, redirect to index
+  if (result) {
+    toast.add({
+      severity: "success",
+      summary: "Updated.",
+      detail: "The character was updated.",
+      life: 4000
+    })
+
+    navigateTo("/")
+  } else {
+    toast.add({
+      severity: "error",
+      summary: "Error.",
+      detail: error.value
+    })
+  }
 }
 
 async function deleteCharacter() {
-  await destroy(route.params.id, token)
+  const result = await destroy(route.params.id, token)
 
-  // TODO: add toast, redirect to index
+  if (result) {
+    toast.add({
+      severity: "success",
+      summary: "Deleted.",
+      detail: "The character was deleted.",
+      life: 4000
+    })
+
+    navigateTo("/")
+  } else {
+    toast.add({
+      severity: "error",
+      summary: "Error.",
+      detail: error.value
+    })
+  }
 }
 
 function confirmRevert() {
