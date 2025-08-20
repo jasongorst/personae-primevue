@@ -4,9 +4,11 @@
     :visible="true"
   />
 
-  <!-- navbar text-[1.25rem] [1.25rem]; line-height 1.5 [1.875rem]; py-2 [2 * --spacing(2) = --spacing(4) = 16px]; mb-4 [--spacing(4) = 16px] -->
-  <!-- line-height 1.25 [1.25rem]; py-2 [2 * --spacing(2) = --spacing(4) = 8px]; border [2 * 1px = 2px]; mb-2 [--spacing(2) = 8px] -->
-  <!-- scrollHeight="calc(100vh - 3.125rem - 56px)" -->
+  <!-- navbar: line-height 1.5 [1.25rem * 1.5 = 1.875rem]; py-2 [2 * --spacing(2) = --spacing(4) = 16px]; border [2 * 1px = 2px]; mb-4 [--spacing(4) = 16px] -->
+  <!-- filter: line-height 1.25 [1.25rem]; py-2 [2 * --spacing(2) = --spacing(4) = 16px]; border [2 * 1px = 2px]; mb-2 [--spacing(2) = 8px] -->
+  <!-- toolbar: line-height 1.5 [1.25rem]; py-2 [2 * --spacing(2) = --spacing(4) = 16px]; border [2 * 1px = 2px] -->
+  <!-- scrollHeight="calc(100vh - 4.375rem - 78px)" -->
+  <!-- actually needs 85px -->
   <DataTable
     v-else
     :value="characters"
@@ -16,7 +18,7 @@
     :globalFilterFields="apiAttributesList"
     removableSort
     rowHover
-    scrollHeight="calc(100vh - 3.125rem - 62px)"
+    scrollHeight="calc(100vh - 4.375rem - 85px)"
     scrollable
     selectionMode="single"
     size="small"
@@ -24,6 +26,7 @@
     stateStorage="session"
     stripedRows
     :pt="{
+      root: 'pb-[calc(--spacing(6)+1.25rem)]',
       header: 'pb-0!',
       thead: 'bg-surface-0! dark:bg-surface-950!',
       headerRow: 'first-of-type:bg-surface-0 dark:first-of-type:bg-surface-900 nth-of-type-2:align-top nth-of-type-2:*:px-1 nth-of-type-2:*:py-2',
@@ -36,18 +39,11 @@
   >
     <template #header>
       <div class="mb-2 flex gap-4 justify-between">
-        <InputThing>
-          <template #start>
-            <Icon name="ph:magnifying-glass-bold" />
-          </template>
-
-          <InputText
-            v-model="filters['global'].value"
-            placeholder="Search"
-            type="search"
-            fluid
-          />
-        </InputThing>
+        <SearchField
+          v-model="filters['global'].value"
+          placeholder="Search"
+          type="search"
+        />
 
         <Button
           variant="outlined"
@@ -178,9 +174,44 @@
       </template>
     </Column>
   </DataTable>
+
+  <Toolbar
+    pt:root="
+      absolute bottom-0 left-0 w-full py-0
+      bg-primary-0! dark:bg-primary-900! text-primary dark:text-primary
+      border-0 rounded-t-none rounded-b-md
+    "
+  >
+    <template #start>
+      <div class="whitespace-nowrap text-sm text-primary">
+        Showing <strong class="font-semibold">{{ filteredCount }}</strong>
+        of <strong class="font-semibold">{{ count }}</strong>
+        character{{ (count > 1 ? "s" : "") }}
+      </div>
+    </template>
+
+    <template #end>
+      <Button variant="text">
+        <NuxtLink
+          class="flex items-center gap-0.5"
+          to="/create"
+        >
+          <span class="font-semibold">
+            Add
+          </span>
+
+          <Icon
+            name="ph:plus-bold"
+          />
+        </NuxtLink>
+      </Button>
+    </template>
+  </Toolbar>
 </template>
 
 <script setup>
+import SearchField from "../components/SearchField.vue"
+
 const toast = useToast()
 const showFilters = useState("showFilters")
 const dataTable = useTemplateRef("dataTable")
@@ -189,14 +220,17 @@ const { status } = useAuth()
 const isLoggedIn = computed(() => status.value === "authenticated")
 
 const charactersStore = useCharactersStore()
-const { characters, filters, hasAnyAttributeFilter, hasAnyFilter, hasGlobalFilter, isLoaded } = storeToRefs(charactersStore)
+const { characters, count, filters, hasAnyAttributeFilter, hasAnyFilter, hasGlobalFilter, isLoaded } = storeToRefs(charactersStore)
 const { hasFilterFor, load, removeFilter, resetFilterFor, resetFilters } = charactersStore
 
 const selectedCharacter = ref(null)
 
+const filteredCharacters = computed(() => dataTable.value?.processedData)
+const filteredCount = computed(() => _size(filteredCharacters.value))
+
 function filteredValues(attribute) {
   // noinspection JSUnresolvedReference
-  return uniqValues(dataTable.value.processedData, attribute)
+  return uniqValues(filteredCharacters.value, attribute)
 }
 
 function isFilteredValue(attribute, value) {
