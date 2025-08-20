@@ -9,10 +9,7 @@
     pt:end="flex-none"
   >
     <template #start>
-      <Button
-        variant="text"
-        :ptOptions="{ mergeProps: true }"
-      >
+      <Button variant="text">
         <NuxtLink
           class="whitespace-nowrap text-[1.25rem] font-bold"
           data-testid="title"
