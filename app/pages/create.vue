@@ -79,7 +79,7 @@ const { status, token } = useAuth()
 const isLoggedIn = computed(() => status.value === "authenticated")
 
 const charactersStore = useCharactersStore()
-const { options } = storeToRefs(charactersStore)
+const { error, options } = storeToRefs(charactersStore)
 const { create } = charactersStore
 
 const emptyCharacter = _fromPairs(
@@ -103,9 +103,24 @@ async function reset() {
 }
 
 async function saveCharacter() {
-  await create(character.value, token)
+  const result = await create(character.value, token)
 
-  // TODO: add toast, redirect to index
+  if (result) {
+    toast.add({
+      severity: "success",
+      summary: "Saved.",
+      detail: "The character was saved.",
+      life: 4000
+    })
+
+    navigateTo("/")
+  } else {
+    toast.add({
+      severity: "error",
+      summary: "Error.",
+      detail: error.value
+    })
+  }
 }
 
 function confirmReset() {
