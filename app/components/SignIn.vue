@@ -156,7 +156,8 @@ async function signInWithPassword(values) {
     toast.add({
       severity: "success",
       summary: "Signed In.",
-      detail: "You are now signed in."
+      detail: "You are now signed in.",
+      life: 4000
     })
   } catch (error) {
     console.log(error)
@@ -164,8 +165,7 @@ async function signInWithPassword(values) {
     toast.add({
       severity: "error",
       summary: "Not Signed In.",
-      detail: error.data?.message || error.message,
-      closeable: false
+      detail: error.data?.message || error.message
     })
   }
 }
