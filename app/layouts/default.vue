@@ -94,7 +94,7 @@
   />
 
   <div
-    class="w-full xl:max-w-screen-xl xl:mx-auto"
+    class="relative w-full xl:max-w-screen-xl xl:mx-auto"
     data-testid="base-container"
   >
     <NavBar />
