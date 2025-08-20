@@ -7,6 +7,7 @@
       aria-controls="user_menu"
       @click="toggleMenu"
     >
+      <!--suppress JSUnresolvedReference -->
       <span class="font-semibold">
         {{ user.email }}
       </span>
@@ -78,6 +79,7 @@ const menu = useTemplateRef("menu")
 const isLoggedIn = computed(() => status.value === "authenticated")
 
 const menuItems = computed(() => {
+  // noinspection JSUnresolvedReference
   if (isLoggedIn.value && user.value.admin) {
     // noinspection JSUnresolvedReference
     return [
@@ -117,7 +119,6 @@ function toggleMenu(event) {
 }
 
 function closeMenu(_) {
-  // noinspection JSUnresolvedReference
   menu.value.hide()
 }
 </script>
