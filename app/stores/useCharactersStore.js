@@ -1,39 +1,11 @@
 import * as jsonpatch from "fast-json-patch"
-import { FilterMatchMode } from "@primevue/core/api"
-
-const initialFilters = _reduce(
-  listAttributes,
-  (filters, attribute) => {
-    if (_includes(categoryAttributes, attribute)) {
-      // category attribute
-      filters[attribute] = {
-        value: [],
-        matchMode: FilterMatchMode.IN
-      }
-    } else {
-      filters[attribute] = {
-        value: "",
-        matchMode: FilterMatchMode.CONTAINS
-      }
-    }
-
-    // add global field
-    filters['global'] = {
-      value: null,
-      matchMode: FilterMatchMode.CONTAINS
-    }
-
-    return filters
-  },
-  {}
-)
 
 export const useCharactersStore = defineStore("characters", () => {
   const config = useRuntimeConfig()
 
   // state
   const data = ref({})
-  const filters = ref(initialFilters)
+  const filters = ref(_clone(emptyFilters))
   const sort = ref({ attribute: "createdAt", order: "asc" })
   const loading = ref(false)
   const error = ref(null)
@@ -62,15 +34,20 @@ export const useCharactersStore = defineStore("characters", () => {
   }
 
   function resetFilters() {
-    filters.value = initialFilters
+    filters.value = _clone(emptyFilters)
   }
 
   function resetFilterFor(attribute) {
-    filters.value[attribute] = initialFilters[attribute]
+    filters.value[attribute] = emptyFilters[attribute]
   }
 
   function removeFilter(attribute, value) {
     filters.value[attribute] = _without(filters.value[attribute], value)
+  }
+
+  async function getCharacter(id) {
+    await ensureLoaded()
+    return data.value[id]
   }
 
   function patch(patch) {
@@ -78,6 +55,12 @@ export const useCharactersStore = defineStore("characters", () => {
       jsonpatch.applyPatch(data.value, patch)
     } catch(error) {
       console.log(error)
+    }
+  }
+
+  async function ensureLoaded() {
+    if (!isLoaded.value) {
+      await load()
     }
   }
 
@@ -210,6 +193,7 @@ export const useCharactersStore = defineStore("characters", () => {
     // actions
     create,
     destroy,
+    getCharacter,
     hasFilterFor,
     load,
     patch,
