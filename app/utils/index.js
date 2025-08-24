@@ -33,7 +33,7 @@ export const apiAttributes = _concat(
 )
 
 // for global filter
-export const apiAttributesList = _concat(nameAttributes, optionsAttributes, plainTextAttributes)
+export const globalFilterAttributes = _concat(nameAttributes, optionsAttributes, plainTextAttributes)
 
 // for attribute filters, all list attributes except names
 export const categoryAttributes = _difference(listAttributes, nameAttributes)
