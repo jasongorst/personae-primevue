@@ -5,11 +5,9 @@
 </template>
 
 <script setup>
-const showFilters = useState("showFilters", () => false)
-
 // init charactersStore
-const charactersStore = useCharactersStore()
-callOnce(() => charactersStore.load())
+const { load, patch } = useCharactersStore()
+callOnce(async () => await load())
 
 // connect to ActiveCable channel
 const { vueApp } = useNuxtApp()
@@ -19,15 +17,15 @@ const channels = {
   CharacterChannel: {
     connected() {
       console.log("[CharacterChannel connected]")
-      charactersStore.load()
+      load()
     },
 
     received(data) {
       data = deepParseTimestamps(deepConvertKeys(data, _camelCase))
       console.log("[CharacterChannel message]", data)
 
-      // charactersStore.patch(data)
-      // console.log("[patched charactersStore]")
+      // patch(data)
+      // console.log("[patched]")
     },
 
     disconnected() {
