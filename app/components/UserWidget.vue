@@ -71,6 +71,7 @@
 </template>
 
 <script setup>
+const route = useRoute()
 const toast = useToast()
 const showSignIn = useState("showSignIn")
 const { status, data: user, signOut } = useAuth()
@@ -103,10 +104,15 @@ async function doSignOut() {
   toast.add({
     severity: "success",
     summary: "Signed Out.",
-    detail: "You've been signed out."
+    detail: "You've been signed out.",
+    life: 3000
   })
 
   closeMenu()
+
+  if (route.name === "edit-id") {
+    await navigateTo({ name: "show-id", params: { id: route.params.id } })
+  }
 }
 
 function doSignIn() {
