@@ -1,6 +1,7 @@
 <template>
   <Dialog
     :visible="visible"
+    :closeOnEscape="false"
     modal
     :showHeader="false"
     pt:root:class="bg-transparent! border-0"
