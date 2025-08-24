@@ -1,6 +1,8 @@
 <template>
   <Dialog
     v-model:visible="visible"
+    modal
+    dismissableMask
     pt:root="w-11/12 max-w-128"
     :ptOptions="{ mergeProps: ptViewMerge }"
   >
@@ -126,6 +128,7 @@ const props = defineProps({
 
 const visible = defineModel("visible", { required: true })
 
+const route = useRoute()
 const toast = useToast()
 const { status, signIn } = useAuth()
 const isLoading = computed(() => status.value === "loading")
@@ -157,8 +160,12 @@ async function signInWithPassword(values) {
       severity: "success",
       summary: "Signed In.",
       detail: "You are now signed in.",
-      life: 4000
+      life: 3000
     })
+
+    if (route.name === "show-id") {
+      await navigateTo({ name: "edit-id", params: { id: route.params.id } })
+    }
   } catch (error) {
     console.log(error)
 
