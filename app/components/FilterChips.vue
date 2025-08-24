@@ -8,11 +8,13 @@
         v-for="value in filters[attribute].value"
         :label="value"
         removable
+        pt:root="bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-primary-0!"
+        :ptOptions="{ mergeProps: ptViewMerge }"
       >
         <template #removeicon>
           <Icon
             name="ph:x-bold"
-            class="p-0.5 rounded-full hover:bg-surface-200 dark:hover:bg-surface-600"
+            class="p-0.5 rounded-full hover:bg-primary-200 dark:hover:bg-primary-600"
             size="1.25em"
             @click="emit('remove', attribute, value)"
           />
