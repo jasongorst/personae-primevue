@@ -1,8 +1,5 @@
 <template>
-  <Card
-    v-if="isLoaded"
-    class="max-w-prose mx-auto"
-  >
+  <Card class="max-w-prose mx-auto">
     <template #content>
       <!--suppress JSValidateTypes -->
       <div class="flex flex-col gap-2">
@@ -48,10 +45,12 @@
 
 <script setup>
 const route = useRoute()
-const charactersStore = useCharactersStore()
-const { data, isLoaded } = storeToRefs(charactersStore)
+const { getCharacter } = useCharactersStore()
+const character = ref(emptyCharacter)
 
-const character = data.value[route.params.id]
+onMounted(async () => {
+  character.value = await getCharacter(route.params.id)
+})
 </script>
 
 <style scoped>

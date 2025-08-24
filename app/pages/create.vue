@@ -60,7 +60,7 @@
         </Button>
 
         <Button
-          :disabled="!isEdited || !isLoggedIn"
+          :disabled="!isEdited"
           @click="saveCharacter"
         >
           Save
@@ -74,17 +74,11 @@
 const confirm = useConfirm()
 const toast = useToast()
 const trixEditors = useTemplateRef("trixEditors")
-
-const { status, token } = useAuth()
-const isLoggedIn = computed(() => status.value === "authenticated")
+const { token } = useAuth()
 
 const charactersStore = useCharactersStore()
 const { error, options } = storeToRefs(charactersStore)
 const { create } = charactersStore
-
-const emptyCharacter = _fromPairs(
-  _map(apiAttributes, ({ attribute }) => [ attribute, null ])
-)
 
 const character = ref(_clone(emptyCharacter))
 const suggestions = ref(_clone(options.value))
@@ -110,7 +104,7 @@ async function saveCharacter() {
       severity: "success",
       summary: "Saved.",
       detail: "The character was saved.",
-      life: 4000
+      life: 3000
     })
 
     navigateTo("/")
@@ -144,7 +138,8 @@ function confirmReset() {
     reject: () => toast.add({
       severity: "info",
       summary: "Cancelled.",
-      detail: "Reset cancelled."
+      detail: "Reset cancelled.",
+      life: 3000
     })
   })
 }

@@ -1,8 +1,5 @@
 <template>
-  <Card
-    v-if="isLoaded"
-    class="max-w-prose mx-auto"
-  >
+  <Card class="max-w-prose mx-auto">
     <template #content>
       <div class="flex flex-col gap-2">
         <div
@@ -85,10 +82,7 @@
             Revert
           </Button>
 
-          <Button
-            :disabled="!isLoggedIn"
-            @click="updateCharacter"
-          >
+          <Button @click="updateCharacter">
             Save
           </Button>
         </template>
@@ -101,7 +95,6 @@
           </Button>
 
           <Button
-            :disabled="!isLoggedIn"
             severity="danger"
             @click="confirmDelete"
           >
@@ -114,26 +107,28 @@
 </template>
 
 <script setup>
+definePageMeta({
+  middleware: "row-select"
+})
+
 const route = useRoute()
 const confirm = useConfirm()
 const toast = useToast()
 const trixEditors = useTemplateRef("trixEditors")
-
-const { status, token } = useAuth()
-const isLoggedIn = computed(() => status.value === "authenticated")
+const { token } = useAuth()
 
 const charactersStore = useCharactersStore()
-const { data, options, isLoaded } = storeToRefs(charactersStore)
-const { update, destroy } = charactersStore
+const { options, error } = storeToRefs(charactersStore)
+const { getCharacter, update, destroy } = charactersStore
 
 const suggestions = ref(_clone(options.value))
-const originalCharacter = ref(null)
-const character = ref(null)
+const originalCharacter = ref(emptyCharacter)
+const character = ref(emptyCharacter)
 
 const updatedFields = computed(() => findDifferences(originalCharacter.value, character.value))
-const isUpdated = computed(() => !_isEmpty(updatedFields.value))
+const isUpdated = computed(() => (!_isEmpty(updatedFields.value)))
 
-loadCharacter()
+onMounted(async () => await initCharacter())
 
 async function focusInput(attribute) {
   // wait for Swap
@@ -170,7 +165,7 @@ async function onAutoCompleteBlur(close) {
 
 async function reset() {
   // reload character
-  loadCharacter()
+  await initCharacter()
 
   // reset the trix-editors
   await nextTick()
@@ -181,9 +176,11 @@ async function reset() {
   )
 }
 
-function loadCharacter() {
-  originalCharacter.value = _clone(data.value[route.params.id])
-  character.value = _clone(originalCharacter.value)
+async function initCharacter() {
+  const char = await getCharacter(route.params.id)
+
+  originalCharacter.value = _clone(char)
+  character.value = _clone(char)
 }
 
 async function updateCharacter() {
@@ -194,7 +191,7 @@ async function updateCharacter() {
       severity: "success",
       summary: "Updated.",
       detail: "The character was updated.",
-      life: 4000
+      life: 3000
     })
 
     navigateTo("/")
@@ -215,7 +212,7 @@ async function deleteCharacter() {
       severity: "success",
       summary: "Deleted.",
       detail: "The character was deleted.",
-      life: 4000
+      life: 3000
     })
 
     navigateTo("/")
@@ -249,7 +246,8 @@ function confirmRevert() {
     reject: () => toast.add({
       severity: "info",
       summary: "Cancelled.",
-      detail: "Revert cancelled."
+      detail: "Revert cancelled.",
+      life: 3000
     })
   })
 }
@@ -275,7 +273,8 @@ function confirmDelete() {
     reject: () => toast.add({
       severity: "info",
       summary: "Cancelled.",
-      detail: "Delete cancelled."
+      detail: "Delete cancelled.",
+      life: 3000
     })
   })
 }
