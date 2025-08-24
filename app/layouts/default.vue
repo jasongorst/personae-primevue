@@ -86,8 +86,6 @@
     </template>
   </ConfirmDialog>
 
-  <DynamicDialog />
-
   <SignIn
     class="z-90"
     v-model:visible="showSignIn"
@@ -99,15 +97,18 @@
   >
     <NavBar />
 
-    <slot />
+    <SpinnerModal :visible="!isLoaded" />
+
+    <div :class="!isLoaded && 'hidden'">
+      <slot />
+    </div>
   </div>
 </template>
 
 <script setup>
-const showSignIn = useState("showSignIn")
-callOnce(() => showSignIn.value = false)
-
-useState("query", () => "")
+const showSignIn = useState("showSignIn", () => false)
+const charactersStore = useCharactersStore()
+const { isLoaded } = storeToRefs(charactersStore)
 </script>
 
 <style scoped>
