@@ -31,8 +31,8 @@
   --p-surface-color: var(--p-surface-0);
   --p-primary-color: var(--p-primary-500);
   --p-primary-contrast-color: var(--p-surface-0);
-  --p-primary-hover-color: var(--p-primary-600);
-  --p-primary-active-color: var(--p-primary-700);
+  --p-primary-hover-color: var(--p-primary-700);
+  --p-primary-active-color: var(--p-primary-900);
   --p-content-border-color: var(--p-surface-200);
   --p-content-hover-background: var(--p-surface-100);
   --p-content-hover-color: var(--p-surface-800);
@@ -59,8 +59,8 @@
     --p-surface-color: var(--p-surface-950);
     --p-primary-color: var(--p-primary-400);
     --p-primary-contrast-color: var(--p-surface-900);
-    --p-primary-hover-color: var(--p-primary-300);
-    --p-primary-active-color: var(--p-primary-200);
+    --p-primary-hover-color: var(--p-primary-200);
+    --p-primary-active-color: var(--p-primary-50);
     --p-content-border-color: var(--p-surface-700);
     --p-content-hover-background: var(--p-surface-800);
     --p-content-hover-color: var(--p-surface-0);
@@ -77,4 +77,19 @@
 
 @theme inline {
   --color-surface: var(--p-surface-color);
+  --color-primary: var(--p-primary-color);
+  --color-primary-emphasis: var(--p-primary-hover-color);
+  --color-primary-emphasis-alt: var(--p-primary-active-color);
+  --color-primary-contrast: var(--p-primary-contrast-color);
+  --color-primary-50: var(--p-primary-50);
+  --color-primary-100: var(--p-primary-100);
+  --color-primary-200: var(--p-primary-200);
+  --color-primary-300: var(--p-primary-300);
+  --color-primary-400: var(--p-primary-400);
+  --color-primary-500: var(--p-primary-500);
+  --color-primary-600: var(--p-primary-600);
+  --color-primary-700: var(--p-primary-700);
+  --color-primary-800: var(--p-primary-800);
+  --color-primary-900: var(--p-primary-900);
+  --color-primary-950: var(--p-primary-950);
 }
