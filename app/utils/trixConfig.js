@@ -1,7 +1,7 @@
 export default {
   blockAttributes: {
     default: {
-      tagName: "p",
+      tagName: "div",
       parse: false,
     }
   },
