@@ -13,12 +13,12 @@
   },
   "dependencies": {
     "nuxt": "^4.0.3",
-    "vue": "^3.5.18"
+    "vue": "^3.5.20"
   },
   "devDependencies": {
     "@iconify-json/fa6-solid": "^1.2.4",
     "@iconify-json/ph": "^1.2.2",
-    "@nuxt/devtools": "^2.6.2",
+    "@nuxt/devtools": "^2.6.3",
     "@nuxt/icon": "^2.0.0",
     "@pinia/nuxt": "^0.11.2",
     "@primevue/core": "^4.3.7",
@@ -28,7 +28,7 @@
     "@tailwindcss/language-server": "^0.14.26",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.12",
-    "@vue/language-server": "^3.0.5",
+    "@vue/language-server": "^3.0.6",
     "actioncable-vue": "^3.1.2",
     "fast-json-patch": "^3.1.1",
     "lodash-es": "^4.17.21",
