@@ -52,6 +52,8 @@ const props = defineProps({
 })
 
 defineExpose({
+  id: props.id,
+  modelValue: model,
   reset() { reset() }
 })
 
@@ -72,16 +74,18 @@ const emit = defineEmits([
   "trix-selection-change"
 ])
 
-const initialValue = ref(model.value)
-
-const defaultClass = [ "trix-content" ]
-const trixEditorClass = computed(() => twMerge(defaultClass, props.class))
+const initialValue = ref(_isNull(model.value) ? "" : model.value)
 
 onBeforeMount(() => {
   _merge(Trix.config, trixConfig, props.config)
 })
 
 async function reset() {
+  if (_isNull(model.value)) {
+    model.value = ""
+    await nextTick()
+  }
+
   trixEditor.value?.editor.loadHTML(model.value)
 }
 
@@ -94,6 +98,8 @@ function onTrixChange(event) {
 }
 
 function onTrixInitialize(event) {
+  reset()
+
   emit("trix-initialize", event)
 }
 
