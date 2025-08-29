@@ -208,15 +208,11 @@
 </template>
 
 <script setup>
-const toast = useToast()
 const dataTable = useTemplateRef("dataTable")
 
-const { status } = useAuth()
-const isLoggedIn = computed(() => status.value === "authenticated")
-
 const charactersStore = useCharactersStore()
-const { characters, count, filters, hasAnyAttributeFilter, hasAnyFilter, hasGlobalFilter, isLoaded } = storeToRefs(charactersStore)
-const { hasFilterFor, load, removeFilter, resetFilterFor, resetFilters } = charactersStore
+const { characters, count, filters, hasAnyAttributeFilter, hasAnyFilter, hasGlobalFilter } = storeToRefs(charactersStore)
+const { hasFilterFor, removeFilter, resetFilterFor, resetFilters } = charactersStore
 
 const showFilters = ref(false)
 const selectedCharacter = ref(null)
