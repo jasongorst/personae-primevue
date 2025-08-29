@@ -28,6 +28,10 @@ const emit = defineEmits([
   "update:active"
 ])
 
+defineExpose({
+  open() { open() }
+})
+
 const isActive = ref(props.active)
 
 function open(event) {
