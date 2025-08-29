@@ -3,12 +3,15 @@
     <!--suppress VueUnrecognizedSlot -->
     <template #messageicon="{ class: messageIconClass }">
       <div :class="messageIconClass">
-        <Icon class="not-group-p-success:hidden" name="ph:check-circle-fill" size="1.125rem" />
-        <Icon class="not-group-p-info:hidden" name="ph:info-fill" size="1.125rem" />
-        <Icon class="not-group-p-warn:hidden" name="ph:warning-circle-fill" size="1.125rem" />
-        <Icon class="not-group-p-danger:hidden" name="ph:warning-fill" size="1.125rem" />
-        <Icon class="not-group-p-secondary:hidden " name="ph:check-circle-fill" size="1.125rem" />
-        <Icon class="not-group-p-contrast:hidden" name="ph:check-circle-fill" size="1.125rem" />
+        <template
+          v-for="{ className, iconName } in messageIcons"
+        >
+          <Icon
+            :class="className"
+            :name="iconName"
+            size="1.125rem"
+          />
+        </template>
       </div>
     </template>
 
@@ -109,6 +112,15 @@
 const showSignIn = useState("showSignIn", () => false)
 const charactersStore = useCharactersStore()
 const { isLoaded } = storeToRefs(charactersStore)
+
+const messageIcons = [
+  { className: "not-group-p-success:hidden", iconName: "ph:check-circle-fill" },
+  { className: "not-group-p-info:hidden", iconName: "ph:info-fill" },
+  { className: "not-group-p-warn:hidden", iconName: "ph:warning-circle-fill" },
+  { className: "not-group-p-danger:hidden", iconName: "ph:warning-fill" },
+  { className: "not-group-p-secondary:hidden", iconName: "ph:check-circle-fill" },
+  { className: "not-group-p-contrast:hidden", iconName: "ph:check-circle-fill" }
+]
 </script>
 
 <style scoped>
