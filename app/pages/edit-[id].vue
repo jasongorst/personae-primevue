@@ -17,16 +17,21 @@
           <Swap
             v-if="type === 'richText'"
             @active="focusTrixEditor(attribute)"
+            :ref="(el) => { swaps[attribute] = el }"
           >
             <div
               class="px-3 py-2 border border-transparent trix-content"
+              tabindex="0"
               v-html="(character?.[attribute]) || '&nbsp;'"
+              @keydown.enter.prevent="open(attribute)"
+              @keydown.space.prevent="open(attribute)"
             />
 
             <template #active="{ close }">
               <TrixEditor
                 v-model="character[attribute]"
                 :id="attribute"
+                tabindex="0"
                 @blur="close"
                 ref="trixEditors"
               />
@@ -36,8 +41,14 @@
           <Swap
             v-else-if="type === 'autocomplete'"
             @active="focusInput(attribute)"
+            :ref="(component) => { swaps[attribute] = component }"
           >
-            <div class="px-3 py-2 border border-transparent">
+            <div
+              class="px-3 py-2 border border-transparent"
+              tabindex="0"
+              @keydown.enter.prevent="open(attribute)"
+              @keydown.space.prevent="open(attribute)"
+            >
               {{ character?.[attribute] || "&nbsp;" }}
             </div>
 
@@ -54,8 +65,14 @@
           <Swap
             v-else
             @active="focusInput(attribute)"
+            :ref="(el) => { swaps[attribute] = el }"
           >
-            <div class="px-3 py-2 border border-transparent">
+            <div
+              class="px-3 py-2 border border-transparent"
+              tabindex="0"
+              @keydown.enter.prevent="open(attribute)"
+              @keydown.space.prevent="open(attribute)"
+            >
               {{ character?.[attribute] || "&nbsp;" }}
             </div>
 
@@ -108,14 +125,16 @@
 
 <script setup>
 definePageMeta({
-  middleware: "row-select"
+  middleware: "edit"
 })
 
 const route = useRoute()
 const confirm = useConfirm()
 const toast = useToast()
-const trixEditors = useTemplateRef("trixEditors")
 const { token } = useAuth()
+
+const trixEditors = useTemplateRef("trixEditors")
+const swaps = ref({})
 
 const charactersStore = useCharactersStore()
 const { options, error } = storeToRefs(charactersStore)
@@ -129,6 +148,11 @@ const updatedFields = computed(() => findDifferences(originalCharacter.value, ch
 const isUpdated = computed(() => (!_isEmpty(updatedFields.value)))
 
 onMounted(async () => await initCharacter())
+
+function open(attribute) {
+  // noinspection JSUnresolvedReference
+  swaps.value[attribute].open()
+}
 
 async function focusInput(attribute) {
   // wait for Swap
