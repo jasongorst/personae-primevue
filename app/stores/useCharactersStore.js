@@ -140,31 +140,22 @@ export const useCharactersStore = defineStore("characters", () => {
       token = null
     } = {}) {
     let response, error
-    let url = "/characters"
+
+    const url = toValue(id) ? `/${toValue(id)}` : "/"
 
     const options = {
       baseURL: config.public.api.baseURL,
       method: method
     }
 
-    if (toValue(id)) {
-      url += `/${toValue(id)}`
-    }
-
-    if (toValue(token)) {
-      _set(options, "headers.Authorization", toValue(token))
-    }
-
     if (toValue(character)) {
-      _set(options, "body.character", deepConvertKeys(toValue(character), _snakeCase))
+      options.body = toValue(character)
     }
 
     try {
       loading.value = true
       response = await $fetch(url, options)
       loading.value = false
-
-      response = deepParseTimestamps(deepConvertKeys(response, _camelCase))
     } catch (err) {
       console.log(err)
       error = err

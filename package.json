@@ -9,9 +9,12 @@
     "generate": "nuxt generate",
     "postcleanup": "nuxt prepare",
     "postinstall": "nuxt prepare",
-    "preview": "nuxt preview -p 4001"
+    "preview": "nuxt preview -p 4001",
+    "prisma-generate": "prisma generate",
+    "migrate": "prisma migrate dev"
   },
   "dependencies": {
+    "@prisma/client": "^6.15.0",
     "nuxt": "^4.0.3",
     "vue": "^3.5.20"
   },
@@ -35,6 +38,7 @@
     "nuxt-lodash": "github:jasongorst/nuxt-lodash",
     "pinia": "^3.0.3",
     "primevue": "^4.3.7",
+    "prisma": "^6.15.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.12",
     "tailwindcss-primeui": "^0.6.1",
