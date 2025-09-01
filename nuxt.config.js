@@ -51,6 +51,12 @@ export default defineNuxtConfig({
     ...mockAuthModule
   ],
 
+  nitro: {
+    experimental: {
+      websocket: true
+    }
+  },
+
   runtimeConfig: {
     // placeholders to be overridden by env vars
     auth: { baseUrl: "" },
@@ -62,6 +68,55 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    build: {
+      sourcemap: false,
+      
+      terserOptions: {
+        format: {
+          comments: false
+        }
+      }
+    },
+    
+    esbuild: {
+      legalComments: "none"
+    },
+    
+    optimizeDeps: {
+      include: [
+        "@primevue/core/api",
+        "@primevue/forms",
+        "@primevue/forms/resolvers/yup",
+        "fast-json-patch",
+        "lodash-es",
+        "primevue/autocomplete",
+        "primevue/button",
+        "primevue/card",
+        "primevue/chip",
+        "primevue/column",
+        "primevue/config",
+        "primevue/confirmationservice",
+        "primevue/confirmdialog",
+        "primevue/datatable",
+        "primevue/dialog",
+        "primevue/dialogservice",
+        "primevue/inputtext",
+        "primevue/listbox",
+        "primevue/menu",
+        "primevue/message",
+        "primevue/password",
+        "primevue/toast",
+        "primevue/toastservice",
+        "primevue/toolbar",
+        "primevue/useconfirm",
+        "primevue/usetoast",
+        "tailwind-merge",
+        "trix",
+        "uuid",
+        "yup"
+      ]
+    },
+    
     plugins: [ tailwindcss() ],
 
     vue: {
