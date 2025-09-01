@@ -1,84 +1,68 @@
 <template>
-  <Card class="max-w-prose mx-auto">
-    <template #content>
-      <div class="flex flex-col gap-2">
-        <div
-          class="flex flex-col"
-          v-for="{ attribute, type } in apiAttributes"
-          :key="attribute"
-        >
-          <label
-            :for="attribute"
-            class="ml-1 text-primary dark:text-primary text-sm"
-          >
-            {{ _startCase(attribute) }}
-          </label>
+  <DetailCard>
+    <template #attribute="{ attribute, type }">
+      <TrixEditor
+        v-if="type === 'richText'"
+        v-model="character[attribute]"
+        :id="attribute"
+        tabindex="1"
+        :ref="(component) => { trixEditors[attribute] = component }"
+      />
 
-          <TrixEditor
-            v-if="type === 'richText'"
-            v-model="character[attribute]"
-            :id="attribute"
-            tabindex="1"
-            ref="trixEditors"
-          />
+      <ComboBox
+        v-else-if="type === 'autocomplete'"
+        v-model="character[attribute]"
+        :inputId="attribute"
+        :suggestions="suggestions[attribute]"
+        :tabindex="1"
+      />
 
-          <ComboBox
-            v-else-if="type === 'autocomplete'"
-            v-model="character[attribute]"
-            :inputId="attribute"
-            :suggestions="suggestions[attribute]"
-            :tabindex="1"
-          />
-
-          <InputText
-            v-else
-            v-model="character[attribute]"
-            :id="attribute"
-            fluid
-            tabindex="1"
-          />
-        </div>
-      </div>
+      <InputText
+        v-else
+        v-model="character[attribute]"
+        :id="attribute"
+        fluid
+        tabindex="1"
+      />
     </template>
 
-    <template #footer>
-      <div class="mt-4 flex flex-row gap-3 justify-end">
-        <Button
-          v-if="!isEdited"
-        >
-          <NuxtLink to="/">
-            Cancel
-          </NuxtLink>
-        </Button>
+    <template #buttons>
+      <Button
+        v-if="!isEdited"
+      >
+        <NuxtLink to="/">
+          Cancel
+        </NuxtLink>
+      </Button>
 
-        <Button
-          v-else
-          severity="warn"
-          @click="confirmReset"
-        >
-          Reset
-        </Button>
+      <Button
+        v-else
+        severity="warn"
+        @click="confirmReset"
+      >
+        Reset
+      </Button>
 
-        <Button
-          :disabled="!isEdited"
-          @click="saveCharacter"
-        >
-          Save
-        </Button>
-      </div>
+      <Button
+        :disabled="!isEdited"
+        @click="saveCharacter"
+      >
+        Save
+      </Button>
     </template>
-  </Card>
+  </DetailCard>
 </template>
 
 <script setup>
 const confirm = useConfirm()
 const toast = useToast()
-const trixEditors = useTemplateRef("trixEditors")
 const { token } = useAuth()
 
 const charactersStore = useCharactersStore()
 const { error, options } = storeToRefs(charactersStore)
 const { create } = charactersStore
+
+const trixEditors = ref({})
 
 const character = ref(_clone(emptyCharacter))
 const suggestions = ref(_clone(options.value))
@@ -86,6 +70,8 @@ const isEdited = computed(() => _some(character.value, (value) => isPresent(valu
 
 async function reset() {
   character.value = _clone(emptyCharacter)
+
+  console.log(character.value)
 
   // reset the trix-editors
   await nextTick()

@@ -1,126 +1,109 @@
 <template>
-  <Card class="max-w-prose mx-auto">
-    <template #content>
-      <div class="flex flex-col gap-2">
+  <DetailCard>
+    <template #attribute="{ attribute, type }">
+       <Swap
+        v-if="type === 'richText'"
+        @active="focusTrixEditor(attribute)"
+        :ref="(component) => { swaps[attribute] = component }"
+      >
         <div
-          class="flex flex-col"
-          v-for="{ attribute, type } in apiAttributes"
-          :key="attribute"
+          class="px-3 py-2 border border-transparent trix-content"
+          tabindex="0"
+          v-html="(character?.[attribute]) || '&nbsp;'"
+          @keydown.enter.prevent="open(attribute)"
+          @keydown.space.prevent="open(attribute)"
+        />
+
+        <template #active="{ close }">
+          <TrixEditor
+            v-model="character[attribute]"
+            :id="attribute"
+            tabindex="0"
+            @blur="close"
+            :ref="(component) => { trixEditors[attribute] = component }"
+          />
+        </template>
+      </Swap>
+
+      <Swap
+        v-else-if="type === 'autocomplete'"
+        @active="focusInput(attribute)"
+        :ref="(component) => { swaps[attribute] = component }"
+      >
+        <div
+          class="px-3 py-2 border border-transparent"
+          tabindex="0"
+          @keydown.enter.prevent="open(attribute)"
+          @keydown.space.prevent="open(attribute)"
         >
-          <label
-            :for="attribute"
-            class="ml-1 text-primary dark:text-primary text-sm"
-          >
-            {{ _startCase(attribute) }}
-          </label>
-
-          <Swap
-            v-if="type === 'richText'"
-            @active="focusTrixEditor(attribute)"
-            :ref="(el) => { swaps[attribute] = el }"
-          >
-            <div
-              class="px-3 py-2 border border-transparent trix-content"
-              tabindex="0"
-              v-html="(character?.[attribute]) || '&nbsp;'"
-              @keydown.enter.prevent="open(attribute)"
-              @keydown.space.prevent="open(attribute)"
-            />
-
-            <template #active="{ close }">
-              <TrixEditor
-                v-model="character[attribute]"
-                :id="attribute"
-                tabindex="0"
-                @blur="close"
-                ref="trixEditors"
-              />
-            </template>
-          </Swap>
-
-          <Swap
-            v-else-if="type === 'autocomplete'"
-            @active="focusInput(attribute)"
-            :ref="(component) => { swaps[attribute] = component }"
-          >
-            <div
-              class="px-3 py-2 border border-transparent"
-              tabindex="0"
-              @keydown.enter.prevent="open(attribute)"
-              @keydown.space.prevent="open(attribute)"
-            >
-              {{ character?.[attribute] || "&nbsp;" }}
-            </div>
-
-            <template #active="{ close }">
-              <ComboBox
-                v-model="character[attribute]"
-                :inputId="attribute"
-                :suggestions="suggestions[attribute]"
-                @blur="onAutoCompleteBlur(close)"
-              />
-            </template>
-          </Swap>
-
-          <Swap
-            v-else
-            @active="focusInput(attribute)"
-            :ref="(el) => { swaps[attribute] = el }"
-          >
-            <div
-              class="px-3 py-2 border border-transparent"
-              tabindex="0"
-              @keydown.enter.prevent="open(attribute)"
-              @keydown.space.prevent="open(attribute)"
-            >
-              {{ character?.[attribute] || "&nbsp;" }}
-            </div>
-
-            <template #active="{ close }">
-              <InputText
-                v-model="character[attribute]"
-                :id="attribute"
-                fluid
-                @blur="close"
-              />
-            </template>
-          </Swap>
+          {{ character?.[attribute] || "&nbsp;" }}
         </div>
-      </div>
+
+        <template #active="{ close }">
+          <ComboBox
+            v-model="character[attribute]"
+            :inputId="attribute"
+            :suggestions="suggestions[attribute]"
+            @blur="onAutoCompleteBlur(close)"
+          />
+        </template>
+      </Swap>
+
+      <Swap
+        v-else
+        @active="focusInput(attribute)"
+        :ref="(component) => { swaps[attribute] = component }"
+      >
+        <div
+          class="px-3 py-2 border border-transparent"
+          tabindex="0"
+          @keydown.enter.prevent="open(attribute)"
+          @keydown.space.prevent="open(attribute)"
+        >
+          {{ character?.[attribute] || "&nbsp;" }}
+        </div>
+
+        <template #active="{ close }">
+          <InputText
+            v-model="character[attribute]"
+            :id="attribute"
+            fluid
+            @blur="close"
+          />
+        </template>
+      </Swap>
     </template>
 
-    <template #footer>
-      <div class="mt-4 flex flex-row gap-3 justify-end">
-        <template v-if="isUpdated">
-          <Button
-            severity="warn"
-            @click="confirmRevert"
-          >
-            Revert
-          </Button>
+    <template #buttons>
+      <template v-if="isUpdated">
+        <Button
+          severity="warn"
+          @click="confirmRevert"
+        >
+          Revert
+        </Button>
 
-          <Button @click="updateCharacter">
-            Save
-          </Button>
-        </template>
+        <Button @click="updateCharacter">
+          Save
+        </Button>
+      </template>
 
-        <template v-else>
-          <Button>
-            <NuxtLink to="/">
-              Back
-            </NuxtLink>
-          </Button>
+      <template v-else>
+        <Button>
+          <NuxtLink to="/">
+            Back
+          </NuxtLink>
+        </Button>
 
-          <Button
-            severity="danger"
-            @click="confirmDelete"
-          >
-            Delete
-          </Button>
-        </template>
-      </div>
+        <Button
+          severity="danger"
+          @click="confirmDelete"
+        >
+          Delete
+        </Button>
+      </template>
     </template>
-  </Card>
+  </DetailCard>
 </template>
 
 <script setup>
@@ -133,17 +116,18 @@ const confirm = useConfirm()
 const toast = useToast()
 const { token } = useAuth()
 
-const trixEditors = useTemplateRef("trixEditors")
-const swaps = ref({})
-
 const charactersStore = useCharactersStore()
 const { options, error } = storeToRefs(charactersStore)
 const { getCharacter, update, destroy } = charactersStore
+
+const swaps = ref({})
+const trixEditors = ref({})
 
 const suggestions = ref(_clone(options.value))
 const originalCharacter = ref(emptyCharacter)
 const character = ref(emptyCharacter)
 
+const id = computed(() => _toInteger(route.params.id))
 const updatedFields = computed(() => findDifferences(originalCharacter.value, character.value))
 const isUpdated = computed(() => (!_isEmpty(updatedFields.value)))
 
@@ -201,14 +185,14 @@ async function reset() {
 }
 
 async function initCharacter() {
-  const char = await getCharacter(route.params.id)
+  const char = await getCharacter(id.value)
 
   originalCharacter.value = _clone(char)
   character.value = _clone(char)
 }
 
 async function updateCharacter() {
-  const result = await update(route.params.id, updatedFields.value, token)
+  const result = await update(id.value, updatedFields.value, token)
 
   if (result) {
     toast.add({
@@ -229,7 +213,7 @@ async function updateCharacter() {
 }
 
 async function deleteCharacter() {
-  const result = await destroy(route.params.id, token)
+  const result = await destroy(id.value, token)
 
   if (result) {
     toast.add({
