@@ -1,5 +1,7 @@
+import { toInteger } from "lodash-es"
+
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, "id")
+  const id = toInteger(getRouterParam(event, "id"))
 
   try {
     return await prisma.character.delete({ where: { id: id } })
