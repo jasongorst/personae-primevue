@@ -9,43 +9,11 @@
 const { load, patch } = useCharactersStore()
 callOnce(async () => await load())
 
-// connect to ActiveCable channel
-const { vueApp } = useNuxtApp()
-let $cable
-
-const channels = {
-  CharacterChannel: {
-    connected() {
-      console.log("[CharacterChannel connected]")
-      load()
-    },
-
-    received(data) {
-      data = deepParseTimestamps(deepConvertKeys(data, _camelCase))
-      console.log("[CharacterChannel message]", data)
-
-      // patch(data)
-      // console.log("[patched]")
-    },
-
-    disconnected() {
-      console.log("[CharacterChannel disconnected]")
-    }
-  }
-}
-
-onMounted(() => {
-  $cable = vueApp.config.globalProperties.$cable
-  // noinspection JSUnresolvedReference
-  $cable.registerChannels(channels, vueApp)
-  $cable.subscribe({ channel: "CharacterChannel" })
-})
-
-onUnmounted(() => {
-  // noinspection JSUnresolvedReference
-  $cable.unregisterChannels(channels, vueApp)
-  $cable.unsubscribe("CharacterChannel")
-})
+// connect to websocket
+// const { status, data, send, open, close } = useWebSocket(
+//   "ws://localhost:3001/ws",
+//   { heartbeat: true }
+// )
 
 // sign in
 const toast = useToast()
