@@ -53,6 +53,7 @@ export default defineNuxtConfig({
 
   nitro: {
     experimental: {
+      asyncContext: true,
       websocket: true
     }
   },
@@ -70,18 +71,18 @@ export default defineNuxtConfig({
   vite: {
     build: {
       sourcemap: false,
-      
+
       terserOptions: {
         format: {
           comments: false
         }
       }
     },
-    
+
     esbuild: {
       legalComments: "none"
     },
-    
+
     optimizeDeps: {
       include: [
         "@primevue/core/api",
@@ -105,18 +106,20 @@ export default defineNuxtConfig({
         "primevue/menu",
         "primevue/message",
         "primevue/password",
+        "primevue/progressspinner",
         "primevue/toast",
         "primevue/toastservice",
         "primevue/toolbar",
         "primevue/useconfirm",
         "primevue/usetoast",
+        "socket.io-client",
         "tailwind-merge",
         "trix",
         "uuid",
         "yup"
       ]
     },
-    
+
     plugins: [ tailwindcss() ],
 
     vue: {
