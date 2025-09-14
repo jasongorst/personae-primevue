@@ -27,3 +27,11 @@ model Character {
 
   @@index([createdAt])
 }
+
+model Patch {
+  id  Int @id @default(autoincrement())
+  createdAt DateTime  @db.Timestamp(6) @default(now())
+  patch Json
+
+  @@index([createdAt])
+}
