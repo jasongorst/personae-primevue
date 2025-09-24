@@ -2,9 +2,7 @@ import * as jsonpatch from "fast-json-patch"
 
 export const useCharactersStore = defineStore("characters", () => {
   const config = useRuntimeConfig()
-
-  const { $socketio } = useNuxtApp()
-  const socket = $socketio.socket
+  const { $socketio: { socket } } = useNuxtApp()
 
   // state
   const data = ref({})
@@ -17,25 +15,19 @@ export const useCharactersStore = defineStore("characters", () => {
   const count = computed(() => _size(characters.value))
   const isLoaded = computed(() => isPositive(count.value))
   const hasGlobalFilter = computed(() => isPresent(filters.value["global"].value))
-  const hasAnyFilter = computed(() => _some(filters.value, (value) => isPresent(value.value)))
+  const hasAnyFilters = computed(() => _some(filters.value, (value) => isPresent(value.value)))
 
-  const hasAnyAttributeFilter = computed(
-    () => _some(_map(listAttributes, (attribute) => hasFilterFor(attribute)))
-  )
+  const hasAnyAttributeFilters = computed(() => _some(
+    _map(listAttributes, (attribute) => hasFilterFor(attribute))
+  ))
 
-  const options = computed(
-    () => _reduce(
-      optionsAttributes,
-      (accumulator, attribute) => _set(
-        accumulator,
-        attribute,
-        _sortBy(_uniq(_compact(
-          _map(characters.value, (character) => character[attribute])
-        )))
-      ),
-      {}
-    )
-  )
+  const options = computed(() => _reduce(
+    optionsAttributes,
+    (accumulator, attribute) => _set(
+      accumulator, attribute, uniqValues(characters.value, attribute)
+    ),
+    {}
+  ))
 
   // actions
   function hasFilterFor(attribute) {
@@ -54,9 +46,19 @@ export const useCharactersStore = defineStore("characters", () => {
     filters.value[attribute] = _without(filters.value[attribute], value)
   }
 
+  function resetGlobalFilter() {
+    filters.value.global.value = ""
+  }
+
   async function getCharacter(id) {
     await ensureLoaded()
     return data.value[id]
+  }
+
+  async function ensureLoaded() {
+    if (!isLoaded.value) {
+      await load()
+    }
   }
 
   function applyPatch(patch) {
@@ -67,57 +69,43 @@ export const useCharactersStore = defineStore("characters", () => {
     }
   }
 
-  async function ensureLoaded() {
-    if (!isLoaded.value) {
-      load()
-    }
-  }
+  async function load() {
+    const response = await socket.emitWithAck("character:list")
 
-  function load() {
-    let response
-    
-    socket.emit("character:list", (res) => {
-      if (_has(res, "data")) {
-        data.value = res.data
-      } else {
-        response = res
-      }
-    })
-    
+    if (_has(response, "data")) {
+      data.value = response.data
+    }
+
     return response
   }
 
-  function create(character, _token) {
-    let response
-    
-    socket.emit("character:create", character, (res) => response = res)
+  async function create(character, _token) {
+    const response = await socket.emitWithAck("character:create", character)
+
+    if (_has(response, "data")) {
+      _set(data.value, response.data.id, response.data)
+    }
+
+    return response
+  }
+
+  async function update(id, character, _token) {
+    const response = await socket.emitWithAck("character:update", id, character)
+
+    if (_has(response, "data")) {
+      _set(data.value, response.data.id, response.data)
+    }
+
+    return response
+  }
+
+  async function destroy(id, _token) {
+    const response = await socket.emitWithAck("character:delete", id)
     
     if (_has(response, "data")) {
-      const created = response.data
-      _set(data.value, created.id, created)
+      _unset(data.value, response.data.id)
     }
-    
-    return response
-  }
 
-  function update(id, character, _token) {
-    let response
-    
-    socket.emit("character:update", id, character, (res) => response = res)
-    
-    if (_has(response, "data")) {
-      const created = response.data
-      _set(data.value, created.id, created)
-    }
-    
-    return response
-  }
-  
-  function destroy(id, _token) {
-    let response
-
-    socket.emit("character:delete", id, (res) => response = res)
-    
     return response
   }
 
@@ -148,7 +136,7 @@ export const useCharactersStore = defineStore("characters", () => {
       if (_has(response, "id")) {
         _set(data.value, response.id, response)
       } else {
-        console.log("[useCharacterStore create (no id)]", response)
+        console.log("[characterStore.apiCreate - no id]", response)
       }
     }
 
@@ -228,8 +216,8 @@ export const useCharactersStore = defineStore("characters", () => {
     // getters
     characters,
     count,
-    hasAnyAttributeFilter,
-    hasAnyFilter,
+    hasAnyAttributeFilters,
+    hasAnyFilters,
     hasGlobalFilter,
     isLoaded,
     options,
@@ -249,5 +237,10 @@ export const useCharactersStore = defineStore("characters", () => {
     removeFilter,
     resetFilterFor,
     resetFilters,
+    resetGlobalFilter
   }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useCharactersStore, import.meta.hot))
+}
