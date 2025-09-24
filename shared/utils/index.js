@@ -1,9 +1,10 @@
-import { concat, difference, fromPairs, includes, map, reduce } from "lodash-es"
+import { concat, difference, fromPairs, includes, map, reduce, set } from "lodash-es"
 import { FilterMatchMode } from "@primevue/core/api"
 
-const attributes = [
-  "faeName",
-  "mortalName",
+const nameAttributes = [ "faeName", "mortalName" ]
+const richTextAttributes = [ "description", "notes" ]
+
+const optionsAttributes = [
   "player",
   "kith",
   "house",
@@ -14,63 +15,58 @@ const attributes = [
   "position"
 ]
 
-const nameAttributes = [ "faeName", "mortalName" ]
-const omitFromList = [ "house", "bannerhouse" ]
+// for filter Listboxes: optionsAttributes except house and bannerhouse
+const categoryAttributes = difference(optionsAttributes, [ "house", "bannerhouse" ])
 
-export const richTextAttributes = [ "description", "notes" ]
-export const plainTextAttributes = map(richTextAttributes, (attribute) => `${attribute}PlainText`)
+// for datatable: name and category attributes
+const listAttributes = concat(nameAttributes, categoryAttributes)
 
-// for datatable, all detail attributes except house and bannerhouse
-export const listAttributes = difference(attributes, omitFromList)
+// for global filter
+const plainTextAttributes = map(richTextAttributes, (attribute) => `${attribute}PlainText`)
+const globalFilterAttributes = concat(nameAttributes, optionsAttributes, plainTextAttributes)
 
-// for autocomplete, all detail attributes except names
-export const optionsAttributes = difference(attributes, nameAttributes)
+// for datatable filters
+const filtersAttributes = concat(listAttributes, "global")
 
-// for create/edit
-export const apiAttributes = concat(
+// for create/edit forms
+const apiAttributes = concat(
   map(nameAttributes, (attr) => ({ attribute: attr, type: "text" })),
   map(optionsAttributes, (attr) => ({ attribute: attr, type: "autocomplete" })),
   map(richTextAttributes, (attr) => ({ attribute: attr, type: "richText" }))
 )
 
-// for global filter
-export const globalFilterAttributes = concat(nameAttributes, optionsAttributes, plainTextAttributes)
-
-// for attribute filters, all list attributes except names
-export const categoryAttributes = difference(listAttributes, nameAttributes)
-
-export const emptyCharacter = fromPairs(
-  map(apiAttributes, ({ attribute, type }) => {
-    return [
-      attribute,
-      (type === "richText") ? "" : null
-    ]
-  })
-)
-
-export const emptyFilters = reduce(
-  listAttributes,
-  (filters, attribute) => {
-    if (includes(categoryAttributes, attribute)) {
-      // category attribute
-      filters[attribute] = {
-        value: [],
-        matchMode: FilterMatchMode.IN
-      }
+const emptyCharacter = reduce(
+  apiAttributes,
+  (accumulator, { attribute, type }) => {
+    if (type === "richText") {
+      return set(accumulator, attribute, "")
     } else {
-      filters[attribute] = {
-        value: "",
-        matchMode: FilterMatchMode.CONTAINS
-      }
+      return set(accumulator, attribute, null)
     }
-
-    // add global field
-    filters['global'] = {
-      value: "",
-      matchMode: FilterMatchMode.CONTAINS
-    }
-
-    return filters
   },
   {}
 )
+
+const emptyFilters = reduce(
+  filtersAttributes,
+  (accumulator, attribute) => {
+    if (includes(categoryAttributes, attribute)) {
+      return set(accumulator, attribute, { value: [], matchMode: FilterMatchMode.IN })
+    } else {
+      return set(accumulator, attribute, { value: "", matchMode: FilterMatchMode.CONTAINS })
+    }
+  },
+  {}
+)
+
+export {
+  richTextAttributes,
+  plainTextAttributes,
+  listAttributes,
+  optionsAttributes,
+  apiAttributes,
+  globalFilterAttributes,
+  categoryAttributes,
+  emptyCharacter,
+  emptyFilters
+}
