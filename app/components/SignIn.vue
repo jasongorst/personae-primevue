@@ -162,10 +162,6 @@ async function signInWithPassword(values) {
       detail: "You are now signed in.",
       life: 3000
     })
-
-    if (route.name === "show-id") {
-      await navigateTo({ name: "edit-id", params: { id: route.params.id } })
-    }
   } catch (error) {
     console.log(error)
 

@@ -109,10 +109,6 @@ async function doSignOut() {
   })
 
   closeMenu()
-
-  if (route.name === "edit-id") {
-    await navigateTo({ name: "show-id", params: { id: route.params.id } })
-  }
 }
 
 function doSignIn() {
