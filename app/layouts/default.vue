@@ -4,17 +4,16 @@
   <ConfirmContainer />
 
   <SignIn
-    class="z-90"
     v-model:visible="showSignIn"
+    class="z-90"
   />
 
-  <div class="relative w-full xl:max-w-screen-xl xl:mx-auto">
+  <div class="relative w-full">
     <NavBar />
 
-<!--    <SpinnerModal :visible="!isLoaded" />-->
+    <SpinnerModal :visible="!isLoaded" />
 
-<!--    <div :class="!isLoaded && 'hidden'">-->
-    <div>
+    <div :class="!isLoaded && 'hidden'">
       <slot />
     </div>
   </div>
