@@ -1,8 +1,9 @@
 <template>
   <DetailCard>
     <template #attribute="{ attribute, type }">
-       <Swap
+      <Swap
         v-if="type === 'richText'"
+        :disabled="!isSignedIn"
         @active="focusTrixEditor(attribute)"
         :ref="(component) => { swaps[attribute] = component }"
       >
@@ -27,6 +28,7 @@
 
       <Swap
         v-else-if="type === 'autocomplete'"
+        :disabled="!isSignedIn"
         @active="focusInput(attribute)"
         :ref="(component) => { swaps[attribute] = component }"
       >
@@ -51,6 +53,7 @@
 
       <Swap
         v-else
+        :disabled="!isSignedIn"
         @active="focusInput(attribute)"
         :ref="(component) => { swaps[attribute] = component }"
       >
@@ -96,6 +99,7 @@
         </Button>
 
         <Button
+          v-if="isSignedIn"
           severity="danger"
           @click="confirmDelete"
         >
@@ -107,17 +111,15 @@
 </template>
 
 <script setup>
-definePageMeta({
-  middleware: "edit"
-})
-
 const route = useRoute()
 const confirm = useConfirm()
 const toast = useToast()
-const { token } = useAuth()
+
+const { status, token } = useAuth()
+const isSignedIn = computed(() => status.value === "authenticated")
 
 const charactersStore = useCharactersStore()
-const { options, error } = storeToRefs(charactersStore)
+const { options } = storeToRefs(charactersStore)
 const { getCharacter, update, destroy } = charactersStore
 
 const swaps = ref({})
@@ -178,6 +180,7 @@ async function reset() {
   // reset the trix-editors
   await nextTick()
 
+  // noinspection JSUnresolvedReference
   _forEach(
     trixEditors.value,
     async (trixEditor) => trixEditor.reset()
@@ -192,9 +195,9 @@ async function initCharacter() {
 }
 
 async function updateCharacter() {
-  const result = await update(id.value, updatedFields.value, token)
+  const { data, error } = await update(id.value, updatedFields.value, token)
 
-  if (result) {
+  if (data) {
     toast.add({
       severity: "success",
       summary: "Updated.",
@@ -207,15 +210,15 @@ async function updateCharacter() {
     toast.add({
       severity: "error",
       summary: "Error.",
-      detail: error.value
+      detail: error
     })
   }
 }
 
 async function deleteCharacter() {
-  const result = await destroy(id.value, token)
+  const { data, error } = await destroy(id.value, token)
 
-  if (result) {
+  if (data) {
     toast.add({
       severity: "success",
       summary: "Deleted.",
@@ -228,7 +231,7 @@ async function deleteCharacter() {
     toast.add({
       severity: "error",
       summary: "Error.",
-      detail: error.value
+      detail: error
     })
   }
 }
