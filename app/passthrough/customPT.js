@@ -2,7 +2,7 @@ const customPT = {
   autocomplete: {
     root: `inline-flex p-fluid:flex`,
     pcInputText: {
-      root: `appearance-none rounded-md outline-hidden 
+      root: `appearance-none rounded-md outline-hidden
             bg-surface-0 dark:bg-surface-950
             p-filled:bg-surface-50 dark:p-filled:bg-surface-800
             text-surface-700 dark:text-surface-0
@@ -136,7 +136,7 @@ const customPT = {
 
   card:{
     root: `flex flex-col rounded-xl
-        bg-surface-0 dark:bg-surface-900 
+        bg-surface-0 dark:bg-surface-900
         text-surface-700 dark:text-surface-0
         shadow-md`,
     header: ``,
@@ -190,7 +190,7 @@ const customPT = {
     mask: `bg-black/50 text-surface-200 absolute z-10 flex items-center justify-center w-full h-full backdrop-blu-`,
     column: {
       root: ``,
-      headerCell: `group py-3 px-4 font-normal text-start transition-colors duration-200
+      headerCell: `relative group py-3 px-4 font-normal text-start transition-colors duration-200
             border-b border-surface-200 dark:border-surface-700
             bg-surface-0 dark:bg-surface-900
             text-surface-700 dark:text-surface-0
@@ -379,7 +379,7 @@ const customPT = {
         group-p-disabled:text-surface-500 dark:group-p-disabled:text-surface-400 group-p-disabled:pointer-events-none
         p-disabled:opacity-60 p-disabled:pointer-events-none
         transition-colors duration-200`,
-    optionCheckIcon: `relative -ms-[0.375rem] me-[0.375rem] text-surface-700 dark:text-surface-0`,
+    optionCheckIcon: ``,
     optionBlankIcon: ``,
     emptyMessage: `px-3 py-2`
   },
@@ -454,7 +454,7 @@ const customPT = {
         p-contrast:hover:bg-surface-800 p-contrast:focus-visible:outline-surface-50 dark:p-contrast:hover:bg-surface-100 dark:p-contrast:focus-visible:outline-surface-950
         p-outlined:hover:bg-transparent p-simple:hover:bg-transparent`,
     closeIcon: `w-4 h-4 text-base
-        p-small:w-3.5 p-small:h-3.5 p-small:text-sm 
+        p-small:w-3.5 p-small:h-3.5 p-small:text-sm
         p-large:w-[1.125rem] p-large:h-[1.125rem] p-large:text-xl`,
     transition: {
       enterFromClass: 'opacity-0',
