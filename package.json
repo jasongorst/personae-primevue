@@ -11,11 +11,12 @@
     "postinstall": "nuxt prepare",
     "preview": "nuxt preview -p 4001",
     "prisma-generate": "prisma generate",
-    "migrate": "prisma migrate dev"
+    "migrate": "prisma migrate dev",
+    "updatePlainTextFields": "tsx ./prisma/updatePlainTextFields.js"
   },
   "dependencies": {
-    "@prisma/client": "^6.16.0",
-    "nuxt": "^4.1.1",
+    "@prisma/client": "^6.16.2",
+    "nuxt": "^4.1.2",
     "vue": "^3.5.21"
   },
   "devDependencies": {
@@ -31,7 +32,8 @@
     "@tailwindcss/language-server": "^0.14.26",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.13",
-    "@vue/language-server": "^3.0.6",
+    "@vue/language-server": "^3.0.7",
+    "dotenv": "^17.2.2",
     "engine.io": "^6.6.4",
     "fast-json-patch": "^3.1.1",
     "html-to-text": "^9.0.5",
@@ -39,16 +41,17 @@
     "nuxt-lodash": "github:jasongorst/nuxt-lodash",
     "pinia": "^3.0.3",
     "primevue": "^4.3.9",
-    "prisma": "^6.16.0",
+    "prisma": "^6.16.2",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.13",
     "tailwindcss-primeui": "^0.6.1",
     "trix": "^2.1.15",
+    "tsx": "^4.20.5",
     "uuid": "^13.0.0",
     "vite": "^7.1.5",
     "yup": "^1.7.0"
   },
-  "packageManager": "pnpm@10.15.1"
+  "packageManager": "pnpm@10.16.1"
 }
