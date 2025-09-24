@@ -1,8 +1,7 @@
 <template>
   <div class="contents">
     <div
-      class="hover:bg-primary/15 cursor-pointer"
-      :class="isActive && 'hidden'"
+      :class="[ !disabled && 'hover:bg-primary/15 cursor-pointer', isActive && 'hidden' ]"
       @click="open"
     >
       <slot />
@@ -17,6 +16,11 @@
 <script setup>
 const props = defineProps({
   active: {
+    type: Boolean,
+    default: false
+  },
+
+  disabled: {
     type: Boolean,
     default: false
   }
@@ -35,9 +39,11 @@ defineExpose({
 const isActive = ref(props.active)
 
 function open(event) {
-  isActive.value = true
-  emit("active", event)
-  emit("update:active", true)
+  if (!props.disabled) {
+    isActive.value = true
+    emit("active", event)
+    emit("update:active", true)
+  }
 }
 
 function close(event) {
