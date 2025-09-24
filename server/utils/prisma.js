@@ -1,46 +1,25 @@
-import { PrismaClient } from "~~/prisma/generated/prisma/client"
-import { get, isNull } from "lodash-es"
+import { Prisma, PrismaClient } from "../../prisma/generated/prisma/client"
 
-export default new PrismaClient().$extends({
+const characterLocks = Prisma.defineExtension({
+  name: "handleLocks",
+  
   query: {
     character: {
-      async $allOperations({ _model, _operation, args, query }) {
-        if (get(args, "data.description") === "") {
-          args.data.description = null
-        }
-
-        if (get(args, "data.notes") === "") {
-          args.data.notes = null
-        }
-
-        return query(args)
-      }
-    }
-  },
-
-  result: {
-    character: {
-      description: {
-        needs: { description: true },
-        compute(user) {
-          if (isNull(user.description)) {
-            return ""
-          } else {
-            return user.description
-          }
-        }
-      },
-
-      notes: {
-        needs: { notes: true },
-        compute(user) {
-          if (isNull(user.notes)) {
-            return ""
-          } else {
-            return user.notes
-          }
+      async update({ args, query }) {
+        const lock = await PrismaClient.character.findUnique({
+          where: { id: args.where.id },
+          select: { lock: true }
+        })
+        
+        if (lock) {
+          return false
+        } else {
+          return query(args)
         }
       }
     }
   }
 })
+
+// export default new PrismaClient().$extends(characterLocks)
+export default new PrismaClient()
