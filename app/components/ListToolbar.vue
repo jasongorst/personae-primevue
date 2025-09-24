@@ -1,20 +1,24 @@
 <template>
   <Toolbar
     pt:root="
-      absolute bottom-0 left-0 w-full py-0 border-0 rounded-t-none rounded-b-md
+      w-full py-1 border-0 rounded-t-none rounded-b-md
       bg-primary-0! dark:bg-primary-900! text-primary dark:text-primary
+      min-h-[calc(--spacing(6)+1.25rem+2px)]
     "
   >
     <template #start>
       <div class="whitespace-nowrap text-sm text-primary">
-        Showing <strong class="font-semibold">{{ filteredCount }}</strong>
+        Showing <strong class="font-semibold">{{ filteredCountValue }}</strong>
         of <strong class="font-semibold">{{ count }}</strong>
-        character{{ (count > 1 ? "s" : "") }}
+        {{ pluralize("character", count) }}
       </div>
     </template>
 
     <template #end>
-      <Button variant="text">
+      <Button
+        v-if="isSignedIn"
+        variant="text"
+      >
         <NuxtLink
           class="flex items-center gap-0.5"
           to="/create"
@@ -42,6 +46,19 @@ const props = defineProps({
   filteredCount: {
     type: Number,
     required: true
+  }
+})
+
+const { status } = useAuth()
+const isSignedIn = computed(() => status.value === "authenticated")
+
+const filteredCountValue = computed(() => {
+  if (props.filteredCount === props.count) {
+    return "all"
+  } else if (props.filteredCount === 0) {
+    return "none"
+  } else {
+    return props.filteredCount
   }
 })
 </script>
