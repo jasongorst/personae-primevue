@@ -4,6 +4,7 @@ import AutoComplete from "primevue/autocomplete"
 export default {
   name: "InitialAutoComplete",
   extends: AutoComplete,
+
   methods: {
     onFocus(event) {
       if (this.disabled) {
@@ -25,6 +26,7 @@ export default {
 
       this.$emit("focus", event)
     },
+
     onInput(event) {
       if (this.typeahead) {
         if (this.searchTimeout) {
@@ -53,6 +55,7 @@ export default {
         }
       }
     },
+
     search(event, query, _) {
       //allow empty string but not undefined or null
       if (query === undefined || query === null) {
