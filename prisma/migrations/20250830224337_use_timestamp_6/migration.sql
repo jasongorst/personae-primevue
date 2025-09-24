@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "public"."Character" ALTER COLUMN "createdAt" SET DATA TYPE TIMESTAMP(6),
-ALTER COLUMN "updatedAt" SET DATA TYPE TIMESTAMP(6);
