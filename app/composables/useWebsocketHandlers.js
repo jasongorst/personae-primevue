@@ -1,11 +1,11 @@
 export default function useWebsocketHandlers() {
-  const { $socketio } = useNuxtApp()
-  const { socket } = $socketio
+  const { $socketio: { socket } } = useNuxtApp()
   const { applyPatch } = useCharactersStore()
 
+  // socket.on("character:patch", ({ timestamp, patch }) => {
   socket.on("character:patch", (patch) => {
-    console.log(["character:patch"], patch)
     applyPatch(patch)
+    // socket.auth.offset = timestamp
   })
 
   onBeforeUnmount(() => {

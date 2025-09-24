@@ -7,7 +7,15 @@ export default defineNuxtPlugin({
   async setup () {
     const config = useRuntimeConfig()
 
-    const socket = io(config.public.websocketHost, { transports: [ "polling", "websocket" ] })
+    const socket = io(config.public.websocketHost, {
+      transports: [ "polling", "websocket" ],
+      
+      // delivery guarantee
+      retries: 3,
+      ackTimeout: 10000,
+      auth: { offset: undefined }
+    })
+    
     const isConnected = ref(false)
     const transport = ref("N/A")
 
@@ -25,6 +33,12 @@ export default defineNuxtPlugin({
       socket.io.engine.on("upgrade", (rawTransport) => {
         transport.value = rawTransport.name
       })
+      
+      // if (socket.recovered) {
+      //   // any event missed during the disconnection period will be received now
+      // } else {
+      //   // new or unrecoverable session
+      // }
     }
 
     function onDisconnect() {
@@ -44,7 +58,7 @@ export default defineNuxtPlugin({
       if (import.meta.server) {
         const { $socketio } = useNuxtApp()
         const { socket } = $socketio
-        
+
         socket.off("connect")
         socket.off("disconnect")
       }
