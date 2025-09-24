@@ -59,7 +59,7 @@ const toast = useToast()
 const { token } = useAuth()
 
 const charactersStore = useCharactersStore()
-const { error, options } = storeToRefs(charactersStore)
+const { options } = storeToRefs(charactersStore)
 const { create } = charactersStore
 
 const trixEditors = ref({})
@@ -71,11 +71,10 @@ const isEdited = computed(() => _some(character.value, (value) => isPresent(valu
 async function reset() {
   character.value = _clone(emptyCharacter)
 
-  console.log(character.value)
-
   // reset the trix-editors
   await nextTick()
 
+  // noinspection JSUnresolvedReference
   _forEach(
     trixEditors.value,
     async (trixEditor) => trixEditor.reset()
@@ -83,9 +82,9 @@ async function reset() {
 }
 
 async function saveCharacter() {
-  const result = await create(character.value, token)
+  const { data, error } = await create(character.value, token)
 
-  if (result) {
+  if (data) {
     toast.add({
       severity: "success",
       summary: "Saved.",
@@ -98,7 +97,7 @@ async function saveCharacter() {
     toast.add({
       severity: "error",
       summary: "Error.",
-      detail: error.value
+      detail: error
     })
   }
 }
