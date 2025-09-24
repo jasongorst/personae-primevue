@@ -36,6 +36,8 @@ export default defineNuxtConfig({
   },
 
   imports: {
+    dirs: [ 'stores' ],
+    
     presets: [ {
       from: "tailwind-merge",
       imports: [ "twJoin", "twMerge" ]
@@ -199,6 +201,10 @@ export default defineNuxtConfig({
     prefix: "_",
     prefixSkip: false,
     upperAfterPrefix: false
+  },
+  
+  pinia: {
+    storesDirs: [ './app/stores/**' ],
   },
 
   primevue: {
