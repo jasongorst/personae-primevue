@@ -11,30 +11,30 @@ async function main() {
         id: true,
         notes: true
       },
-      
+
       where: {
         notes: { not: "" }
       }
     })
-    
+
     for (const character of notes) {
       await tx.character.update({
         where: { id: character.id },
         data: { notesPlainText: htmlToPlainText(character.notes) }
       })
     }
-    
+
     const descriptions = await tx.character.findMany({
       select: {
         id: true,
         description: true
       },
-      
+
       where: {
         description: { not: "" }
       }
     })
-    
+
     for (const character of descriptions) {
       await tx.character.update({
         where: { id: character.id },
