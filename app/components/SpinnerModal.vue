@@ -7,7 +7,10 @@
     pt:root:class="bg-transparent! border-0"
     pt:content:class="p-0!"
   >
-    <ProgressSpinner :unstyled="false" />
+    <ProgressSpinner
+      class="p-progressspinner"
+      :unstyled="false"
+    />
   </Dialog>
 </template>
 
@@ -22,7 +25,6 @@ const props = defineProps({
 </script>
 
 <style scoped>
-/*noinspection CssUnusedSymbol*/
 .p-progressspinner {
   --p-progressspinner-color-one: var(--color-primary-400);
   --p-progressspinner-color-two: var(--color-primary-900);
