@@ -4,27 +4,42 @@ export default defineNuxtPlugin({
   name: "socketio",
   enforce: "pre",
 
-  async setup () {
+  async setup() {
     const config = useRuntimeConfig()
+    const { status, token} = useAuth()
+    const isSignedIn = computed(() => status.value === "authenticated")
 
-    const socket = io(config.public.websocketHost, {
-      transports: [ "polling", "websocket" ],
-      
-      // delivery guarantee
-      retries: 3,
-      ackTimeout: 10000,
-      auth: { offset: undefined }
-    })
-    
+    const opts = { auth: {} }
+
+    if (isSignedIn.value) {
+      opts.auth.token = token.value
+    } else {
+      opts.auth.token = null
+    }
+
+    const socket = io(config.public.websocketHost, opts)
     const isConnected = ref(false)
     const transport = ref("N/A")
 
     if (socket.connected) {
-      onConnect()
+      await onConnect()
     }
 
     socket.on("connect", onConnect)
     socket.on("disconnect", onDisconnect)
+
+    watch(status, async (newValue) => {
+      if (newValue !== "loading") {
+        if (newValue === "authenticated") {
+          socket.auth = { token: token.value }
+        } else {
+          socket.auth = { token: null }
+        }
+
+        // force reconnect
+        socket.disconnect().connect()
+      }
+    })
 
     function onConnect() {
       isConnected.value = true
@@ -33,17 +48,14 @@ export default defineNuxtPlugin({
       socket.io.engine.on("upgrade", (rawTransport) => {
         transport.value = rawTransport.name
       })
-      
-      // if (socket.recovered) {
-      //   // any event missed during the disconnection period will be received now
-      // } else {
-      //   // new or unrecoverable session
-      // }
     }
 
     function onDisconnect() {
       isConnected.value = false
       transport.value = "N/A"
+
+      socket.off("connect")
+      socket.off("disconnect")
     }
 
     return {
@@ -53,20 +65,10 @@ export default defineNuxtPlugin({
     }
   },
 
-  hooks: {
-    "app:rendered"() {
-      if (import.meta.server) {
-        const { $socketio } = useNuxtApp()
-        const { socket } = $socketio
-
-        socket.off("connect")
-        socket.off("disconnect")
-      }
-    }
-  },
+  hooks: {},
 
   env: {
     // Set this value to `false` if you don't want the plugin to run when rendering server-only or island components.
-    islands: false
+    islands: true
   }
 })

@@ -2,6 +2,7 @@ export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
   const token = useCookie("auth.token", { watch: false})
 
+  // noinspection JSCheckFunctionSignatures
   const api = $fetch.create({
     baseURL: config.public.useApi.baseURL,
     transform: (response) => deepConvertKeys(response, _camelCase),
