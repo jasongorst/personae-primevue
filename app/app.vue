@@ -11,13 +11,15 @@ onMounted(async () => await useAutoSignIn())
 onMounted(() => useWebsocketHandlers())
 
 // init charactersStore
-const charactersStore = useCharactersStore()
-const { isLoaded } = storeToRefs(charactersStore)
-const { load } = charactersStore
+callOnce(async () => await useCharactersStore().load())
 
-if (!isLoaded) {
-  await load()
-}
+// const charactersStore = useCharactersStore()
+// const { isLoaded } = storeToRefs(charactersStore)
+// const { load } = charactersStore
+//
+// if (!isLoaded) {
+//   await load()
+// }
 </script>
 
 <style scoped>
