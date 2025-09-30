@@ -1,8 +1,9 @@
 import { Prisma, PrismaClient } from "../../prisma/generated/prisma/client"
 
+// noinspection JSUnusedLocalSymbols
 const characterLocks = Prisma.defineExtension({
   name: "handleLocks",
-  
+
   query: {
     character: {
       async update({ args, query }) {
@@ -10,7 +11,7 @@ const characterLocks = Prisma.defineExtension({
           where: { id: args.where.id },
           select: { lock: true }
         })
-        
+
         if (lock) {
           return false
         } else {
