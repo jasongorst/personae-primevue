@@ -1,3 +1,4 @@
+<!--suppress JSUnresolvedReference -->
 <script>
 import AutoComplete from "primevue/autocomplete"
 
