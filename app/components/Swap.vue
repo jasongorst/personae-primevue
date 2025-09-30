@@ -1,10 +1,13 @@
 <template>
   <div class="contents">
     <div
-      :class="[ !disabled && 'hover:bg-primary/15 cursor-pointer', isActive && 'hidden' ]"
+      :class="[
+        !disabled && 'hover:bg-primary/15 cursor-pointer',
+        isActive && 'hidden'
+      ]"
       @click="open"
     >
-      <slot />
+      <slot name="inactive" :open="open" />
     </div>
 
     <div :class="!isActive && 'hidden'">
@@ -32,9 +35,7 @@ const emit = defineEmits([
   "update:active"
 ])
 
-defineExpose({
-  open() { open() }
-})
+defineExpose({ close, open })
 
 const isActive = ref(props.active)
 
