@@ -19,9 +19,10 @@
         v-if="isSignedIn"
         variant="text"
       >
+        <!--suppress HtmlUnknownTarget -->
         <NuxtLink
           class="flex items-center gap-0.5"
-          to="/create"
+          :to="{ name: 'create' }"
         >
           <span class="font-semibold">
             Add

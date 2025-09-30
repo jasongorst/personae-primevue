@@ -23,7 +23,7 @@
     </template>
 
     <template #end>
-      <UserWidget />
+      <UserMenu />
     </template>
   </Toolbar>
 </template>
