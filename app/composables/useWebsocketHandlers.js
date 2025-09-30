@@ -2,16 +2,21 @@ export default function useWebsocketHandlers() {
   const { $socketio: { socket } } = useNuxtApp()
   const { applyPatch } = useCharactersStore()
 
-  // socket.on("character:patch", ({ timestamp, patch }) => {
+  // connection state recovery
+  socket.on("connect", async () => {
+    if (socket.recovered) {
+      // any event missed during the disconnection period will be received now
+    } else {
+      // new or unrecoverable session
+      await useCharactersStore().load()
+    }
+  })
+  
   socket.on("character:patch", (patch) => {
-    applyPatch(patch)
-    // socket.auth.offset = timestamp
+    console.log("[character:patch]", patch)
+
+    // applyPatch(patch)
   })
 
-  onBeforeUnmount(() => {
-    socket.off("connect")
-    socket.off("disconnect")
-
-    socket.off("character:patch")
-  })
+  onUnmounted(() => socket.removeAllListeners())
 }
