@@ -13,10 +13,10 @@ export const useCharactersStore = defineStore("characters", () => {
   // getters
   const characters = computed(() => _values(data.value))
   const count = computed(() => _size(characters.value))
-  const isLoaded = computed(() => isPositive(count.value))
+  const isLoaded = computed(() => !isEmpty(characters.value))
   const hasGlobalFilter = computed(() => isPresent(filters.value["global"].value))
   const hasAnyFilters = computed(() => _some(filters.value, (value) => isPresent(value.value)))
-
+  
   const hasAnyAttributeFilters = computed(() => _some(
     _map(listAttributes, (attribute) => hasFilterFor(attribute))
   ))
@@ -101,7 +101,7 @@ export const useCharactersStore = defineStore("characters", () => {
 
   async function destroy(id, _token) {
     const response = await socket.emitWithAck("character:delete", id)
-    
+
     if (_has(response, "data")) {
       _unset(data.value, response.data.id)
     }
