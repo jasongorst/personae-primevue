@@ -1,7 +1,7 @@
 <template>
   <div>
     <Button
-      v-if="isLoggedIn"
+      v-if="isSignedIn"
       variant="text"
       aria-haspopup="true"
       aria-controls="user_menu"
@@ -9,7 +9,7 @@
     >
       <!--suppress JSUnresolvedReference -->
       <span class="font-semibold">
-        {{ user.email }}
+        {{ user.username }}
       </span>
 
       <Icon
@@ -71,23 +71,22 @@
 </template>
 
 <script setup>
-const route = useRoute()
 const toast = useToast()
 const showSignIn = useState("showSignIn")
-const { status, data: user, signOut } = useAuth()
+const { data: user, signOut, status } = useAuth()
 const menu = useTemplateRef("menu")
 
-const isLoggedIn = computed(() => status.value === "authenticated")
+const isSignedIn = computed(() => status.value === "authenticated")
 
 const menuItems = computed(() => {
   // noinspection JSUnresolvedReference
-  if (isLoggedIn.value && user.value.admin) {
+  if (isSignedIn.value && user.value.admin) {
     // noinspection JSUnresolvedReference
     return [
       { label: "Dashboard", route: "/" },
       { label: "Sign Out", command: () => doSignOut() }
     ]
-  } else if (isLoggedIn.value) {
+  } else if (isSignedIn.value) {
     return [
       { label: "Sign Out", command: () => doSignOut() }
     ]
