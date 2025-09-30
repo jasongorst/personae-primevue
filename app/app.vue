@@ -5,19 +5,13 @@
 </template>
 
 <script setup>
-onMounted(async () => await useAutoSignIn())
-
-// register websocket handlers (client-side only)
-onMounted(() => useWebsocketHandlers())
+// register websocket handlers (client only)
+if (import.meta.client) {
+  useWebsocketHandlers()
+}
 
 // init charactersStore
-const charactersStore = useCharactersStore()
-const { isLoaded } = storeToRefs(charactersStore)
-const { load } = charactersStore
-
-if (!isLoaded) {
-  await load()
-}
+callOnce(async () => await useCharactersStore().load())
 </script>
 
 <style scoped>
