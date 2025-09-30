@@ -1,4 +1,6 @@
-export function registerCharacterHandlers(socket) {
+import { isNull } from "lodash-es"
+
+export function registerCharacterHandlers(io, socket) {
   socket.on("character:create", createCharacter)
   socket.on("character:read",  readCharacter)
   socket.on("character:update", updateCharacter)
@@ -8,32 +10,31 @@ export function registerCharacterHandlers(socket) {
   socket.on("character:unlock", unlockCharacter)
 
   async function createCharacter(payload, callback) {
-    let character, created
-
-    console.log("[createCharacter payload]", payload)
-
+    if (isNull(await authenticateSocket(socket))) {
+      callback({ error: "invalid token" })
+      return
+    }
+    
+    let validated, created
+    
     try {
-      character = characterSchema.validateSync(payload)
-      console.log("[createCharacter validated]", character)
+      validated = createCharacterSchema.validateSync(payload)
     } catch (error) {
       callback({ error })
       return
     }
+    
+    const augmented = addPlainTextAttributes(validated)
 
     try {
-      created = await prisma.character.create({ data: character })
-      console.log("[createCharacter created]", created)
+      created = await prisma.character.create({ data: augmented })
     } catch (error) {
       callback({ error })
       return
     }
 
     callback({ data: created })
-
-    const patch = addCharacterPatch(created)
-    console.log("[createCharacter patch]", patch)
-    // noinspection JSCheckFunctionSignatures
-    socket.broadcast.emit("character:patch", patch)
+    broadcastPatch(io, socket, addCharacterPatch(created))
   }
 
   async function readCharacter(id, callback) {
@@ -57,41 +58,58 @@ export function registerCharacterHandlers(socket) {
   }
 
   async function updateCharacter(id, payload, callback) {
+    if (isNull(await authenticateSocket(socket))) {
+      callback({ error: "invalid token" })
+      return
+    }
+    
     const { validId, error } = validateId(id)
 
     if (error) {
       callback({ error })
+      console.error("[updateCharacter validateId]", error)
       return
     }
 
-    let character, updated
+    let validated, previous, updated
 
     try {
-      character = characterSchema.validateSync(payload)
-      console.log("[updateCharacter validated]", character)
+      validated = updateCharacterSchema.validateSync(payload)
     } catch (error) {
       callback({ error })
+      console.error("[updateCharacter validate]", error)
       return
     }
+    
+    try {
+      previous = await prisma.character.findUnique({ where: { id: validId }})
+    } catch (error) {
+      callback({ error })
+      console.error("[updateCharacter previous]", error)
+      return
+    }
+    
+    const augmented = addPlainTextAttributes(validated)
 
     try {
-      updated = await prisma.character.update({ where: { id: validId }, data: character })
-      console.log("[updateCharacter updated]", updated)
+      updated = await prisma.character.update({ where: { id: validId }, data: augmented })
     } catch (error) {
-      console.error(error)
       callback({ error })
+      console.error("[updateCharacter update]", error)
       return
     }
 
     callback({ data: updated })
-
-    const patch = replaceCharacterPatch(validId, character)
-    console.log("[updateCharacter patch]", patch)
-    // noinspection JSCheckFunctionSignatures
-    socket.broadcast.emit("character:patch", patch)
+    
+    broadcastPatch(io, socket, replaceCharacterPatch(validId, previous, updated))
  }
 
   async function deleteCharacter(id, callback) {
+    if (isNull(await authenticateSocket(socket))) {
+      callback({ error: "invalid token" })
+      return
+    }
+    
     const { validId, error } = validateId(id)
 
     if (error) {
@@ -107,8 +125,7 @@ export function registerCharacterHandlers(socket) {
     }
 
     callback({ data: { id: validId } })
-    // noinspection JSCheckFunctionSignatures
-    socket.broadcast.emit("character:patch", removeCharacterPatch(validId))
+    broadcastPatch(io, socket, removeCharacterPatch(validId))
  }
 
   async function listCharacters(callback) {

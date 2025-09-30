@@ -1,6 +1,6 @@
 export default function removeCharacterPatch(id) {
-  return {
+  return [{
     op: "remove",
     path: `/${id}`
-  }
+  }]
 }

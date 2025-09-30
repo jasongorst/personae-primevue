@@ -10,32 +10,24 @@ datasource db {
 
 model Character {
   id                   Int       @id @default(autoincrement())
-  player               String?
-  mortalName           String?
-  faeName              String?
-  rank                 String?
-  kith                 String?
-  location             String?
-  position             String?
-  seeming              String?
-  house                String?
-  bannerhouse          String?
-  description          String
-  notes                String
+  player               String    @default("")
+  mortalName           String    @default("")
+  faeName              String    @default("")
+  rank                 String    @default("")
+  kith                 String    @default("")
+  location             String    @default("")
+  position             String    @default("")
+  seeming              String    @default("")
+  house                String    @default("")
+  bannerhouse          String    @default("")
+  description          String    @default("")
+  notes                String    @default("")
   descriptionPlainText String    @default("")
   notesPlainText       String    @default("")
   createdAt            DateTime  @default(now()) @db.Timestamp(6)
   updatedAt            DateTime  @updatedAt @db.Timestamp(6)
   lock                 Boolean   @default(false)
   lockedAt             DateTime? @db.Timestamp(6)
-
-  @@index([createdAt])
-}
-
-model Patch {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now()) @db.Timestamp(6)
-  patch     Json
 
   @@index([createdAt])
 }

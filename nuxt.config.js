@@ -37,7 +37,7 @@ export default defineNuxtConfig({
 
   imports: {
     dirs: [ 'stores' ],
-    
+
     presets: [ {
       from: "tailwind-merge",
       imports: [ "twJoin", "twMerge" ]
@@ -136,25 +136,24 @@ export default defineNuxtConfig({
   // module configs
   auth: {
     isEnabled: true,
-
-    globalAppMiddleware: {
-      unauthenticatedOnly: false,
-      navigateAuthenticatedTo: "/",
-      navigateUnauthenticatedTo: "/",
-      addDefaultCallbackUrl: false
-    },
-
     originEnvKey: "NUXT_AUTH_BASE_URL",
 
     provider: {
       type: "local",
-      pages: { login: "/" },
 
       endpoints: {
         signUp: false,
         signIn: { path: "/login", method: "post" },
         signOut: { path: "/logout", method: "post" },
         getSession: { path: "/session", method: "get" }
+      },
+
+      session: {
+        dataType: {
+          username: "string",
+          email: "string",
+          admin: "boolean"
+        }
       },
 
       token: {
@@ -165,6 +164,7 @@ export default defineNuxtConfig({
 
       refresh: {
         isEnabled: true,
+        
         endpoint: {
           path: "/jwt-refresh",
           method: "post"
@@ -202,7 +202,7 @@ export default defineNuxtConfig({
     prefixSkip: false,
     upperAfterPrefix: false
   },
-  
+
   pinia: {
     storesDirs: [ './app/stores/**' ],
   },

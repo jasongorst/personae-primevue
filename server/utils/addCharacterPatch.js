@@ -1,7 +1,7 @@
 export default function addCharacterPatch(character) {
-  return {
+  return [{
     op: "add",
     path: `/${character.id}`,
     value: addPlainTextAttributes(character)
-  }
+  }]
 }
