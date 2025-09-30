@@ -5,10 +5,10 @@
 </template>
 
 <script setup>
-// register websocket handlers (client only)
-if (import.meta.client) {
-  useWebsocketHandlers()
-}
+onMounted(async () => await useAutoSignIn())
+
+// register websocket handlers (client-side only)
+onMounted(() => useWebsocketHandlers())
 
 // init charactersStore
 callOnce(async () => await useCharactersStore().load())
