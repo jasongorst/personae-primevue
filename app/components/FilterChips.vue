@@ -1,6 +1,7 @@
 <template>
   <div class="flex flex-row flex-wrap gap-1">
     <template v-if="hasGlobalFilter">
+      <!--suppress JSUnresolvedReference -->
       <Chip
         :label="`&ldquo;${filters.global.value}&rdquo;`"
         removable

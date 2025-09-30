@@ -19,6 +19,7 @@ defineOptions({
 
 const model = defineModel()
 
+// noinspection JSCheckFunctionSignatures
 const props = defineProps({
   inputId: {
     type: String,
