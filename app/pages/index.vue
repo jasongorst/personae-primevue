@@ -12,6 +12,8 @@
     v-model:filters="filters"
     :filterDisplay="showFilters ? 'row' : null"
     :globalFilterFields="globalFilterAttributes"
+    sortField="createdAt"
+    :sortOrder="1"
     removableSort
     rowHover
     scrollHeight="calc(100vh - 158px)"
@@ -120,8 +122,6 @@
 </template>
 
 <script setup>
-// onMounted(async () => await useAutoSignIn())
-
 const charactersStore = useCharactersStore()
 const { characters, count, filters, hasAnyAttributeFilters, hasAnyFilters, hasGlobalFilter, options } = storeToRefs(charactersStore)
 const { hasFilterFor, resetFilterFor, resetFilters } = charactersStore
@@ -141,7 +141,7 @@ function updatefilteredCharacters(filteredValue) {
 }
 
 async function showDetail({ id }) {
-  await navigateTo({ name: "edit-id", params: { id } })
+  await navigateTo({ name: "detail", params: { id } })
 }
 
 function clearFilters() {
