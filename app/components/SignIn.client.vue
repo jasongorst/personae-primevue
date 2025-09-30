@@ -119,6 +119,8 @@ import { Form } from "@primevue/forms"
 import { yupResolver } from "@primevue/forms/resolvers/yup"
 import * as yup from "yup"
 
+const visible = defineModel("visible", { required: true })
+
 const props = defineProps({
   visible: {
     type: Boolean,
@@ -126,9 +128,6 @@ const props = defineProps({
   }
 })
 
-const visible = defineModel("visible", { required: true })
-
-const route = useRoute()
 const toast = useToast()
 const { status, signIn } = useAuth()
 const isLoading = computed(() => status.value === "loading")
