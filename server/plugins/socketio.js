@@ -2,21 +2,20 @@
 
 import { Server as Engine } from "engine.io"
 import { Server } from "socket.io"
-import { registerCharacterHandlers } from "../handlers"
+import { registerCharacterHandlers } from "../socketio/handlers"
 
 export default defineNitroPlugin((nitroApp) => {
   const engine = new Engine()
 
   const io = new Server({
     serveClient: false,
-
-    connectionStateRecovery: {
-      maxDisconnectionDuration: 2 * 60 * 1000, // 2 hours
-      skipMiddlewares: true
-    }
+    connectionStateRecovery: {}
   })
 
   io.bind(engine)
+
+  // middlewares
+  // io.use(authMiddleware)
 
   nitroApp.hooks.hook("request", (event) => {
     // expose server instance
@@ -24,34 +23,13 @@ export default defineNitroPlugin((nitroApp) => {
   })
 
   io.on("connection", async (socket) => {
-    console.log("[connection]", socket.id)
-
-    // // delivery guarantee
-    // const offset = socket.handshake.auth.offset
-    //
-    // if (offset) {
-    //   // this is a reconnection
-    //   const missedEvents = await prisma.patch.prisma.user.findMany({
-    //     where: { createdAt: { gt: offset } }
-    //   })
-    //
-    //   for (const event of missedEvents) {
-    //     socket.emit("character:patch", { timestamp: event.createdAt, patch: event.patch })
-    //   }
-    // } else {
-    //   // this is a first connection
-    // }
-
-    registerCharacterHandlers(socket)
-
+    registerCharacterHandlers(io, socket)
+    
     socket.onAny((eventName, ...args) => console.log(eventName, args))
     socket.onAnyOutgoing((eventName, ...args) => console.log(eventName, args))
 
-    // if (socket.recovered) {
-    //   // recovery was successful: socket.id, socket.rooms and socket.data were restored
-    // } else {
-    //   // new or unrecoverable session
-    // }
+    console.log("[connection]", socket.id)
+    console.log("[connected]", io.of("/").sockets.size)
   })
 
   nitroApp.router.use("/socket.io/", defineEventHandler({
