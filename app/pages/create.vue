@@ -1,31 +1,8 @@
 <template>
-  <DetailCard>
-    <template #attribute="{ attribute, type }">
-      <TrixEditor
-        v-if="type === 'richText'"
-        v-model="character[attribute]"
-        :id="attribute"
-        tabindex="1"
-        :ref="(component) => { trixEditors[attribute] = component }"
-      />
-
-      <ComboBox
-        v-else-if="type === 'autocomplete'"
-        v-model="character[attribute]"
-        :inputId="attribute"
-        :suggestions="suggestions[attribute]"
-        :tabindex="1"
-      />
-
-      <InputText
-        v-else
-        v-model="character[attribute]"
-        :id="attribute"
-        fluid
-        tabindex="1"
-      />
-    </template>
-
+  <DetailView
+    v-model="character"
+    ref="detailView"
+  >
     <template #buttons>
       <Button
         v-if="!isEdited"
@@ -50,35 +27,24 @@
         Save
       </Button>
     </template>
-  </DetailCard>
+  </DetailView>
 </template>
 
 <script setup>
 const confirm = useConfirm()
 const toast = useToast()
 const { token } = useAuth()
-
-const charactersStore = useCharactersStore()
-const { options } = storeToRefs(charactersStore)
-const { create } = charactersStore
-
-const trixEditors = ref({})
+const { create } = useCharactersStore()
+const detailView = useTemplateRef("detailView")
 
 const character = ref(_clone(emptyCharacter))
-const suggestions = ref(_clone(options.value))
 const isEdited = computed(() => _some(character.value, (value) => isPresent(value)))
 
 async function reset() {
   character.value = _clone(emptyCharacter)
 
   // reset the trix-editors
-  await nextTick()
-
-  // noinspection JSUnresolvedReference
-  _forEach(
-    trixEditors.value,
-    async (trixEditor) => trixEditor.reset()
-  )
+  await detailView.value.reset()
 }
 
 async function saveCharacter() {
@@ -106,7 +72,7 @@ function confirmReset() {
   confirm.require({
     header: "Really?",
     icon: "ph:warning-bold",
-    message: "Are you sure you want to reset the form?",
+    message: "Do you want to reset this character?",
     defaultFocus: "reject",
 
     acceptProps: {
