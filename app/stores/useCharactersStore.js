@@ -1,5 +1,3 @@
-import * as jsonpatch from "fast-json-patch"
-
 export const useCharactersStore = defineStore("characters", () => {
   const config = useRuntimeConfig()
   const { $socketio: { socket } } = useNuxtApp()
@@ -62,11 +60,7 @@ export const useCharactersStore = defineStore("characters", () => {
   }
 
   function applyPatch(patch) {
-    try {
-      jsonpatch.applyPatch(data.value, patch)
-    } catch (error) {
-      console.log("[applyPatch error]", error)
-    }
+    jsonPatch.apply(data.value, patch)
   }
 
   async function load() {
@@ -79,8 +73,8 @@ export const useCharactersStore = defineStore("characters", () => {
     return response
   }
 
-  async function create(character, _token) {
-    const response = await socket.emitWithAck("character:create", character)
+  async function create(character, token) {
+    const response = await socket.emitWithAck("character:create", token, character)
 
     if (_has(response, "data")) {
       _set(data.value, response.data.id, response.data)
@@ -89,8 +83,8 @@ export const useCharactersStore = defineStore("characters", () => {
     return response
   }
 
-  async function update(id, character, _token) {
-    const response = await socket.emitWithAck("character:update", id, character)
+  async function update(id, character, token) {
+    const response = await socket.emitWithAck("character:update", token, id, character)
 
     if (_has(response, "data")) {
       _set(data.value, response.data.id, response.data)
@@ -99,8 +93,8 @@ export const useCharactersStore = defineStore("characters", () => {
     return response
   }
 
-  async function destroy(id, _token) {
-    const response = await socket.emitWithAck("character:delete", id)
+  async function destroy(id, token) {
+    const response = await socket.emitWithAck("character:delete", token, id)
 
     if (_has(response, "data")) {
       _unset(data.value, response.data.id)
@@ -179,7 +173,7 @@ export const useCharactersStore = defineStore("characters", () => {
     method = "get",
     id = null,
     character = null,
-    _token = null
+    token = null
   } = {}) {
     let response, error
 
