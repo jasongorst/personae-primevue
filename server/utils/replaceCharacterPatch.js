@@ -1,15 +1,6 @@
-import { compare } from "fast-json-patch/index.mjs"
-
-export default function replaceCharacterPatch(id, previous, updated) {
-  // build proxies
-  const previousProxy = reshapeCharacters(previous)
-  const updatedProxy = reshapeCharacters(updated)
-
-  console.log("[replaceCharactersPatch proxies]", previousProxy, updatedProxy)
+export default function replaceCharacterPatch(previous, updated) {
+  const previousProxy = reshapeCharacters([ previous ])
+  const updatedProxy = reshapeCharacters([ updated ])
   
-  const patch = compare(previousProxy, updatedProxy)
-  
-  console.log(patch)
-  
-  return patch
+  return jsonPatch.compare(previousProxy, updatedProxy)
 }

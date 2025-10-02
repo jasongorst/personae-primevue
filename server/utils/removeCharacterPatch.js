@@ -1,6 +1,6 @@
 export default function removeCharacterPatch(id) {
-  return [{
-    op: "remove",
-    path: `/${id}`
-  }]
+  const previousProxy = { [id]: {} }
+  const updatedProxy = {}
+  
+  return jsonPatch.compare(previousProxy, updatedProxy)
 }
