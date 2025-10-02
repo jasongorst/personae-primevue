@@ -48,7 +48,7 @@ async function reset() {
 }
 
 async function saveCharacter() {
-  const { data, error } = await create(character.value, token)
+  const { data, error } = await create(character.value, token.value)
 
   if (data) {
     toast.add({

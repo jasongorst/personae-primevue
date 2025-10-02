@@ -35,7 +35,7 @@ export default defineNuxtPlugin({
         } else {
           socket.auth = { token: null }
         }
-        
+
         // force reconnect
         console.log("[auth status change, reconnecting]")
         socket.disconnect().connect()

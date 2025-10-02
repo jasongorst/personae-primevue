@@ -78,7 +78,7 @@ async function reset() {
 }
 
 async function updateCharacter() {
-  const { data, error } = await update(id, updatedFields.value, token)
+  const { data, error } = await update(id, updatedFields.value, token.value)
 
   if (data) {
     toast.add({
@@ -99,7 +99,7 @@ async function updateCharacter() {
 }
 
 async function deleteCharacter() {
-  const { data, error } = await destroy(id, token)
+  const { data, error } = await destroy(id, token.value)
 
   if (data) {
     toast.add({
