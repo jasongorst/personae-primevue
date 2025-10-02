@@ -2,7 +2,9 @@
 
 import { Server as Engine } from "engine.io"
 import { Server } from "socket.io"
+import { authMiddleware } from "../socketio/middlewares"
 import { registerCharacterHandlers } from "../socketio/handlers"
+import { initial } from "lodash-es"
 
 export default defineNitroPlugin((nitroApp) => {
   const engine = new Engine()
@@ -15,7 +17,7 @@ export default defineNitroPlugin((nitroApp) => {
   io.bind(engine)
 
   // middlewares
-  // io.use(authMiddleware)
+  io.use(authMiddleware)
 
   nitroApp.hooks.hook("request", (event) => {
     // expose server instance
@@ -25,10 +27,10 @@ export default defineNitroPlugin((nitroApp) => {
   io.on("connection", async (socket) => {
     registerCharacterHandlers(io, socket)
     
-    socket.onAny((eventName, ...args) => console.log(eventName, args))
+    socket.onAny((eventName, ...args) => console.log(eventName, ...initial(args)))
     socket.onAnyOutgoing((eventName, ...args) => console.log(eventName, args))
 
-    console.log("[connection]", socket.id)
+    console.log("[connection]", socket.id, socket.data.user?.username || "unauthenticated")
     console.log("[connected]", io.of("/").sockets.size)
   })
 
