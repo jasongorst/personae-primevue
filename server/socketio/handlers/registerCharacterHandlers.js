@@ -1,5 +1,3 @@
-import { isNull } from "lodash-es"
-
 export function registerCharacterHandlers(io, socket) {
   socket.on("character:create", createCharacter)
   socket.on("character:read",  readCharacter)
@@ -9,9 +7,8 @@ export function registerCharacterHandlers(io, socket) {
   socket.on("character:lock", lockCharacter)
   socket.on("character:unlock", unlockCharacter)
 
-  async function createCharacter(payload, callback) {
-    if (isNull(await authenticateSocket(socket))) {
-      callback({ error: "invalid token" })
+  async function createCharacter(token, payload, callback) {
+    if (!(await isAuthenticated(socket, callback, token))) {
       return
     }
     
@@ -57,9 +54,8 @@ export function registerCharacterHandlers(io, socket) {
     callback({ data: character })
   }
 
-  async function updateCharacter(id, payload, callback) {
-    if (isNull(await authenticateSocket(socket))) {
-      callback({ error: "invalid token" })
+  async function updateCharacter(token, id, payload, callback) {
+    if (!(await isAuthenticated(socket, callback, token))) {
       return
     }
     
@@ -101,12 +97,11 @@ export function registerCharacterHandlers(io, socket) {
 
     callback({ data: updated })
     
-    broadcastPatch(io, socket, replaceCharacterPatch(validId, previous, updated))
+    broadcastPatch(io, socket, replaceCharacterPatch(previous, updated))
  }
 
-  async function deleteCharacter(id, callback) {
-    if (isNull(await authenticateSocket(socket))) {
-      callback({ error: "invalid token" })
+  async function deleteCharacter(token, id, callback) {
+    if (!(await isAuthenticated(socket, callback, token))) {
       return
     }
     
@@ -129,21 +124,21 @@ export function registerCharacterHandlers(io, socket) {
  }
 
   async function listCharacters(callback) {
-    let characters
+    const { data, error } = await readCharacters()
 
-    try {
-      characters = reshapeCharacters(
-        await prisma.character.findMany({ orderBy: [{ createdAt: "asc" }] })
-      )
-    } catch (error) {
+    if (error) {
       callback({ error })
       return
     }
-
-    callback({ data: characters })
+    
+    callback({ data })
   }
 
-  async function lockCharacter(id, callback) {
+  async function lockCharacter(token, id, callback) {
+    if (!(await isAuthenticated(socket, callback, token))) {
+      return
+    }
+    
     const { validId, error } = validateId(id)
 
     if (error) {
@@ -167,7 +162,11 @@ export function registerCharacterHandlers(io, socket) {
     // socket.broadcast.emit("character:lock", validId, locked.lockedAt)
   }
 
-  async function unlockCharacter(id, callback) {
+  async function unlockCharacter(token, id, callback) {
+    if (!(await isAuthenticated(socket, callback, token))) {
+      return
+    }
+    
     const { validId, error } = validateId(id)
 
     if (error) {
@@ -187,5 +186,19 @@ export function registerCharacterHandlers(io, socket) {
 
     callback({ data: validId })
     // socket.broadcast.emit("character:unlock", validId)
+  }
+  
+  async function readCharacters() {
+    let data, error
+    
+    try {
+      data = reshapeCharacters(
+        await prisma.character.findMany({ orderBy: [{ createdAt: "asc" }] })
+      )
+    } catch (err) {
+      error = err
+    }
+    
+    return { data, error }
   }
 }
