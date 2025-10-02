@@ -1,5 +1,4 @@
 import { reach } from "yup"
-import characterSchema from "./characterSchema.js"
 
 export default function validateId(id) {
   try {

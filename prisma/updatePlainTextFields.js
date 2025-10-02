@@ -1,6 +1,6 @@
 import "dotenv/config"
 import { PrismaClient } from "./generated/prisma/client"
-import htmlToPlainText from "../shared/utils/htmlToPlainText"
+import htmlToPlainText from "server/utils/htmlToPlainText.js"
 
 const prisma = new PrismaClient()
 

@@ -1,6 +1,4 @@
 import { forEach, has, isEmpty, set } from "lodash-es"
-import { richTextAttributes } from "./index.js"
-import htmlToPlainText from "./htmlToPlainText.js"
 
 // mutates character
 export default function addPlainTextAttributes(character) {
