@@ -1,3 +1,5 @@
+import { pick } from "lodash-es"
+
 export function registerCharacterHandlers(io, socket) {
   socket.on("character:create", createCharacter)
   socket.on("character:read",  readCharacter)
@@ -11,16 +13,16 @@ export function registerCharacterHandlers(io, socket) {
     if (!(await isAuthenticated(socket, callback, token))) {
       return
     }
-    
+
     let validated, created
-    
+
     try {
       validated = createCharacterSchema.validateSync(payload)
     } catch (error) {
       callback({ error })
       return
     }
-    
+
     const augmented = addPlainTextAttributes(validated)
 
     try {
@@ -58,12 +60,11 @@ export function registerCharacterHandlers(io, socket) {
     if (!(await isAuthenticated(socket, callback, token))) {
       return
     }
-    
+
     const { validId, error } = validateId(id)
 
     if (error) {
       callback({ error })
-      console.error("[updateCharacter validateId]", error)
       return
     }
 
@@ -73,30 +74,27 @@ export function registerCharacterHandlers(io, socket) {
       validated = updateCharacterSchema.validateSync(payload)
     } catch (error) {
       callback({ error })
-      console.error("[updateCharacter validate]", error)
       return
     }
-    
+
     try {
       previous = await prisma.character.findUnique({ where: { id: validId }})
     } catch (error) {
       callback({ error })
-      console.error("[updateCharacter previous]", error)
       return
     }
-    
+
     const augmented = addPlainTextAttributes(validated)
 
     try {
       updated = await prisma.character.update({ where: { id: validId }, data: augmented })
     } catch (error) {
       callback({ error })
-      console.error("[updateCharacter update]", error)
       return
     }
 
     callback({ data: updated })
-    
+
     broadcastPatch(io, socket, replaceCharacterPatch(previous, updated))
  }
 
@@ -104,7 +102,7 @@ export function registerCharacterHandlers(io, socket) {
     if (!(await isAuthenticated(socket, callback, token))) {
       return
     }
-    
+
     const { validId, error } = validateId(id)
 
     if (error) {
@@ -130,7 +128,7 @@ export function registerCharacterHandlers(io, socket) {
       callback({ error })
       return
     }
-    
+
     callback({ data })
   }
 
@@ -138,35 +136,46 @@ export function registerCharacterHandlers(io, socket) {
     if (!(await isAuthenticated(socket, callback, token))) {
       return
     }
-    
+
     const { validId, error } = validateId(id)
 
     if (error) {
       callback({ error })
       return
     }
-
-    let locked
-
+    
+    let previous, locked
+    
+    try {
+      previous = await prisma.character.findUnique({ where: { id: validId }})
+    } catch (error) {
+      callback({ error })
+      return
+    }
+    
     try {
       locked = await prisma.character.update({
         where: { id: validId },
-        data: { lock: true, lockedAt: Date.now() }
+        data: {
+          locked: true,
+          lockedAt: new Date(),
+          lockedBy: socket.data.user.username
+        }
       })
     } catch (error) {
       callback({ error })
       return
     }
 
-    callback({ data: locked.lockedAt })
-    // socket.broadcast.emit("character:lock", validId, locked.lockedAt)
+    callback({ data: pick(locked, [ "id", "locked", "lockedAt", "lockedBy" ]) })
+    broadcastPatch(io, socket, replaceCharacterPatch(previous, locked))
   }
 
   async function unlockCharacter(token, id, callback) {
     if (!(await isAuthenticated(socket, callback, token))) {
       return
     }
-    
+
     const { validId, error } = validateId(id)
 
     if (error) {
@@ -174,23 +183,36 @@ export function registerCharacterHandlers(io, socket) {
       return
     }
 
+    let previous, unlocked
+    
     try {
-      await prisma.character.update({
+      previous = await prisma.character.findUnique({ where: { id: validId }})
+    } catch (error) {
+      callback({ error })
+      return
+    }
+    
+    try {
+      unlocked = await prisma.character.update({
         where: { id: validId },
-        data: { lock: false, lockedAt: null }
+        data: {
+          locked: false,
+          lockedAt: null,
+          lockedBy: null
+        }
       })
     } catch (error) {
       callback({ error })
       return
     }
 
-    callback({ data: validId })
-    // socket.broadcast.emit("character:unlock", validId)
+    callback({ data: pick(unlocked, [ "id", "locked", "lockedAt", "lockedBy" ]) })
+    broadcastPatch(io, socket, replaceCharacterPatch(previous, unlocked))
   }
-  
+
   async function readCharacters() {
     let data, error
-    
+
     try {
       data = reshapeCharacters(
         await prisma.character.findMany({ orderBy: [{ createdAt: "asc" }] })
@@ -198,7 +220,7 @@ export function registerCharacterHandlers(io, socket) {
     } catch (err) {
       error = err
     }
-    
+
     return { data, error }
   }
 }
