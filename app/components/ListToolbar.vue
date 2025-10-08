@@ -1,13 +1,14 @@
 <template>
   <Toolbar
     pt:root="
-      w-full py-1 border-0 rounded-t-none rounded-b-md
+      w-full p-0! border-0 rounded-t-none rounded-b-md
       bg-primary-0! dark:bg-primary-900! text-primary dark:text-primary
       min-h-[calc(--spacing(6)+1.25rem+2px)]
     "
   >
     <template #start>
-      <div class="whitespace-nowrap text-sm text-primary">
+<!--      20-->
+      <div class="whitespace-nowrap text-sm text-primary ps-6">
         Showing <strong class="font-semibold">{{ filteredCountValue }}</strong>
         of <strong class="font-semibold">{{ count }}</strong>
         {{ pluralize("character", count) }}
@@ -15,8 +16,10 @@
     </template>
 
     <template #end>
+<!--      1 11 20 11 1-->
       <Button
         v-if="isSignedIn"
+        class="px-6!  py-[calc(--spacing(2)+3px)]"
         variant="text"
       >
         <!--suppress HtmlUnknownTarget -->
