@@ -1,59 +1,67 @@
 <template>
-  <Swap
-    :disabled="disabled"
-    @active="focusInput"
-    ref="swap"
+  <div
+    class="flex flex-col"
+    :key="attribute"
   >
-    <template #inactive="{ open }">
-      <div
-        v-if="isRichText"
-        class="px-3 py-2 border border-transparent trix-content"
-        :tabindex="0"
-        @keydown.enter.prevent="open"
-        @keydown.space.prevent="open"
-        v-html="model || '&nbsp;'"
-      />
+    <label
+      :for="attribute"
+      class="ml-1 text-primary dark:text-primary text-sm"
+    >
+      {{ _startCase(attribute) }}
+    </label>
 
-      <div
-        v-else
-        class="px-3 py-2 border border-transparent"
-        :tabindex="0"
-        @keydown.enter.prevent="open"
-        @keydown.space.prevent="open"
-      >
-        {{ model || "&nbsp;" }}
-      </div>
-    </template>
+    <Swap
+      :disabled="disabled"
+      @active="focusInput"
+      ref="swap"
+    >
+      <template #inactive="{ activate }">
+        <div
+          v-if="isRichText"
+          class="px-3 py-2 border border-transparent trix-content"
+          :tabindex="0"
+          v-html="model || '&nbsp;'"
+        />
 
-    <template #active="{ close }">
-      <TrixEditor
-        v-if="isRichText"
-        v-model="model"
-        :id="attribute"
-        :tabindex="0"
-        @blur="close"
-        ref="trixEditor"
-      />
+        <div
+          v-else
+          class="px-3 py-2 border border-transparent"
+          :tabindex="0"
+        >
+          {{ model || "&nbsp;" }}
+        </div>
+      </template>
 
-      <InputText
-        v-else-if="type === 'text'"
-        v-model="model"
-        :id="attribute"
-        :tabindex="0"
-        fluid
-        @blur="close"
-      />
+      <template #active="{ close }">
+        <TrixEditor
+          v-if="isRichText"
+          v-model="model"
+          :id="attribute"
+          :tabindex="0"
+          @blur="close"
+          ref="trixEditor"
+        />
 
-      <ComboBox
-        v-else
-        v-model="model"
-        :tabindex="0"
-        :inputId="attribute"
-        :suggestions="suggestions"
-        @blur="onAutoCompleteBlur(close)"
-      />
-    </template>
-  </Swap>
+        <InputText
+          v-else-if="type === 'text'"
+          v-model="model"
+          :id="attribute"
+          :tabindex="0"
+          fluid
+          @blur="close"
+        />
+
+        <ComboBox
+          v-else
+          v-model="model"
+          :tabindex="0"
+          :inputId="attribute"
+          :suggestions="suggestions"
+          @blur="onAutoCompleteBlur(close)"
+        />
+      </template>
+    </Swap>
+  </div>
 </template>
 
 <script setup>
@@ -84,6 +92,8 @@ const props = defineProps({
     required: false
   }
 })
+
+defineExpose({ activate, reset })
 
 const swap = useTemplateRef("swap")
 const trixEditor = useTemplateRef("trixEditor")
@@ -118,8 +128,8 @@ async function onAutoCompleteBlur(close) {
   close()
 }
 
-function open() {
-  swap.value.open()
+function activate() {
+  swap.value.activate()
 }
 
 function reset() {
@@ -127,8 +137,6 @@ function reset() {
     trixEditor.value.reset()
   }
 }
-
-defineExpose({ open, reset })
 </script>
 
 <style scoped>
