@@ -5,7 +5,7 @@
       size="1.25rem"
     />
 
-    Clear All
+    Clear
   </Button>
 </template>
 

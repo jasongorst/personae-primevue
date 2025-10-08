@@ -12,7 +12,7 @@
       size="1.25rem"
     />
 
-    Filters
+    Filter
   </Button>
 </template>
 
