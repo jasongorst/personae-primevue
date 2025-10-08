@@ -16,7 +16,7 @@
     :sortOrder="1"
     removableSort
     rowHover
-    scrollHeight="calc(100vh - 158px)"
+    scrollHeight="calc(100vh - 162px)"
     scrollable
     selectionMode="single"
     dataKey="id"
@@ -30,11 +30,14 @@
       header: `pb-0!`,
       thead: `bg-surface-0! dark:bg-surface-950!`,
       footer: `p-0!`,
-      headerRow: `first-of-type:bg-surface-0 dark:first-of-type:bg-surface-900 last:align-top
-                  first-of-type:*:border-r-2 last:*:border-r-0 nth-of-type-2:*:px-1 nth-of-type-2:*:py-2`,
+      headerRow: `first:bg-surface-200 dark:first:bg-surface-700
+                  first:*:border-r-2 first:*:last:border-r-0
+                  nth-of-type-2:align-top nth-of-type-2:*:px-1 nth-of-type-2:*:py-2`,
+      bodyRow: `hover:bg-primary/15!`,
       column: {
         bodyCell: `max-w-[8rem] truncate`,
-        headerCell: `bg-transparent! max-w-[8rem] truncate border-r-surface-200 dark:border-r-surface-700`
+        headerCell: `max-w-[8rem] truncate border-r-surface-300 dark:border-r-surface-600
+                     hover:bg-primary/15! hover:text-surface-800! dark:hover:text-surface-0!`
       }
     }"
     @filter="(event) => updatefilteredCharacters(event.filteredValue)"
@@ -54,7 +57,7 @@
           class="px-4"
         />
 
-        <ToggleFiltersButton
+        <ToggleFilterButton
           @click="toggleShowFilters"
           class="px-4"
           :showFilters="showFilters"
@@ -86,31 +89,33 @@
       </div>
     </template>
 
-    <Column
-      v-for="attribute in listAttributes"
-      :field="attribute"
-      :header="_upperCase(attribute)"
-      :showFilterMenu="false"
-      :sortable="true"
-    >
-      <template #filter="{ filterModel, filterCallback }">
-        <OptionsFilter
-          v-if="categoryAttributes.includes(attribute)"
-          v-model="filterModel.value"
-          :options="options[attribute]"
-          :filteredOptions="filteredOptions[attribute]"
-          :filterCallback="filterCallback"
-          :hasFilter="() => hasFilterFor(attribute)"
-          :resetFilter="() => resetFilterFor(attribute)"
-        />
+    <template #default>
+      <Column
+        v-for="attribute in listAttributes"
+        :field="attribute"
+        :header="_upperCase(attribute)"
+        :showFilterMenu="false"
+        :sortable="true"
+      >
+        <template #filter="{ filterModel, filterCallback }">
+          <OptionsFilter
+            v-if="categoryAttributes.includes(attribute)"
+            v-model="filterModel.value"
+            :options="options[attribute]"
+            :filteredOptions="filteredOptions[attribute]"
+            :filterCallback="filterCallback"
+            :hasFilter="() => hasFilterFor(attribute)"
+            :resetFilter="() => resetFilterFor(attribute)"
+          />
 
-        <TextFilter
-          v-else
-          v-model="filterModel.value"
-          :filterCallback="filterCallback"
-        />
-      </template>
-    </Column>
+          <TextFilter
+            v-else
+            v-model="filterModel.value"
+            :filterCallback="filterCallback"
+          />
+        </template>
+      </Column>
+    </template>
 
     <template #footer>
       <ListToolbar

@@ -180,7 +180,7 @@ const customPT = {
         text-surface-700 dark:text-surface-100`,
     table: `border-spacing-0 w-full border-separate`,
     thead: `p-scrollable:bg-surface-0 dark:p-scrollable:bg-surface-900 p-scrollable:top-0 p-scrollable:z-10`,
-    tbody: `p-hoverable:*:hover:bg-surface-200 p-hoverable:*:hover:text-surface-900 dark:p-hoverable:*:hover:bg-surface-700 dark:p-hoverable:*:hover:text-surface-0
+    tbody: `p-hoverable:*:hover:bg-surface-200 p-hoverable:*:hover:text-surface-900 dark:p-hoverable:*:hover:bg-surface-800 dark:p-hoverable:*:hover:text-surface-0
           p-frozen:sticky p-frozen:z-10`,
     bodyRow: `bg-surface-0 odd:bg-surface-50 dark:bg-surface-900 dark:odd:bg-surface-950 text-surface-700 dark:text-surface-100 p-selectable:cursor-pointer p-selected:bg-highlight!`,
     tfoot: `p-scrollable:bg-surface-0 dark:p-scrollable:bg-surface-900 p-scrollable:bottom-0 p-scrollable:z-10`,
@@ -192,9 +192,9 @@ const customPT = {
       root: ``,
       headerCell: `relative group py-3 px-4 font-normal text-start transition-colors duration-200
             border-b border-surface-200 dark:border-surface-700
-            bg-surface-0 dark:bg-surface-900
-            text-surface-700 dark:text-surface-0
-            p-sortable:cursor-pointer p-sortable:select-none p-sortable:focus-visible:outline p-sortable:focus-visible:outline-1 p-sortable:focus-visible:-outline-offset-1 p-sortable:focus-visible:outline-primary
+            p-sortable:cursor-pointer p-sortable:select-none
+            p-sortable:focus-visible:outline p-sortable:focus-visible:outline-1
+            p-sortable:focus-visible:-outline-offset-1 p-sortable:focus-visible:outline-primary
             p-sortable:hover:bg-surface-100 p-sortable:hover:text-surface-800
             dark:p-sortable:hover:bg-surface-800 dark:p-sortable:hover:text-surface-0
             p-frozen:sticky p-frozen:bg-surface-0 dark:p-frozen:bg-surface-900 p-frozen:z-10
