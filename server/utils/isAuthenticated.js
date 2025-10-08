@@ -1,18 +1,15 @@
-import { isNil, isNull } from "lodash-es"
+import { isEmpty, isNil, isNull } from "lodash-es"
 
-// mutates socket.data
-// returns true after successful auth
-export default async function isAuthenticated(socket, callback, token) {
-  if (isNil(token)) {
-    callback({ error: "missing token" })
-    return false
+export default async function isAuthenticated(socket, token) {
+  // mutates socket.data
+  if (isNil(token) || isEmpty(token)) {
+    throw Error("missing token")
   }
   
   socket.data = await authenticateToken(token)
   
   if (isNull(socket.data.token)) {
-    callback({ error: "invalid token" })
-    return false
+    throw Error("invalid token")
   }
   
   return true
