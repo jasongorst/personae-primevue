@@ -8,7 +8,7 @@
     class="z-90"
   />
 
-  <div class="relative w-full">
+  <div class="relative">
     <NavBar />
 
     <SpinnerModal :visible="!isLoaded" />
