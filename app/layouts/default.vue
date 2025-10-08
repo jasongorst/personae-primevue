@@ -21,9 +21,7 @@
 
 <script setup>
 const showSignIn = useState("showSignIn", () => false)
-
-const charactersStore = useCharactersStore()
-const { isLoaded } = storeToRefs(charactersStore)
+const { isLoaded } = storeToRefs(useCharactersStore())
 </script>
 
 <style scoped>
