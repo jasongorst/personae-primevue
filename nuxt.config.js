@@ -24,7 +24,7 @@ export default defineNuxtConfig({
 
   srcDir: "app/",
 
-  compatibilityDate: '2025-07-31',
+  compatibilityDate: '2025-10-08',
 
   css: [ "~/assets/css/main.css" ],
 
@@ -54,8 +54,12 @@ export default defineNuxtConfig({
   ],
 
   nitro: {
+    buildDir: ".nuxt",
+    compatibilityDate: "2025-10-08",
+    
     experimental: {
       asyncContext: true,
+      tasks: true,
       websocket: true
     }
   },
