@@ -5,9 +5,11 @@
         !disabled && 'hover:bg-primary/15 cursor-pointer',
         isActive && 'hidden'
       ]"
-      @click="open"
+      @click="activate"
+      @keydown.enter.prevent="activate"
+      @keydown.space.prevent="activate"
     >
-      <slot name="inactive" :open="open" />
+      <slot name="inactive" :activate="activate" />
     </div>
 
     <div :class="!isActive && 'hidden'">
@@ -35,11 +37,11 @@ const emit = defineEmits([
   "update:active"
 ])
 
-defineExpose({ close, open })
+defineExpose({ activate, close })
 
 const isActive = ref(props.active)
 
-function open(event) {
+function activate(event) {
   if (!props.disabled) {
     isActive.value = true
     emit("active", event)
