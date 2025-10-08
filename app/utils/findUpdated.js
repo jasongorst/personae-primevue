@@ -1,6 +1,6 @@
 export default function findUpdated(source, target) {
   const updatedAttributes = _reject(
-    schemaAttributesList,
+    detailAttributesList,
     (attribute) => source[attribute] === target[attribute]
   )
   

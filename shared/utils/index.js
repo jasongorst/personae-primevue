@@ -28,17 +28,17 @@ const globalFilterAttributes = concat(nameAttributes, optionsAttributes, plainTe
 // for datatable filters
 const filtersAttributes = concat(listAttributes, "global")
 
-// for create/edit forms
-const schemaAttributes = concat(
+// for detail forms
+const detailAttributes = concat(
   map(nameAttributes, (attr) => ({ attribute: attr, type: "text" })),
   map(optionsAttributes, (attr) => ({ attribute: attr, type: "autocomplete" })),
   map(richTextAttributes, (attr) => ({ attribute: attr, type: "richText" }))
 )
 
-const schemaAttributesList = map(schemaAttributes, ({ attribute }) => attribute)
+const detailAttributesList = map(detailAttributes, ({ attribute }) => attribute)
 
 const emptyCharacter = reduce(
-  schemaAttributes,
+  detailAttributes,
   (accumulator, { attribute }) => set(accumulator, attribute, ""),
   {}
 )
@@ -60,8 +60,8 @@ export {
   plainTextAttributes,
   listAttributes,
   optionsAttributes,
-  schemaAttributes,
-  schemaAttributesList,
+  detailAttributes,
+  detailAttributesList,
   globalFilterAttributes,
   categoryAttributes,
   emptyCharacter,
