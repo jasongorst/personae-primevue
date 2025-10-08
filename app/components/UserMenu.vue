@@ -2,13 +2,16 @@
   <div>
     <Button
       v-if="isSignedIn"
+      class="px-6! py-[calc(--spacing(2)+3px)]"
       variant="text"
       aria-haspopup="true"
       aria-controls="user_menu"
       @click="toggleMenu"
     >
       <!--suppress JSUnresolvedReference -->
-      <span class="font-semibold">
+      <span
+        class="font-semibold"
+      >
         {{ user.username }}
       </span>
 
@@ -20,6 +23,7 @@
 
     <Button
       v-else
+      class="px-6! py-[calc(--spacing(2)+3px)]"
       variant="text"
       @click="doSignIn"
     >
@@ -79,21 +83,17 @@ const menu = useTemplateRef("menu")
 const isSignedIn = computed(() => status.value === "authenticated")
 
 const menuItems = computed(() => {
-  // noinspection JSUnresolvedReference
-  if (isSignedIn.value && user.value.admin) {
-    // noinspection JSUnresolvedReference
-    return [
-      { label: "Dashboard", route: "/" },
-      { label: "Sign Out", command: () => doSignOut() }
-    ]
-  } else if (isSignedIn.value) {
-    return [
-      { label: "Sign Out", command: () => doSignOut() }
-    ]
+  if (isSignedIn.value) {
+    // if (user.value.admin) {
+    //   return [
+    //     { label: "Dashboard", route: "/" },
+    //     { label: "Sign Out", command: () => doSignOut() }
+    //   ]
+    // } else {
+      return [ { label: "Sign Out", command: () => doSignOut() } ]
+    // }
   } else {
-    return [
-      { label: "Sign In", command: () => doSignIn() }
-    ]
+    return [ { label: "Sign In", command: () => doSignIn() } ]
   }
 })
 

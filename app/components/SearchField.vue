@@ -1,7 +1,7 @@
 <template>
   <div
     class="
-      flex items-stretch flex-auto group
+      text-base flex items-stretch flex-auto group
       rounded-md border border-surface-300 dark:border-surface-700
       has-hover:border-surface-400 dark:has-hover:border-surface-600
       has-focus:border-primary

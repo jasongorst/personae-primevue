@@ -29,11 +29,8 @@
 <script setup>
 import Trix from "trix"
 
-defineOptions({
-  inheritAttrs: false
-})
+defineOptions({ inheritAttrs: false })
 
-const trixEditor = useTemplateRef("trixEditor")
 const model = defineModel()
 
 const props = defineProps({
@@ -49,12 +46,6 @@ const props = defineProps({
     required: false,
     default: () => {}
   }
-})
-
-defineExpose({
-  id: props.id,
-  modelValue: model,
-  reset() { reset() }
 })
 
 const emit = defineEmits([
@@ -73,6 +64,14 @@ const emit = defineEmits([
   "trix-paste",
   "trix-selection-change"
 ])
+
+defineExpose({
+  id: props.id,
+  modelValue: model,
+  reset() { reset() }
+})
+
+const trixEditor = useTemplateRef("trixEditor")
 
 const initialValue = ref(_isNull(model.value) ? "" : model.value)
 
