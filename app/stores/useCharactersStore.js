@@ -102,7 +102,27 @@ export const useCharactersStore = defineStore("characters", () => {
 
     return response
   }
+  
+  async function lock(id, token) {
+    const response = await socket.emitWithAck("character:lock", token, id)
 
+    if (_has(response, "data")) {
+      _assign(data.value[response.data.id], _omit(response.data, [ "id" ]))
+    }
+
+    return response
+  }
+  
+  async function unlock(id, token) {
+    const response = await socket.emitWithAck("character:unlock", token, id)
+
+    if (_has(response, "data")) {
+      _assign(data.value[response.data.id], _omit(response.data, [ "id" ]))
+    }
+
+    return response
+  }
+  
   // api
   async function apiLoad() {
     const { response, error } = await apiFetch({
@@ -173,7 +193,7 @@ export const useCharactersStore = defineStore("characters", () => {
     method = "get",
     id = null,
     character = null,
-    token = null
+    _token = null
   } = {}) {
     let response, error
 
@@ -221,6 +241,8 @@ export const useCharactersStore = defineStore("characters", () => {
     create,
     destroy,
     update,
+    lock,
+    unlock,
     apiLoad,
     apiCreate,
     apiDestroy,
