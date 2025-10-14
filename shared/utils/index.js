@@ -1,8 +1,7 @@
-import { concat, difference, includes, map, reduce, set } from "lodash-es"
-import { FilterMatchMode } from "@primevue/core/api"
+// import mapObject from "shared/utils/mapObject.js"
 
-const nameAttributes = [ "faeName", "mortalName" ]
-const richTextAttributes = [ "description", "notes" ]
+const nameAttributes = ["faeName", "mortalName"]
+const richTextAttributes = ["description", "notes"]
 
 const optionsAttributes = [
   "player",
@@ -16,54 +15,55 @@ const optionsAttributes = [
 ]
 
 // for filter Listboxes: optionsAttributes except house and bannerhouse
-const categoryAttributes = difference(optionsAttributes, [ "house", "bannerhouse" ])
+const categoryAttributes = _difference(optionsAttributes, [
+  "house",
+  "bannerhouse"
+])
 
 // for datatable: name and category attributes
-const listAttributes = concat(nameAttributes, categoryAttributes)
+const listAttributes = _concat(nameAttributes, categoryAttributes)
 
 // for global filter
-const plainTextAttributes = map(richTextAttributes, (attribute) => `${attribute}PlainText`)
-const globalFilterAttributes = concat(nameAttributes, optionsAttributes, plainTextAttributes)
+const plainTextAttributes = _map(
+  richTextAttributes,
+  (attribute) => `${attribute}PlainText`
+)
+
+const globalFilterAttributes = _concat(
+  nameAttributes,
+  optionsAttributes,
+  plainTextAttributes
+)
 
 // for datatable filters
-const filtersAttributes = concat(listAttributes, "global")
+const filtersAttributes = _concat(listAttributes, "global")
 
 // for create/edit forms
-const schemaAttributes = concat(
-  map(nameAttributes, (attr) => ({ attribute: attr, type: "text" })),
-  map(optionsAttributes, (attr) => ({ attribute: attr, type: "autocomplete" })),
-  map(richTextAttributes, (attr) => ({ attribute: attr, type: "richText" }))
+const schemaAttributes = _concat(
+  _map(nameAttributes, (attr) => ({ attribute: attr, type: "text" })),
+  _map(optionsAttributes, (attr) => ({
+    attribute: attr,
+    type: "autocomplete"
+  })),
+  _map(richTextAttributes, (attr) => ({ attribute: attr, type: "richText" }))
 )
 
-const schemaAttributesList = map(schemaAttributes, ({ attribute }) => attribute)
-
-const emptyCharacter = reduce(
+const schemaAttributesList = _map(
   schemaAttributes,
-  (accumulator, { attribute }) => set(accumulator, attribute, ""),
-  {}
+  ({ attribute }) => attribute
 )
 
-const emptyFilters = reduce(
-  filtersAttributes,
-  (accumulator, attribute) => {
-    if (includes(categoryAttributes, attribute)) {
-      return set(accumulator, attribute, { value: [], matchMode: FilterMatchMode.IN })
-    } else {
-      return set(accumulator, attribute, { value: "", matchMode: FilterMatchMode.CONTAINS })
-    }
-  },
-  {}
-)
+const emptyCharacter = mapObject(schemaAttributesList, () => "")
 
 export {
-  richTextAttributes,
-  plainTextAttributes,
-  listAttributes,
-  optionsAttributes,
-  schemaAttributes,
-  schemaAttributesList,
-  globalFilterAttributes,
   categoryAttributes,
   emptyCharacter,
-  emptyFilters
+  filtersAttributes,
+  globalFilterAttributes,
+  listAttributes,
+  optionsAttributes,
+  plainTextAttributes,
+  richTextAttributes,
+  schemaAttributes,
+  schemaAttributesList
 }

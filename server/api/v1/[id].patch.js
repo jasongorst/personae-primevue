@@ -1,7 +1,5 @@
-import { toInteger } from "lodash-es"
-
 export default defineEventHandler(async (event) => {
-  const id = toInteger(getRouterParam(event, "id"))
+  const id = _toInteger(getRouterParam(event, "id"))
   const character = await readBody(event)
 
   try {

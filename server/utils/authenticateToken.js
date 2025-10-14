@@ -1,5 +1,3 @@
-import { pick } from "lodash-es"
-
 export default async function authenticateToken(token) {
   const config = useRuntimeConfig()
   let validatedToken = null
@@ -17,7 +15,7 @@ export default async function authenticateToken(token) {
     
     // noinspection JSUnresolvedReference
     validatedToken = `Bearer ${session.access_token}`
-    user = pick(session, [ "username", "email", "admin" ])
+    user = _pick(session, [ "username", "email", "admin" ])
   } catch (error) {
     if (error.statusCode === 401) {
       console.error("[authenticateJWT 401]", error)
