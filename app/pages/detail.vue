@@ -13,16 +13,12 @@
           Revert
         </Button>
 
-        <Button @click="updateCharacter">
-          Save
-        </Button>
+        <Button @click="updateCharacter">Save</Button>
       </template>
 
       <template v-else>
         <Button>
-          <NuxtLink to="/">
-            Back
-          </NuxtLink>
+          <NuxtLink to="/">Back</NuxtLink>
         </Button>
 
         <Button
@@ -59,14 +55,17 @@ const detailView = useTemplateRef("detailView")
 const originalCharacter = ref(emptyCharacter)
 const character = ref(emptyCharacter)
 
-const updatedFields = computed(() => findUpdated(originalCharacter.value, character.value))
-const isUpdated = computed(() => (!_isEmpty(updatedFields.value)))
+const updatedFields = computed(() =>
+  findUpdated(originalCharacter.value, character.value)
+)
+
+const isUpdated = computed(() => !_isEmpty(updatedFields.value))
 
 onMounted(async () => await initCharacter())
 
 async function initCharacter() {
   originalCharacter.value = await getCharacter(id)
-  character.value = _clone(originalCharacter.value)
+  character.value = _cloneDeep(originalCharacter.value)
 }
 
 async function reset() {
@@ -137,12 +136,13 @@ function confirmRevert() {
 
     accept: async () => await reset(),
 
-    reject: () => toast.add({
-      severity: "info",
-      summary: "Cancelled.",
-      detail: "Revert cancelled.",
-      life: 3000
-    })
+    reject: () =>
+      toast.add({
+        severity: "info",
+        summary: "Cancelled.",
+        detail: "Revert cancelled.",
+        life: 3000
+      })
   })
 }
 
@@ -164,16 +164,15 @@ function confirmDelete() {
 
     accept: async () => await deleteCharacter(),
 
-    reject: () => toast.add({
-      severity: "info",
-      summary: "Cancelled.",
-      detail: "Delete cancelled.",
-      life: 3000
-    })
+    reject: () =>
+      toast.add({
+        severity: "info",
+        summary: "Cancelled.",
+        detail: "Delete cancelled.",
+        life: 3000
+      })
   })
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -33,16 +33,13 @@ const props = defineProps({
   }
 })
 
-const currentSuggestions = ref(_clone(props.suggestions))
+const currentSuggestions = ref(_cloneDeep(props.suggestions))
 
 function onComplete({ query }) {
-  currentSuggestions.value = _filter(
-    props.suggestions,
-    (value) => _startsWith(_lowerCase(value), _lowerCase(query))
+  currentSuggestions.value = _filter(props.suggestions, (value) =>
+    _startsWith(_lowerCase(value), _lowerCase(query))
   )
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

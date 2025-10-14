@@ -1,5 +1,5 @@
 <template>
-  <Card class="max-w-prose mx-auto">
+  <Card class="mx-auto max-w-prose">
     <template #content>
       <div class="flex flex-col gap-2">
         <div
@@ -9,7 +9,7 @@
         >
           <label
             :for="attribute"
-            class="ml-1 text-primary dark:text-primary text-sm"
+            class="text-primary dark:text-primary ml-1 text-sm"
           >
             {{ _startCase(attribute) }}
           </label>
@@ -20,14 +20,18 @@
             :type="type"
             :disabled="!editable"
             :suggestions="suggestions[attribute]"
-            :ref="(component) => { attributes[attribute] = component }"
+            :ref="
+              (component) => {
+                attributes[attribute] = component
+              }
+            "
           />
         </div>
       </div>
     </template>
 
     <template #footer>
-      <div class="mt-4 flex flex-row gap-3 justify-end">
+      <div class="mt-4 flex flex-row justify-end gap-3">
         <slot name="buttons" />
       </div>
     </template>
@@ -50,19 +54,16 @@ const attributes = ref({})
 
 const charactersStore = useCharactersStore()
 const { options } = storeToRefs(charactersStore)
-const suggestions = ref(_clone(options.value))
+const suggestions = ref(_cloneDeep(options.value))
 
 async function reset() {
   await nextTick()
 
   // noinspection JSUnresolvedReference
-  _forEach(
-    richTextAttributes,
-    (attribute) => attributes.value[attribute].reset()
+  _forEach(richTextAttributes, (attribute) =>
+    attributes.value[attribute].reset()
   )
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
