@@ -1,6 +1,6 @@
 import tailwindcss from "@tailwindcss/vite"
 
-const mockAuthModule = process.env.VITEST ? [ "./test/mocks/setup.js" ] : []
+const mockAuthModule = process.env.VITEST ? ["./test/mocks/setup.js"] : []
 
 export default defineNuxtConfig({
   app: {
@@ -11,24 +11,19 @@ export default defineNuxtConfig({
         { rel: "manifest", href: "/manifest.json" },
         { rel: "mask-icon", href: "/theater-masks-solid.svg", color: "#6e0b75" }
       ],
-
       meta: [
         { charset: "UTF-8" },
         { name: "theme-color", content: "#6e0b75" },
         { name: "viewport", content: "width=device-width, initial-scale=1.0" }
       ],
-
       title: "Dramatis Personae"
     }
   },
 
   srcDir: "app/",
-
-  compatibilityDate: '2025-07-31',
-
-  css: [ "~/assets/css/main.css" ],
-
-  devServer: { port: 3001 },
+  compatibilityDate: "2025-07-31",
+  css: ["~/assets/css/main.css"],
+  devServer: { port: 3000 },
 
   devtools: {
     enabled: true,
@@ -36,12 +31,14 @@ export default defineNuxtConfig({
   },
 
   imports: {
-    dirs: [ 'stores' ],
+    dirs: ["stores"],
 
-    presets: [ {
-      from: "tailwind-merge",
-      imports: [ "twJoin", "twMerge" ]
-    } ]
+    presets: [
+      {
+        from: "tailwind-merge",
+        imports: ["twJoin", "twMerge"]
+      }
+    ]
   },
 
   modules: [
@@ -49,7 +46,6 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "@primevue/nuxt-module",
     "@sidebase/nuxt-auth",
-    "nuxt-lodash",
     ...mockAuthModule
   ],
 
@@ -73,11 +69,8 @@ export default defineNuxtConfig({
   vite: {
     build: {
       sourcemap: false,
-
       terserOptions: {
-        format: {
-          comments: false
-        }
+        format: { comments: false }
       }
     },
 
@@ -123,12 +116,13 @@ export default defineNuxtConfig({
       ]
     },
 
-    plugins: [ tailwindcss() ],
+    plugins: [tailwindcss()],
 
     vue: {
       template: {
         compilerOptions: {
-          isCustomElement: (tag) => tag.startsWith("trix-") || tag.startsWith("action-text-")
+          isCustomElement: (tag) =>
+            tag.startsWith("trix-") || tag.startsWith("action-text-")
         }
       }
     }
@@ -165,7 +159,7 @@ export default defineNuxtConfig({
 
       refresh: {
         isEnabled: true,
-        
+
         endpoint: {
           path: "/jwt-refresh",
           method: "post"
@@ -205,12 +199,12 @@ export default defineNuxtConfig({
   },
 
   pinia: {
-    storesDirs: [ './app/stores/**' ],
+    storesDirs: ["./app/stores/**"]
   },
 
   primevue: {
     directives: {
-      include: [ "Tooltip" ]
+      include: ["Tooltip"]
     },
     importPT: { from: "~/passthrough/customPT.js" },
     options: {
