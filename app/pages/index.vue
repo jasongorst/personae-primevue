@@ -1,12 +1,4 @@
 <template>
-  <!-- navbar: line-height 1.5 [1.25rem * 1.5 = 1.875rem]; py-2 [2 * --spacing(2) = --spacing(4) = 16px]; border [2 * 1px = 2px]; mb-4 [--spacing(4) = 16px] -->
-  <!-- header: line-height 1.25 [1.25rem]; py-2 [2 * --spacing(2) = --spacing(4) = 16px]; border [2 * 1px = 2px]; mb-2 [
-  --spacing(2) = 8px] -->
-  <!-- footer: line-height 1.25 [1.25rem]; py-1 [1 * --spacing(1) = --spacing(2) = 8px; border [2 * 1px = 2px] -->
-
-  <!-- toolbar: 48px + 16px = 64px -->
-  <!-- header: 46px + 1px = 47px -->
-  <!-- footer: 46px + 1px = 47px -->
   <DataTable
     :value="characters"
     v-model:filters="filters"
@@ -16,7 +8,7 @@
     :sortOrder="1"
     removableSort
     rowHover
-    scrollHeight="calc(100vh - 158px)"
+    :scrollHeight="`calc(100vh - ${getElementHeights()})`"
     scrollable
     selectionMode="single"
     dataKey="id"
@@ -27,9 +19,15 @@
     showGridlines
     resizableColumns
     :pt="{
-      header: `pb-0!`,
+      header: {
+        class: `pb-0!`,
+        id: 'datatable_header'
+      },
       thead: `bg-surface-0! dark:bg-surface-950!`,
-      footer: `p-0!`,
+      footer: {
+        class: `p-0!`,
+        id: 'datatable_footer'
+      },
       headerRow: `first-of-type:bg-surface-0 dark:first-of-type:bg-surface-900 last:align-top
                   first-of-type:*:border-r-2 last:*:border-r-0 nth-of-type-2:*:px-1 nth-of-type-2:*:py-2`,
       column: {
@@ -41,7 +39,7 @@
     @rowSelect="(event) => showDetail(event.data)"
   >
     <template #header>
-      <div class="mb-2 flex gap-4 justify-between">
+      <div class="mb-2 flex justify-between gap-4">
         <SearchField
           v-model="filters['global'].value"
           placeholder="Search"
@@ -50,7 +48,7 @@
 
         <ClearFiltersButton
           :disabled="!hasAnyFilters"
-          @click="clearFilters"
+          @click="resetFilters"
           class="px-4"
         />
 
@@ -68,21 +66,24 @@
     </template>
 
     <template #empty>
-      <div class="text-2xl text-center">
+      <div class="text-center text-2xl">
         <template v-if="hasGlobalFilter && !hasAnyAttributeFilters">
           No characters matching
-          <span class="italic">&ldquo;{{ filters['global'].value }}&rdquo;</span>.
+          <span class="italic">
+            &ldquo;{{ filters["global"].value }}&rdquo;
+          </span>
+          .
         </template>
 
         <template v-else-if="hasGlobalFilter && hasAnyAttributeFilters">
           No characters matching
-          <span class="italic">&ldquo;{{ filters['global'].value }}&rdquo;</span>
+          <span class="italic">
+            &ldquo;{{ filters["global"].value }}&rdquo;
+          </span>
           with the current filters.
         </template>
 
-        <template v-else>
-          No characters match the current filters.
-        </template>
+        <template v-else>No characters match the current filters.</template>
       </div>
     </template>
 
@@ -123,18 +124,27 @@
 
 <script setup>
 const charactersStore = useCharactersStore()
-const { characters, count, filters, hasAnyAttributeFilters, hasAnyFilters, hasGlobalFilter, options } = storeToRefs(charactersStore)
 const { hasFilterFor, resetFilterFor, resetFilters } = charactersStore
+
+const {
+  characters,
+  count,
+  filters,
+  hasAnyAttributeFilters,
+  hasAnyFilters,
+  hasGlobalFilter,
+  options
+} = storeToRefs(charactersStore)
 
 const showFilters = ref(false)
 const filteredCharacters = ref(characters.value)
 const filteredCount = computed(() => _size(filteredCharacters.value))
 
-const filteredOptions = computed(() => _reduce(
-  categoryAttributes,
-  (acc, attribute) => _set(acc, attribute, uniqValues(filteredCharacters.value, attribute)),
-  {}
-))
+const filteredOptions = computed(() =>
+  mapObject(categoryAttributes, (attribute) =>
+    uniqValues(filteredCharacters.value, attribute)
+  )
+)
 
 function updatefilteredCharacters(filteredValue) {
   filteredCharacters.value = filteredValue
@@ -144,16 +154,21 @@ async function showDetail({ id }) {
   await navigateTo({ name: "detail", params: { id } })
 }
 
-function clearFilters() {
-  resetFilters()
-  showFilters.value = false
-}
-
 function toggleShowFilters() {
   showFilters.value = !showFilters.value
 }
+
+function getElementHeights() {
+  // total height of non-datatable elements
+  const totalHeight = _reduce(
+    ["navbar", "datatable_header", "datatable_footer"],
+    (acc, element) => acc + document?.getElementById(element)?.offsetHeight,
+    0
+  )
+
+  // plus 16px [--spacing(4)] bottom navbar margin
+  return `${totalHeight + 16}px`
+}
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

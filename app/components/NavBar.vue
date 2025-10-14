@@ -1,5 +1,6 @@
 <template>
   <Toolbar
+    id="navbar"
     pt:root="
       bg-primary-0! dark:bg-primary-900! text-primary dark:text-primary
       border-0 rounded-md py-0 mb-4
