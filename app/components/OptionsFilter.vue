@@ -1,5 +1,7 @@
 <template>
-  <div class="flex flex-col justify-between gap-2 min-h-[calc(--spacing(3)+13.25rem+2px)]">
+  <div
+    class="flex min-h-[calc(--spacing(3)+13.25rem+2px)] flex-col justify-between gap-2"
+  >
     <Listbox
       v-model="model"
       :options="options"
@@ -7,25 +9,28 @@
       scrollHeight="12rem"
       pt:root="text-sm"
       pt:list="p-0!"
-      pt:option="pl-2 pr-3 py-1!"
+      pt:option="pl-1 pr-1 py-1!"
       @change="filterCallback"
     >
       <template #option="{ option, selected, index }">
         <div
           :id="`filter_${index}`"
-          class="flex flex-row items-center gap-1"
-          :class="!isFilteredOption(option) && 'text-surface-400! dark:text-surface-500!'"
+          class="flex w-full flex-row items-center gap-1"
+          :class="
+            !isFilteredOption(option) &&
+            'text-surface-400! dark:text-surface-500!'
+          "
         >
           <div>
             <Icon
               v-if="selected"
               name="ph:check-bold"
-              size="1em"
+              size="0.875em"
             />
 
             <span
               v-else
-              class="inline-block size-[1em]"
+              class="inline-block size-[0.875em]"
             />
           </div>
 
@@ -84,6 +89,4 @@ function isFilteredOption(option) {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

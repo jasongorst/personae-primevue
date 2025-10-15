@@ -1,9 +1,7 @@
-import { reduce, set } from "lodash-es"
-
 export default function reshapeCharacters(characters) {
-  return reduce(
+  return _reduce(
     characters,
-    (object, character) => set(object, character.id, character),
+    (object, character) => _set(object, character.id, character),
     {}
   )
 }

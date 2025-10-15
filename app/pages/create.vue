@@ -4,12 +4,8 @@
     ref="detailView"
   >
     <template #buttons>
-      <Button
-        v-if="!isEdited"
-      >
-        <NuxtLink to="/">
-          Cancel
-        </NuxtLink>
+      <Button v-if="!isEdited">
+        <NuxtLink to="/">Cancel</NuxtLink>
       </Button>
 
       <Button
@@ -37,8 +33,10 @@ const { token } = useAuth()
 const { create } = useCharactersStore()
 const detailView = useTemplateRef("detailView")
 
-const character = ref(_clone(emptyCharacter))
-const isEdited = computed(() => _some(character.value, (value) => isPresent(value)))
+const character = ref(_cloneDeep(emptyCharacter))
+const isEdited = computed(() =>
+  _some(character.value, (value) => isPresent(value))
+)
 
 onBeforeRouteLeave(() => {
   if (isEdited.value && !confirmLeave()) {
@@ -48,7 +46,7 @@ onBeforeRouteLeave(() => {
 })
 
 async function reset() {
-  character.value = _clone(emptyCharacter)
+  character.value = _cloneDeep(emptyCharacter)
 
   // reset the trix-editors
   await detailView.value.reset()
@@ -93,12 +91,13 @@ function confirmReset() {
 
     accept: () => reset(),
 
-    reject: () => toast.add({
-      severity: "info",
-      summary: "Cancelled.",
-      detail: "Reset cancelled.",
-      life: 3000
-    })
+    reject: () =>
+      toast.add({
+        severity: "info",
+        summary: "Cancelled.",
+        detail: "Reset cancelled.",
+        life: 3000
+      })
   })
 }
 
@@ -134,6 +133,4 @@ function confirmLeave() {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

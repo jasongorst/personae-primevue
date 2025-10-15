@@ -7,9 +7,8 @@ export default function deepConvertKeys(object, converter) {
   } else if (_isPlainObject(object)) {
     // converts the keys of the top-level object and recursively converts the keys
     //   of nested objects (in values or inside arrays)
-    return _mapValues(
-      convertKeys(object, converter),
-      (value) => deepConvertKeys(value, converter)
+    return _mapValues(convertKeys(object, converter), (value) =>
+      deepConvertKeys(value, converter)
     )
   } else {
     return object

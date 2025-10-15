@@ -1,10 +1,29 @@
+import { FilterMatchMode } from "@primevue/core/api"
+
+const emptyFilters = mapObject(filtersAttributes, (attribute) => {
+  if (_includes(categoryAttributes, attribute)) {
+    return {
+      value: [],
+      matchMode: FilterMatchMode.IN
+    }
+  } else {
+    return {
+      value: "",
+      matchMode: FilterMatchMode.CONTAINS
+    }
+  }
+})
+
 export const useCharactersStore = defineStore("characters", () => {
   const config = useRuntimeConfig()
-  const { $socketio: { socket } } = useNuxtApp()
+
+  const {
+    $socketio: { socket }
+  } = useNuxtApp()
 
   // state
   const data = ref({})
-  const filters = ref(_clone(emptyFilters))
+  const filters = ref(_cloneDeep(emptyFilters))
   const sort = ref({ attribute: "createdAt", order: "asc" })
   const loading = ref(false)
 
@@ -12,32 +31,42 @@ export const useCharactersStore = defineStore("characters", () => {
   const characters = computed(() => _values(data.value))
   const count = computed(() => _size(characters.value))
   const isLoaded = computed(() => !isEmpty(characters.value))
-  const hasGlobalFilter = computed(() => isPresent(filters.value["global"].value))
-  const hasAnyFilters = computed(() => _some(filters.value, (value) => isPresent(value.value)))
   
-  const hasAnyAttributeFilters = computed(() => _some(
-    _map(listAttributes, (attribute) => hasFilterFor(attribute))
-  ))
+  const hasGlobalFilter = computed(() =>
+    isPresent(filters.value["global"].value)
+  )
+  
+  const hasAnyFilters = computed(() =>
+    _some(filters.value, (value) => isPresent(value.value))
+  )
 
-  const options = computed(() => _reduce(
-    optionsAttributes,
-    (accumulator, attribute) => _set(
-      accumulator, attribute, uniqValues(characters.value, attribute)
-    ),
-    {}
-  ))
+  const hasFilterByAttribute = computed(() =>
+    mapObject(listAttributes, (attribute) =>
+      isPresent(filters.value[attribute].value)
+    )
+  )
+
+  const hasAnyAttributeFilters = computed(() =>
+    _some(hasFilterByAttribute.value)
+  )
+
+  const options = computed(() =>
+    mapObject(optionsAttributes, (attribute) =>
+      uniqValues(characters.value, attribute)
+    )
+  )
 
   // actions
   function hasFilterFor(attribute) {
-    return isPresent(filters.value[attribute]?.value)
+    return hasFilterByAttribute.value[attribute]
   }
 
   function resetFilters() {
-    filters.value = _clone(emptyFilters)
+    filters.value = _cloneDeep(emptyFilters)
   }
 
   function resetFilterFor(attribute) {
-    filters.value[attribute] = emptyFilters[attribute]
+    filters.value[attribute] = _cloneDeep(emptyFilters[attribute])
   }
 
   function removeFilter(attribute, value) {
@@ -74,7 +103,11 @@ export const useCharactersStore = defineStore("characters", () => {
   }
 
   async function create(character, token) {
-    const response = await socket.emitWithAck("character:create", token, character)
+    const response = await socket.emitWithAck(
+      "character:create",
+      token,
+      character
+    )
 
     if (_has(response, "data")) {
       _set(data.value, response.data.id, response.data)
@@ -84,7 +117,12 @@ export const useCharactersStore = defineStore("characters", () => {
   }
 
   async function update(id, character, token) {
-    const response = await socket.emitWithAck("character:update", token, id, character)
+    const response = await socket.emitWithAck(
+      "character:update",
+      token,
+      id,
+      character
+    )
 
     if (_has(response, "data")) {
       _set(data.value, response.data.id, response.data)
@@ -193,24 +231,24 @@ export const useCharactersStore = defineStore("characters", () => {
     method = "get",
     id = null,
     character = null,
-    _token = null
+    token = null
   } = {}) {
     let response, error
 
     const url = toValue(id) ? `/${toValue(id)}` : "/"
 
-    const options = {
+    const fetchOptions = {
       baseURL: config.public.api.baseURL,
       method: method
     }
 
     if (toValue(character)) {
-      options.body = toValue(character)
+      fetchOptions.body = toValue(character)
     }
 
     try {
       loading.value = true
-      response = await $fetch(url, options)
+      response = await $fetch(url, fetchOptions)
       loading.value = false
     } catch (err) {
       console.log("[apiFetch error]", err)
@@ -232,28 +270,29 @@ export const useCharactersStore = defineStore("characters", () => {
     count,
     hasAnyAttributeFilters,
     hasAnyFilters,
+    hasFilterByAttribute,
     hasGlobalFilter,
     isLoaded,
     options,
 
     // actions
-    load,
-    create,
-    destroy,
-    update,
-    lock,
-    unlock,
-    apiLoad,
     apiCreate,
     apiDestroy,
+    apiLoad,
     apiUpdate,
+    applyPatch,
+    create,
+    destroy,
     getCharacter,
     hasFilterFor,
-    applyPatch,
+    load,
+    lock,
     removeFilter,
     resetFilterFor,
     resetFilters,
-    resetGlobalFilter
+    resetGlobalFilter,
+    unlock,
+    update
   }
 })
 

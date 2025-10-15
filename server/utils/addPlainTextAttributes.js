@@ -1,15 +1,13 @@
-import { forEach, has, isEmpty, set } from "lodash-es"
-
-// mutates character
 export default function addPlainTextAttributes(character) {
-  forEach(
+  // mutates character
+  _forEach(
     richTextAttributes,
     (attribute) => {
-      if (has(character, attribute)) {
-        set(
+      if (_has(character, attribute)) {
+        _set(
           character,
           `${attribute}PlainText`,
-          isEmpty(character[attribute]) ? "" : htmlToPlainText(character[attribute])
+          _isEmpty(character[attribute]) ? "" : htmlToPlainText(character[attribute])
         )
       }
     }
