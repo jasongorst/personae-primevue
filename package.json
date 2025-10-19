@@ -57,5 +57,5 @@
     "vite": "^7.1.10",
     "yup": "^1.7.1"
   },
-  "packageManager": "pnpm@10.18.2"
+  "packageManager": "pnpm@10.18.3"
 }
