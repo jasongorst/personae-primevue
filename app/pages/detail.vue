@@ -14,15 +14,11 @@
           Revert
         </Button>
 
-        <Button @click="updateCharacter">
-          Save
-        </Button>
+        <Button @click="updateCharacter">Save</Button>
       </template>
 
       <template v-else>
-        <Button @click="back">
-          Back
-        </Button>
+        <Button @click="back">Back</Button>
 
         <Button
           v-if="isSignedIn"
@@ -42,7 +38,7 @@ definePageMeta({
   path: "/:id(\\d+)"
 })
 
-const id = _toInteger(useRoute().params.id)
+const id = _toInteger(useRoute().params?.id)
 const confirm = useConfirm()
 const toast = useToast()
 
@@ -53,22 +49,27 @@ const detailView = useTemplateRef("detailView")
 
 const originalCharacter = ref(emptyCharacter)
 const character = ref(emptyCharacter)
+const isSaved = ref(false)
 const isBeingEdited = ref(false)
 
 const isSignedIn = computed(() => status.value === "authenticated")
-const updatedFields = computed(() => findUpdated(originalCharacter.value, character.value))
-const isUpdated = computed(() => (!_isEmpty(updatedFields.value)))
+
+const updatedFields = computed(() =>
+  findUpdated(originalCharacter.value, character.value)
+)
+
+const isUpdated = computed(() => !_isEmpty(updatedFields.value))
 
 onMounted(async () => await initCharacter())
 
 onBeforeRouteLeave(() => {
   if (isBeingEdited.value) {
-    if (isUpdated.value && !confirmLeave()) {
+    if (isUpdated.value && !isSaved.value && !confirmLeave()) {
       // cancel navigation
       return false
     }
   } else {
-    unlockCharacter()
+    // unlockCharacter()
   }
 })
 
@@ -78,19 +79,19 @@ async function initCharacter() {
 }
 
 async function editRequest(attribute) {
-  if (!isBeingEdited.value) {
-    if (isLocked()) {
-      return
-    }
-
-    await lockCharacter()
-  }
+  // if (!isBeingEdited.value) {
+  //   if (isLocked()) {
+  //     return
+  //   }
+  //
+  //   await lockCharacter()
+  // }
 
   detailView.value.activate(attribute)
 }
 
 async function reset() {
-  await unlockCharacter()
+  // await unlockCharacter()
   await initCharacter()
 
   // reset the trix-editors
@@ -98,9 +99,9 @@ async function reset() {
 }
 
 async function back() {
-  if (isBeingEdited.value) {
-    await unlockCharacter()
-  }
+  // if (isBeingEdited.value) {
+  //   await unlockCharacter()
+  // }
 
   navigateTo("/")
 }
@@ -160,6 +161,7 @@ async function updateCharacter() {
       life: 3000
     })
 
+    isSaved.value = true
     navigateTo("/")
   } else {
     toast.add({
@@ -169,7 +171,7 @@ async function updateCharacter() {
     })
   }
 
-  await unlockCharacter()
+  // await unlockCharacter()
 }
 
 async function deleteCharacter() {
@@ -183,6 +185,7 @@ async function deleteCharacter() {
       life: 3000
     })
 
+    isSaved.value = true
     navigateTo("/")
   } else {
     toast.add({
@@ -211,19 +214,20 @@ function confirmRevert() {
 
     accept: async () => await reset(),
 
-    reject: () => toast.add({
-      severity: "info",
-      summary: "Cancelled.",
-      detail: "Revert cancelled.",
-      life: 3000
-    })
+    reject: () =>
+      toast.add({
+        severity: "info",
+        summary: "Cancelled.",
+        detail: "Revert cancelled.",
+        life: 3000
+      })
   })
 }
 
 function confirmDelete() {
-  if (isLocked()) {
-    return
-  }
+  // if (isLocked()) {
+  //   return
+  // }
 
   confirm.require({
     header: "Really?",
@@ -242,12 +246,13 @@ function confirmDelete() {
 
     accept: async () => await deleteCharacter(),
 
-    reject: () => toast.add({
-      severity: "info",
-      summary: "Cancelled.",
-      detail: "Delete cancelled.",
-      life: 3000
-    })
+    reject: () =>
+      toast.add({
+        severity: "info",
+        summary: "Cancelled.",
+        detail: "Delete cancelled.",
+        life: 3000
+      })
   })
 }
 
@@ -270,9 +275,9 @@ function confirmLeave() {
     },
 
     accept: async () => {
-        await unlockCharacter()
-        result = true
-      },
+      // await unlockCharacter()
+      result = true
+    },
 
     reject: () => {
       result = false
@@ -283,6 +288,4 @@ function confirmLeave() {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

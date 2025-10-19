@@ -1,6 +1,7 @@
 <template>
   <DetailView
     v-model="character"
+    @editRequest="editRequest"
     ref="detailView"
   >
     <template #buttons>
@@ -34,16 +35,30 @@ const { create } = useCharactersStore()
 const detailView = useTemplateRef("detailView")
 
 const character = ref(_cloneDeep(emptyCharacter))
+const isSaved = ref(false)
+
 const isEdited = computed(() =>
   _some(character.value, (value) => isPresent(value))
 )
 
 onBeforeRouteLeave(() => {
-  if (isEdited.value && !confirmLeave()) {
+  if (isEdited.value && !isSaved.value && !confirmLeave()) {
     // cancel navigation
     return false
   }
 })
+
+async function editRequest(attribute) {
+  // if (!isBeingEdited.value) {
+  //   if (isLocked()) {
+  //     return
+  //   }
+  //
+  //   await lockCharacter()
+  // }
+
+  detailView.value.activate(attribute)
+}
 
 async function reset() {
   character.value = _cloneDeep(emptyCharacter)
@@ -63,6 +78,7 @@ async function saveCharacter() {
       life: 3000
     })
 
+    isSaved.value = true
     navigateTo("/")
   } else {
     toast.add({
@@ -120,7 +136,7 @@ function confirmLeave() {
     },
 
     accept: async () => {
-      await unlockCharacter()
+      // await unlockCharacter()
       result = true
     },
 
