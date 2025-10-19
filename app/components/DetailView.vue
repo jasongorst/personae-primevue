@@ -1,9 +1,9 @@
 <template>
-  <Card class="max-w-prose mx-auto">
+  <Card class="mx-auto max-w-prose">
     <template #content>
       <div class="flex flex-col gap-2">
         <DetailField
-          v-for="{ attribute, type } in detailAttributes"
+          v-for="{ attribute, type } in schemaAttributes"
           v-model="character[attribute]"
           :key="attribute"
           :attribute="attribute"
@@ -11,13 +11,13 @@
           :disabled="!editable"
           :suggestions="suggestions[attribute]"
           @click.capture.stop="editRequest(attribute)"
-          :ref="(component) => detailFields[attribute] = component"
+          :ref="(component) => (detailFields[attribute] = component)"
         />
       </div>
     </template>
 
     <template #footer>
-      <div class="mt-4 flex flex-row gap-3 justify-end">
+      <div class="mt-4 flex flex-row justify-end gap-3">
         <slot name="buttons" />
       </div>
     </template>
@@ -35,7 +35,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits([ "editRequest" ])
+const emit = defineEmits(["editRequest"])
 const detailFields = ref({})
 const { options } = storeToRefs(useCharactersStore())
 const suggestions = ref(_clone(options.value))
@@ -44,9 +44,8 @@ async function reset() {
   await nextTick()
 
   // noinspection JSUnresolvedReference
-  _forEach(
-    richTextAttributes,
-    (attribute) => detailFields.value[attribute].reset()
+  _forEach(richTextAttributes, (attribute) =>
+    detailFields.value[attribute].reset()
   )
 }
 
@@ -64,6 +63,4 @@ function editRequest(attribute) {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
