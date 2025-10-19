@@ -17,16 +17,15 @@ export function registerCharacterHandlers(io, socket) {
     let validated, created
 
     try {
-      validated = createCharacterSchema.validateSync(payload)
+      const augmented = addPlainTextAttributes(payload)
+      validated = createCharacterSchema.validateSync(augmented)
     } catch (error) {
       callback({ error })
       return
     }
-
-    const augmented = addPlainTextAttributes(validated)
-
+    
     try {
-      created = await prisma.character.create({ data: augmented })
+      created = await prisma.character.create({ data: validated })
     } catch (error) {
       callback({ error })
       return
@@ -62,7 +61,7 @@ export function registerCharacterHandlers(io, socket) {
     }
 
     const { validId, error } = validateId(id)
-
+    
     if (error) {
       callback({ error })
       return
@@ -71,28 +70,31 @@ export function registerCharacterHandlers(io, socket) {
     let validated, previous, updated
 
     try {
-      validated = updateCharacterSchema.validateSync(payload)
+      const augmented = addPlainTextAttributes(payload)
+      validated = updateCharacterSchema.validateSync(augmented)
     } catch (error) {
       callback({ error })
       return
     }
-
+    
     try {
       previous = await prisma.character.findUnique({ where: { id: validId }})
     } catch (error) {
       callback({ error })
       return
     }
-
-    const augmented = addPlainTextAttributes(validated)
-
+    
     try {
-      updated = await prisma.character.update({ where: { id: validId }, data: augmented })
+      updated = await prisma.character.update({
+        where: { id: validId },
+        data: validated
+      })
     } catch (error) {
       callback({ error })
       return
     }
-
+    
+    
     callback({ data: updated })
 
     broadcastPatch(io, socket, replaceCharacterPatch(previous, updated))
