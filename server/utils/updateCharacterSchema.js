@@ -1,5 +1,21 @@
 // noinspection JSUnresolvedReference
-import { object, reach } from "yup"
+
+import { addMethod, object, reach, string } from "yup"
+
+addMethod(string, "plainTextWhen", function plainTextWhen(field) {
+  return this.when(field, {
+    is: (value) => !_isUndefined(value),
+    then: (schema) => schema.ensure(),
+    otherwise: (schema) =>
+      schema
+        .optional()
+        .test(
+          "isUndefined",
+          `not allowed without ${field}`,
+          (value) => _isUndefined(value)
+        )
+  })
+})
 
 export default object({
   player: reach(characterSchema, "player").optional(),
@@ -14,8 +30,16 @@ export default object({
   bannerhouse: reach(characterSchema, "bannerhouse").optional(),
   description: reach(characterSchema, "description").optional(),
   notes: reach(characterSchema, "notes").optional(),
-  descriptionPlainText: reach(characterSchema, "descriptionPlainText").optional(),
-  notesPlainText: reach(characterSchema, "notesPlainText").optional(),
+
+  descriptionPlainText: reach(
+    characterSchema,
+    "descriptionPlainText"
+  ).plainTextWhen("description"),
+
+  notesPlainText: reach(characterSchema, "notesPlainText").plainTextWhen(
+    "notes"
+  ),
+
   locked: reach(characterSchema, "locked"),
   lockedBy: reach(characterSchema, "lockedBy"),
   lockedAt: reach(characterSchema, "lockedAt")
