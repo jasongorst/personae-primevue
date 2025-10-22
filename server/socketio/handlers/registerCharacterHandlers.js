@@ -1,228 +1,181 @@
-import { pick } from "lodash-es"
-
 export function registerCharacterHandlers(io, socket) {
   socket.on("character:create", createCharacter)
-  socket.on("character:read",  readCharacter)
+  socket.on("character:read", readCharacter)
   socket.on("character:update", updateCharacter)
   socket.on("character:delete", deleteCharacter)
   socket.on("character:list", listCharacters)
   socket.on("character:lock", lockCharacter)
   socket.on("character:unlock", unlockCharacter)
 
-  async function createCharacter(token, payload, callback) {
-    if (!(await isAuthenticated(socket, callback, token))) {
-      return
-    }
-
-    let validated, created
-
-    try {
-      const augmented = addPlainTextAttributes(payload)
-      validated = createCharacterSchema.validateSync(augmented)
-    } catch (error) {
-      callback({ error })
-      return
-    }
-    
-    try {
-      created = await prisma.character.create({ data: validated })
-    } catch (error) {
-      callback({ error })
-      return
-    }
-
-    callback({ data: created })
-    broadcastPatch(io, socket, addCharacterPatch(created))
+  async function readCharacter(id, callback) {
+    const query = ({ id }) => prisma.character.findUnique({ where: { id } })
+    await executeQuery({ id, query, callback })
   }
 
-  async function readCharacter(id, callback) {
-    const { validId, error } = validateId(id)
+  async function listCharacters(callback) {
+    const query = () =>
+      prisma.character.findMany({ orderBy: [{ createdAt: "asc" }] })
 
-    if (error) {
-      callback({ error })
-      return
+    const mutator = reshapeCharacters
+    await executeQuery({ query, mutator, callback })
+  }
+
+  async function deleteCharacter(token, id, callback) {
+    const query = ({ id }) => prisma.character.delete({ where: { id } })
+    const { previous, error } = await executeQuery({ token, id, query, callback })
+
+    if (_isUndefined(error)) {
+      broadcastPatch(io, socket, generateCharacterPatch(previous, {}))
     }
+  }
 
-    let character
+  async function createCharacter(token, payload, callback) {
+    const data = addPlainTextAttributes(payload)
+    
+    const validator = (character) =>
+      createCharacterSchema.validateSync(character)
+    
+    const query = ({ data }) => prisma.character.create({ data })
 
-    try {
-      character = await prisma.character.findUnique({ where: { id: validId } })
-    } catch (error) {
-      callback({ error })
-      return
+    const { previous, result, error } = await executeQuery({
+      token,
+      data,
+      validator,
+      query,
+      callback
+    })
+
+    if (_isUndefined(error)) {
+      broadcastPatch(io, socket, generateCharacterPatch(previous, result))
     }
-
-    callback({ data: character })
   }
 
   async function updateCharacter(token, id, payload, callback) {
-    if (!(await isAuthenticated(socket, callback, token))) {
-      return
-    }
-
-    const { validId, error } = validateId(id)
+    const data = addPlainTextAttributes(payload)
     
-    if (error) {
-      callback({ error })
-      return
-    }
-
-    let validated, previous, updated
-
-    try {
-      const augmented = addPlainTextAttributes(payload)
-      validated = updateCharacterSchema.validateSync(augmented)
-    } catch (error) {
-      callback({ error })
-      return
-    }
+    const validator = (character) =>
+      updateCharacterSchema.validateSync(character)
     
-    try {
-      previous = await prisma.character.findUnique({ where: { id: validId }})
-    } catch (error) {
-      callback({ error })
-      return
-    }
+    const query = ({ id, data }) =>
+      prisma.character.update({ where: { id }, data })
     
-    try {
-      updated = await prisma.character.update({
-        where: { id: validId },
-        data: validated
-      })
-    } catch (error) {
-      callback({ error })
-      return
+    const { previous, result, error } = await executeQuery({
+      token,
+      id,
+      data,
+      validator,
+      query,
+      callback
+    })
+
+    if (_isUndefined(error)) {
+      broadcastPatch(io, socket, generateCharacterPatch(previous, result))
     }
-    
-    
-    callback({ data: updated })
-
-    broadcastPatch(io, socket, replaceCharacterPatch(previous, updated))
- }
-
-  async function deleteCharacter(token, id, callback) {
-    if (!(await isAuthenticated(socket, callback, token))) {
-      return
-    }
-
-    const { validId, error } = validateId(id)
-
-    if (error) {
-      callback({ error })
-      return
-    }
-
-    try {
-      await prisma.character.delete({ where: { id: validId } })
-    } catch (error) {
-      callback({ error })
-      return
-    }
-
-    callback({ data: { id: validId } })
-    broadcastPatch(io, socket, removeCharacterPatch(validId))
- }
-
-  async function listCharacters(callback) {
-    const { data, error } = await readCharacters()
-
-    if (error) {
-      callback({ error })
-      return
-    }
-
-    callback({ data })
   }
 
   async function lockCharacter(token, id, callback) {
-    if (!(await isAuthenticated(socket, callback, token))) {
-      return
-    }
-
-    const { validId, error } = validateId(id)
-
-    if (error) {
-      callback({ error })
-      return
+    const data = {
+      locked: true,
+      lockedAt: new Date(),
+      lockedBy: socket.data.user.username
     }
     
-    let previous, locked
-    
-    try {
-      previous = await prisma.character.findUnique({ where: { id: validId }})
-    } catch (error) {
-      callback({ error })
-      return
-    }
-    
-    try {
-      locked = await prisma.character.update({
-        where: { id: validId },
-        data: {
-          locked: true,
-          lockedAt: new Date(),
-          lockedBy: socket.data.user.username
-        }
-      })
-    } catch (error) {
-      callback({ error })
-      return
-    }
+    const query = ({ id, data }) =>
+      prisma.character.update({ where: { id }, data })
 
-    callback({ data: pick(locked, [ "id", "locked", "lockedAt", "lockedBy" ]) })
-    broadcastPatch(io, socket, replaceCharacterPatch(previous, locked))
+    const { previous, result, error } = await executeQuery({
+      token,
+      id,
+      data,
+      query,
+      callback
+    })
+
+    if (_isUndefined(error)) {
+      broadcastPatch(io, socket, generateCharacterPatch(previous, result))
+    }
   }
 
   async function unlockCharacter(token, id, callback) {
-    if (!(await isAuthenticated(socket, callback, token))) {
-      return
-    }
-
-    const { validId, error } = validateId(id)
-
-    if (error) {
-      callback({ error })
-      return
-    }
-
-    let previous, unlocked
-    
-    try {
-      previous = await prisma.character.findUnique({ where: { id: validId }})
-    } catch (error) {
-      callback({ error })
-      return
+    const data = {
+      locked: false,
+      lockedAt: null,
+      lockedBy: null
     }
     
-    try {
-      unlocked = await prisma.character.update({
-        where: { id: validId },
-        data: {
-          locked: false,
-          lockedAt: null,
-          lockedBy: null
-        }
-      })
-    } catch (error) {
-      callback({ error })
-      return
-    }
+    const query = ({ id, data }) =>
+      prisma.character.update({ where: { id }, data })
 
-    callback({ data: pick(unlocked, [ "id", "locked", "lockedAt", "lockedBy" ]) })
-    broadcastPatch(io, socket, replaceCharacterPatch(previous, unlocked))
+    const { previous, result, error } = await executeQuery({
+      token,
+      id,
+      data,
+      query,
+      callback
+    })
+
+    if (_isUndefined(error)) {
+      broadcastPatch(io, socket, generateCharacterPatch(previous, result))
+    }
   }
 
-  async function readCharacters() {
-    let data, error
-
+  async function executeQuery({
+    token,
+    id,
+    data,
+    validator,
+    query,
+    mutator = _identity,
+    callback
+  }) {
     try {
-      data = reshapeCharacters(
-        await prisma.character.findMany({ orderBy: [{ createdAt: "asc" }] })
-      )
-    } catch (err) {
-      error = err
+      const { previous, result: rawResult } = await validateAndQuery({
+        token,
+        id,
+        data,
+        validator,
+        query
+      })
+
+      const result = mutator(rawResult)
+      callback({ data: result })
+      return { previous, result }
+    } catch (error) {
+      console.error(error)
+      
+      callback({ error })
+      return { error }
+    }
+  }
+
+  async function validateAndQuery({
+    token = null,
+    id = null,
+    data = null,
+    validator = _identity,
+    query = _noop
+  }) {
+    if (token) {
+      await isAuthenticated(socket, token)
     }
 
-    return { data, error }
+    let validId, validData
+    let previous = {}
+
+    if (id) {
+      validId = validateId(id)
+
+      // on update/delete
+      if (token) {
+        previous = await prisma.character.findUnique({ where: { id: validId } })
+      }
+    }
+
+    if (data) {
+      validData = validator(data)
+    }
+
+    const result = await query({ id: validId, data: validData })
+    return { previous, result }
   }
 }
