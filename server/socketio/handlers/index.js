@@ -1,1 +1,1 @@
-export * from "./registerCharacterHandlers.js"
+export * from "./characterHandlers.js"

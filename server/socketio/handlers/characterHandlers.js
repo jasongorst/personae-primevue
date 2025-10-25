@@ -1,15 +1,15 @@
-export function registerCharacterHandlers(io, socket) {
-  socket.on("character:create", createCharacter)
+export function characterHandlers(io, socket) {
   socket.on("character:read", readCharacter)
-  socket.on("character:update", updateCharacter)
-  socket.on("character:delete", deleteCharacter)
   socket.on("character:list", listCharacters)
+  socket.on("character:delete", deleteCharacter)
+  socket.on("character:create", createCharacter)
+  socket.on("character:update", updateCharacter)
   socket.on("character:lock", lockCharacter)
   socket.on("character:unlock", unlockCharacter)
 
   async function readCharacter(id, callback) {
     const query = ({ id }) => prisma.character.findUnique({ where: { id } })
-    await executeQuery({ id, query, callback })
+    await _executeQuery({ id, query, callback })
   }
 
   async function listCharacters(callback) {
@@ -17,27 +17,35 @@ export function registerCharacterHandlers(io, socket) {
       prisma.character.findMany({ orderBy: [{ createdAt: "asc" }] })
 
     const mutator = reshapeCharacters
-    await executeQuery({ query, mutator, callback })
+    await _executeQuery({ query, mutator, callback })
   }
 
   async function deleteCharacter(token, id, callback) {
     const query = ({ id }) => prisma.character.delete({ where: { id } })
-    const { previous, error } = await executeQuery({ token, id, query, callback })
+    const mutator = (rawResult) => _pick(rawResult, ["id"])
+
+    const { previous, error } = await _executeQuery({
+      token,
+      id,
+      query,
+      mutator,
+      callback
+    })
 
     if (_isUndefined(error)) {
-      broadcastPatch(io, socket, generateCharacterPatch(previous, {}))
+      broadcastPatch(socket, generateCharacterPatch(previous, {}))
     }
   }
 
   async function createCharacter(token, payload, callback) {
     const data = addPlainTextAttributes(payload)
-    
+
     const validator = (character) =>
       createCharacterSchema.validateSync(character)
-    
+
     const query = ({ data }) => prisma.character.create({ data })
 
-    const { previous, result, error } = await executeQuery({
+    const { previous, result, error } = await _executeQuery({
       token,
       data,
       validator,
@@ -46,20 +54,20 @@ export function registerCharacterHandlers(io, socket) {
     })
 
     if (_isUndefined(error)) {
-      broadcastPatch(io, socket, generateCharacterPatch(previous, result))
+      broadcastPatch(socket, generateCharacterPatch(previous, result))
     }
   }
 
   async function updateCharacter(token, id, payload, callback) {
     const data = addPlainTextAttributes(payload)
-    
+
     const validator = (character) =>
       updateCharacterSchema.validateSync(character)
-    
+
     const query = ({ id, data }) =>
       prisma.character.update({ where: { id }, data })
-    
-    const { previous, result, error } = await executeQuery({
+
+    const { previous, result, error } = await _executeQuery({
       token,
       id,
       data,
@@ -69,7 +77,7 @@ export function registerCharacterHandlers(io, socket) {
     })
 
     if (_isUndefined(error)) {
-      broadcastPatch(io, socket, generateCharacterPatch(previous, result))
+      broadcastPatch(socket, generateCharacterPatch(previous, result))
     }
   }
 
@@ -79,11 +87,11 @@ export function registerCharacterHandlers(io, socket) {
       lockedAt: new Date(),
       lockedBy: socket.data.user.username
     }
-    
+
     const query = ({ id, data }) =>
       prisma.character.update({ where: { id }, data })
 
-    const { previous, result, error } = await executeQuery({
+    const { previous, result, error } = await _executeQuery({
       token,
       id,
       data,
@@ -92,7 +100,7 @@ export function registerCharacterHandlers(io, socket) {
     })
 
     if (_isUndefined(error)) {
-      broadcastPatch(io, socket, generateCharacterPatch(previous, result))
+      broadcastPatch(socket, generateCharacterPatch(previous, result))
     }
   }
 
@@ -102,11 +110,11 @@ export function registerCharacterHandlers(io, socket) {
       lockedAt: null,
       lockedBy: null
     }
-    
+
     const query = ({ id, data }) =>
       prisma.character.update({ where: { id }, data })
 
-    const { previous, result, error } = await executeQuery({
+    const { previous, result, error } = await _executeQuery({
       token,
       id,
       data,
@@ -115,11 +123,11 @@ export function registerCharacterHandlers(io, socket) {
     })
 
     if (_isUndefined(error)) {
-      broadcastPatch(io, socket, generateCharacterPatch(previous, result))
+      broadcastPatch(socket, generateCharacterPatch(previous, result))
     }
   }
 
-  async function executeQuery({
+  async function _executeQuery({
     token,
     id,
     data,
@@ -129,7 +137,7 @@ export function registerCharacterHandlers(io, socket) {
     callback
   }) {
     try {
-      const { previous, result: rawResult } = await validateAndQuery({
+      const { previous, result: rawResult } = await _validateAndQuery({
         token,
         id,
         data,
@@ -142,13 +150,13 @@ export function registerCharacterHandlers(io, socket) {
       return { previous, result }
     } catch (error) {
       console.error(error)
-      
+
       callback({ error })
       return { error }
     }
   }
 
-  async function validateAndQuery({
+  async function _validateAndQuery({
     token = null,
     id = null,
     data = null,

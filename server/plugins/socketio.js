@@ -3,7 +3,7 @@
 import { Server as Engine } from "engine.io"
 import { Server } from "socket.io"
 import { authMiddleware } from "../socketio/middlewares"
-import { registerCharacterHandlers } from "../socketio/handlers"
+import * as handlers from "../socketio/handlers"
 
 export default defineNitroPlugin((nitroApp) => {
   const engine = new Engine()
@@ -24,26 +24,39 @@ export default defineNitroPlugin((nitroApp) => {
   })
 
   io.on("connection", async (socket) => {
-    registerCharacterHandlers(io, socket)
-    
-    socket.onAny((eventName, ...args) => console.log(eventName, ..._initial(args)))
+    handlers.characterHandlers(io, socket)
+
+    socket.onAny((eventName, ...args) =>
+      console.log(eventName, ..._initial(args))
+    )
     socket.onAnyOutgoing((eventName, ...args) => console.log(eventName, args))
 
-    console.log("[connection]", socket.id, socket.data.user?.username || "unauthenticated")
+    console.log(
+      "[connection]",
+      socket.id,
+      socket.data.user?.username || "unauthenticated"
+    )
     console.log("[connected]", io.of("/").sockets.size)
   })
 
-  nitroApp.router.use("/socket.io/", defineEventHandler({
-    handler(event) {
-      engine.handleRequest(event.node.req, event.node.res)
-      event._handled = true
-    },
+  nitroApp.router.use(
+    "/socket.io/",
+    defineEventHandler({
+      handler(event) {
+        engine.handleRequest(event.node.req, event.node.res)
+        event._handled = true
+      },
 
-    websocket: {
-      open(peer) {
-        engine.prepare(peer._internal.nodeReq)
-        engine.onWebSocket(peer._internal.nodeReq, peer._internal.nodeReq.socket, peer.websocket)
+      websocket: {
+        open(peer) {
+          engine.prepare(peer._internal.nodeReq)
+          engine.onWebSocket(
+            peer._internal.nodeReq,
+            peer._internal.nodeReq.socket,
+            peer.websocket
+          )
+        }
       }
-    }
-  }))
+    })
+  )
 })
