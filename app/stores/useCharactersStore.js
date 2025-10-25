@@ -15,8 +15,6 @@ const emptyFilters = mapObject(filtersAttributes, (attribute) => {
 })
 
 export const useCharactersStore = defineStore("characters", () => {
-  const config = useRuntimeConfig()
-
   const {
     $socketio: { socket }
   } = useNuxtApp()
@@ -31,11 +29,11 @@ export const useCharactersStore = defineStore("characters", () => {
   const characters = computed(() => _values(data.value))
   const count = computed(() => _size(characters.value))
   const isLoaded = computed(() => !isEmpty(characters.value))
-  
+
   const hasGlobalFilter = computed(() =>
     isPresent(filters.value["global"].value)
   )
-  
+
   const hasAnyFilters = computed(() =>
     _some(filters.value, (value) => isPresent(value.value))
   )
@@ -140,123 +138,6 @@ export const useCharactersStore = defineStore("characters", () => {
 
     return response
   }
-  
-  async function lock(id, token) {
-    const response = await socket.emitWithAck("character:lock", token, id)
-
-    if (_has(response, "data")) {
-      _assign(data.value[response.data.id], _omit(response.data, [ "id" ]))
-    }
-
-    return response
-  }
-  
-  async function unlock(id, token) {
-    const response = await socket.emitWithAck("character:unlock", token, id)
-
-    if (_has(response, "data")) {
-      _assign(data.value[response.data.id], _omit(response.data, [ "id" ]))
-    }
-
-    return response
-  }
-  
-  // api
-  async function apiLoad() {
-    const { response, error } = await apiFetch({
-      method: "get"
-    })
-
-    if (error) {
-      return false
-    } else {
-      data.value = response
-      return response
-    }
-  }
-
-  async function apiCreate(character, token) {
-    const { response, error } = await apiFetch({
-      method: "post",
-      character: character,
-      token: token
-    })
-
-    if (error) {
-      return false
-    } else {
-      if (_has(response, "id")) {
-        _set(data.value, response.id, response)
-      } else {
-        console.log("[characterStore.apiCreate - no id]", response)
-      }
-    }
-
-    return response
-  }
-
-  async function apiUpdate(id, character, token) {
-    const { response, error } = await apiFetch({
-      method: "patch",
-      id: id,
-      character: character,
-      token: token
-    })
-
-    if (error) {
-      return false
-    } else {
-      _assign(data.value[id], toValue(character))
-      return response
-    }
-  }
-
-  async function apiDestroy(id, token) {
-    const { error } = await apiFetch({
-      method: "delete",
-      id: id,
-      token: token
-    })
-
-    if (error) {
-      return false
-    } else {
-      _unset(data.value, id)
-      return true
-    }
-  }
-
-  // private
-  async function apiFetch({
-    method = "get",
-    id = null,
-    character = null,
-    token = null
-  } = {}) {
-    let response, error
-
-    const url = toValue(id) ? `/${toValue(id)}` : "/"
-
-    const fetchOptions = {
-      baseURL: config.public.api.baseURL,
-      method: method
-    }
-
-    if (toValue(character)) {
-      fetchOptions.body = toValue(character)
-    }
-
-    try {
-      loading.value = true
-      response = await $fetch(url, fetchOptions)
-      loading.value = false
-    } catch (err) {
-      console.log("[apiFetch error]", err)
-      error = err
-    }
-
-    return { response, error }
-  }
 
   return {
     // state
@@ -276,22 +157,16 @@ export const useCharactersStore = defineStore("characters", () => {
     options,
 
     // actions
-    apiCreate,
-    apiDestroy,
-    apiLoad,
-    apiUpdate,
     applyPatch,
     create,
     destroy,
     getCharacter,
     hasFilterFor,
     load,
-    lock,
     removeFilter,
     resetFilterFor,
     resetFilters,
     resetGlobalFilter,
-    unlock,
     update
   }
 })

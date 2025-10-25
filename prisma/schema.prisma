@@ -26,9 +26,6 @@ model Character {
   notesPlainText       String    @default("")
   createdAt            DateTime  @default(now()) @db.Timestamp(6)
   updatedAt            DateTime  @updatedAt @db.Timestamp(6)
-  locked               Boolean   @default(false)
-  lockedBy             String?
-  lockedAt             DateTime? @db.Timestamp(6)
 
   @@index([createdAt])
 }

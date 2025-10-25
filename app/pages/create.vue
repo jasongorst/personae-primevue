@@ -49,18 +49,10 @@ onBeforeRouteLeave(() => {
 })
 
 async function editRequest(attribute) {
-  // if (!isBeingEdited.value) {
-  //   if (isLocked()) {
-  //     return
-  //   }
-  //
-  //   await lockCharacter()
-  // }
-
   detailView.value.activate(attribute)
 }
 
-async function reset() {
+async function resetCharacter() {
   character.value = _cloneDeep(emptyCharacter)
 
   // reset the trix-editors
@@ -105,7 +97,7 @@ function confirmReset() {
       label: "Cancel"
     },
 
-    accept: () => reset(),
+    accept: () => resetCharacter(),
 
     reject: () =>
       toast.add({
@@ -135,14 +127,8 @@ function confirmLeave() {
       label: "Cancel"
     },
 
-    accept: async () => {
-      // await unlockCharacter()
-      result = true
-    },
-
-    reject: () => {
-      result = false
-    }
+    accept: () => (result = true),
+    reject: () => (result = false)
   })
 
   return result

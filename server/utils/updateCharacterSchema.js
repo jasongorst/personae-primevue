@@ -38,9 +38,5 @@ export default object({
 
   notesPlainText: reach(characterSchema, "notesPlainText").plainTextWhen(
     "notes"
-  ),
-
-  locked: reach(characterSchema, "locked"),
-  lockedBy: reach(characterSchema, "lockedBy"),
-  lockedAt: reach(characterSchema, "lockedAt")
+  )
 })

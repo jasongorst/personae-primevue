@@ -1,11 +1,4 @@
-import { boolean, date, mixed, number, object, string } from "yup"
-import { isNil } from "lodash-es"
-
-const nil = mixed().notRequired().test(
-  "is-nil",
-  "${path} must be null or undefined",
-  (value) => isNil(value)
-)
+import { number, object, string } from "yup"
 
 export default object({
   id: number().positive().integer().required(),
@@ -22,18 +15,5 @@ export default object({
   description: string().trim().defined(),
   notes: string().trim().defined(),
   descriptionPlainText: string().trim().defined(),
-  notesPlainText: string().trim().defined(),
-  locked: boolean().optional(),
-  
-  lockedBy: string().notRequired().when("locked", {
-    is: true,
-    then: (schema) => schema.trim().required(),
-    otherwise: () => nil
-  }),
-  
-  lockedAt: date().notRequired().when("locked", {
-    is: true,
-    then: (schema) => schema.required().default(new Date()),
-    otherwise: () => nil
-  })
+  notesPlainText: string().trim().defined()
 })

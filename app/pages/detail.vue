@@ -14,11 +14,13 @@
           Revert
         </Button>
 
-        <Button @click="updateCharacter">Save</Button>
+        <Button @click="saveCharacter">Save</Button>
       </template>
 
       <template v-else>
-        <Button @click="back">Back</Button>
+        <Button>
+          <NuxtLink to="/">Back</NuxtLink>
+        </Button>
 
         <Button
           v-if="isSignedIn"
@@ -43,114 +45,52 @@ const confirm = useConfirm()
 const toast = useToast()
 
 const { status, token } = useAuth()
-const { destroy, getCharacter, lock, unlock, update } = useCharactersStore()
+const { destroy, getCharacter, update } = useCharactersStore()
 
 const detailView = useTemplateRef("detailView")
 
-const originalCharacter = ref(emptyCharacter)
-const character = ref(emptyCharacter)
-const isSaved = ref(false)
-const isBeingEdited = ref(false)
+const character = ref(await getCharacter(id))
+const originalCharacter = ref({})
+const beingEdited = ref(false)
 
 const isSignedIn = computed(() => status.value === "authenticated")
 
-const updatedFields = computed(() =>
-  findUpdated(originalCharacter.value, character.value)
-)
-
-const isUpdated = computed(() => !_isEmpty(updatedFields.value))
-
-onMounted(async () => await initCharacter())
-
-onBeforeRouteLeave(() => {
-  if (isBeingEdited.value) {
-    if (isUpdated.value && !isSaved.value && !confirmLeave()) {
-      // cancel navigation
-      return false
-    }
+const updatedFields = computed(() => {
+  if (beingEdited.value) {
+    return findUpdated(originalCharacter.value, character.value)
   } else {
-    // unlockCharacter()
+    return {}
   }
 })
 
-async function initCharacter() {
-  originalCharacter.value = await getCharacter(id)
-  character.value = _clone(originalCharacter.value)
-}
+const isUpdated = computed(() => !_isEmpty(updatedFields.value))
+
+onBeforeRouteLeave(() => {
+  if (isUpdated.value && !confirmLeave()) {
+    return false
+  }
+})
 
 async function editRequest(attribute) {
-  // if (!isBeingEdited.value) {
-  //   if (isLocked()) {
-  //     return
-  //   }
-  //
-  //   await lockCharacter()
-  // }
+  if (!beingEdited.value) {
+    originalCharacter.value = await getCharacter(id)
+    character.value = _clone(originalCharacter.value)
+    beingEdited.value = true
+  }
 
   detailView.value.activate(attribute)
 }
 
-async function reset() {
-  // await unlockCharacter()
-  await initCharacter()
+async function resetCharacter() {
+  originalCharacter.value = {}
+  character.value = await getCharacter(id)
+  beingEdited.value = false
 
   // reset the trix-editors
   await detailView.value.reset()
 }
 
-async function back() {
-  // if (isBeingEdited.value) {
-  //   await unlockCharacter()
-  // }
-
-  navigateTo("/")
-}
-
-function isLocked() {
-  if (character.value.locked) {
-    toast.add({
-      severity: "warn",
-      summary: "Locked.",
-      detail: `This charactrer is being edited by ${character.value.lockedBy}.`
-    })
-  }
-
-  return character.value.locked
-}
-
-async function lockCharacter() {
-  const { error } = await lock(character.value.id, token.value)
-
-  if (error) {
-    toast.add({
-      severity: "danger",
-      summary: "Lock Error.",
-      detail: error
-    })
-
-    return
-  }
-
-  isBeingEdited.value = true
-}
-
-async function unlockCharacter() {
-  const { error } = await unlock(character.value.id, token.value)
-
-  if (error) {
-    toast.add({
-      severity: "danger",
-      summary: "Unlock Error.",
-      detail: error
-    })
-
-    return
-  }
-
-  isBeingEdited.value = false
-}
-
-async function updateCharacter() {
+async function saveCharacter() {
   const { data, error } = await update(id, updatedFields.value, token.value)
 
   if (data) {
@@ -161,7 +101,7 @@ async function updateCharacter() {
       life: 3000
     })
 
-    isSaved.value = true
+    beingEdited.value = false
     navigateTo("/")
   } else {
     toast.add({
@@ -170,8 +110,6 @@ async function updateCharacter() {
       detail: error
     })
   }
-
-  // await unlockCharacter()
 }
 
 async function deleteCharacter() {
@@ -185,7 +123,7 @@ async function deleteCharacter() {
       life: 3000
     })
 
-    isSaved.value = true
+    beingEdited.value = false
     navigateTo("/")
   } else {
     toast.add({
@@ -212,7 +150,7 @@ function confirmRevert() {
       label: "Cancel"
     },
 
-    accept: async () => await reset(),
+    accept: async () => await resetCharacter(),
 
     reject: () =>
       toast.add({
@@ -225,10 +163,6 @@ function confirmRevert() {
 }
 
 function confirmDelete() {
-  // if (isLocked()) {
-  //   return
-  // }
-
   confirm.require({
     header: "Really?",
     icon: "ph:warning-bold",
@@ -274,14 +208,8 @@ function confirmLeave() {
       label: "Cancel"
     },
 
-    accept: async () => {
-      // await unlockCharacter()
-      result = true
-    },
-
-    reject: () => {
-      result = false
-    }
+    accept: () => (result = true),
+    reject: () => (result = false)
   })
 
   return result

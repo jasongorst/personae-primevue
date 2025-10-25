@@ -4,8 +4,6 @@ export function characterHandlers(io, socket) {
   socket.on("character:delete", deleteCharacter)
   socket.on("character:create", createCharacter)
   socket.on("character:update", updateCharacter)
-  socket.on("character:lock", lockCharacter)
-  socket.on("character:unlock", unlockCharacter)
 
   async function readCharacter(id, callback) {
     const query = ({ id }) => prisma.character.findUnique({ where: { id } })
@@ -72,52 +70,6 @@ export function characterHandlers(io, socket) {
       id,
       data,
       validator,
-      query,
-      callback
-    })
-
-    if (_isUndefined(error)) {
-      broadcastPatch(socket, generateCharacterPatch(previous, result))
-    }
-  }
-
-  async function lockCharacter(token, id, callback) {
-    const data = {
-      locked: true,
-      lockedAt: new Date(),
-      lockedBy: socket.data.user.username
-    }
-
-    const query = ({ id, data }) =>
-      prisma.character.update({ where: { id }, data })
-
-    const { previous, result, error } = await _executeQuery({
-      token,
-      id,
-      data,
-      query,
-      callback
-    })
-
-    if (_isUndefined(error)) {
-      broadcastPatch(socket, generateCharacterPatch(previous, result))
-    }
-  }
-
-  async function unlockCharacter(token, id, callback) {
-    const data = {
-      locked: false,
-      lockedAt: null,
-      lockedBy: null
-    }
-
-    const query = ({ id, data }) =>
-      prisma.character.update({ where: { id }, data })
-
-    const { previous, result, error } = await _executeQuery({
-      token,
-      id,
-      data,
       query,
       callback
     })

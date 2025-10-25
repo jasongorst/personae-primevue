@@ -1,4 +1,4 @@
-export default function broadcastPatch(io, socket, patch) {
+export default function broadcastPatch(socket, patch) {
   // noinspection JSCheckFunctionSignatures
   socket.broadcast.emit("character:patch", patch)
 }
