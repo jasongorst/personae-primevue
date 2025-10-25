@@ -44,6 +44,14 @@ export const useCharactersStore = defineStore("characters", () => {
     )
   )
 
+  const hasAnyNameFilters = computed(() =>
+    _pick(hasFilterByAttribute.value, nameAttributes)
+  )
+  
+  const hasAnyCategoryFilters = computed(() =>
+    _pick(hasFilterByAttribute.value, categoryAttributes)
+  )
+  
   const hasAnyAttributeFilters = computed(() =>
     _some(hasFilterByAttribute.value)
   )
@@ -67,8 +75,8 @@ export const useCharactersStore = defineStore("characters", () => {
     filters.value[attribute] = _cloneDeep(emptyFilters[attribute])
   }
 
-  function removeFilter(attribute, value) {
-    filters.value[attribute] = _without(filters.value[attribute], value)
+  function removeFilterFrom(attribute, value) {
+    filters.value[attribute].value = _without(filters.value[attribute].value, value)
   }
 
   function resetGlobalFilter() {
@@ -150,7 +158,9 @@ export const useCharactersStore = defineStore("characters", () => {
     characters,
     count,
     hasAnyAttributeFilters,
+    hasAnyCategoryFilters,
     hasAnyFilters,
+    hasAnyNameFilters,
     hasFilterByAttribute,
     hasGlobalFilter,
     isLoaded,
@@ -163,7 +173,7 @@ export const useCharactersStore = defineStore("characters", () => {
     getCharacter,
     hasFilterFor,
     load,
-    removeFilter,
+    removeFilterFrom,
     resetFilterFor,
     resetFilters,
     resetGlobalFilter,

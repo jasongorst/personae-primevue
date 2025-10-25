@@ -1,5 +1,3 @@
-// import mapObject from "shared/utils/mapObject.js"
-
 const nameAttributes = ["faeName", "mortalName"]
 const richTextAttributes = ["description", "notes"]
 
@@ -61,6 +59,7 @@ export {
   filtersAttributes,
   globalFilterAttributes,
   listAttributes,
+  nameAttributes,
   optionsAttributes,
   plainTextAttributes,
   richTextAttributes,
