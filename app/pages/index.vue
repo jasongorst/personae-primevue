@@ -1,12 +1,4 @@
 <template>
-  <!-- navbar: line-height 1.5 [1.25rem * 1.5 = 1.875rem]; py-2 [2 * --spacing(2) = --spacing(4) = 16px]; border [2 * 1px = 2px]; mb-4 [--spacing(4) = 16px] -->
-  <!-- header: line-height 1.25 [1.25rem]; py-2 [2 * --spacing(2) = --spacing(4) = 16px]; border [2 * 1px = 2px]; mb-2 [
-  --spacing(2) = 8px] -->
-  <!-- footer: line-height 1.25 [1.25rem]; py-1 [1 * --spacing(1) = --spacing(2) = 8px; border [2 * 1px = 2px] -->
-
-  <!-- toolbar: 48px + 16px = 64px -->
-  <!-- header: 46px + 1px = 47px -->
-  <!-- footer: 46px + 1px = 47px -->
   <DataTable
     :value="characters"
     v-model:filters="filters"
@@ -16,7 +8,7 @@
     :sortOrder="1"
     removableSort
     rowHover
-    scrollHeight="calc(100vh - 162px)"
+    :scrollHeight="`calc(100vh - ${elementHeights})`"
     scrollable
     selectionMode="single"
     dataKey="id"
@@ -27,24 +19,27 @@
     showGridlines
     resizableColumns
     :pt="{
-      header: `pb-0!`,
+      header: {
+        class: `pb-0!`,
+        id: 'datatable_header'
+      },
       thead: `bg-surface-0! dark:bg-surface-950!`,
-      footer: `p-0!`,
-      headerRow: `first:bg-surface-200 dark:first:bg-surface-700
-                  first:*:border-r-2 first:*:last:border-r-0
-                  nth-of-type-2:align-top nth-of-type-2:*:px-1 nth-of-type-2:*:py-2`,
-      bodyRow: `hover:bg-primary/15!`,
+      footer: {
+        class: `p-0!`,
+        id: 'datatable_footer'
+      },
+      headerRow: `first-of-type:bg-surface-0 dark:first-of-type:bg-surface-900 last:align-top
+                  first-of-type:*:border-r-2 last:*:border-r-0 nth-of-type-2:*:px-1 nth-of-type-2:*:py-2`,
       column: {
         bodyCell: `max-w-[8rem] truncate`,
-        headerCell: `max-w-[8rem] truncate border-r-surface-300 dark:border-r-surface-600
-                     hover:bg-primary/15! hover:text-surface-800! dark:hover:text-surface-0!`
+        headerCell: `bg-transparent! max-w-[8rem] truncate border-r-surface-200 dark:border-r-surface-700`
       }
     }"
     @filter="(event) => updatefilteredCharacters(event.filteredValue)"
     @rowSelect="(event) => showDetail(event.data)"
   >
     <template #header>
-      <div class="mb-2 flex gap-4 justify-between">
+      <div class="flex justify-between gap-4 pb-2">
         <SearchField
           v-model="filters['global'].value"
           placeholder="Search"
@@ -53,7 +48,7 @@
 
         <ClearFiltersButton
           :disabled="!hasAnyFilters"
-          @click="clearFilters"
+          @click="resetFilters"
           class="px-4"
         />
 
@@ -66,56 +61,57 @@
 
       <FilterChips
         v-if="hasAnyFilters && !showFilters"
-        class="mb-2"
+        class="pb-2"
       />
     </template>
 
     <template #empty>
-      <div class="text-2xl text-center">
+      <div class="text-center text-2xl">
         <template v-if="hasGlobalFilter && !hasAnyAttributeFilters">
           No characters matching
-          <span class="italic">&ldquo;{{ filters['global'].value }}&rdquo;</span>.
+          <span class="italic">
+            &ldquo;{{ filters["global"].value }}&rdquo;
+          </span>
+          .
         </template>
 
         <template v-else-if="hasGlobalFilter && hasAnyAttributeFilters">
           No characters matching
-          <span class="italic">&ldquo;{{ filters['global'].value }}&rdquo;</span>
+          <span class="italic">
+            &ldquo;{{ filters["global"].value }}&rdquo;
+          </span>
           with the current filters.
         </template>
 
-        <template v-else>
-          No characters match the current filters.
-        </template>
+        <template v-else>No characters match the current filters.</template>
       </div>
     </template>
 
-    <template #default>
-      <Column
-        v-for="attribute in listAttributes"
-        :field="attribute"
-        :header="_upperCase(attribute)"
-        :showFilterMenu="false"
-        :sortable="true"
-      >
-        <template #filter="{ filterModel, filterCallback }">
-          <OptionsFilter
-            v-if="categoryAttributes.includes(attribute)"
-            v-model="filterModel.value"
-            :options="options[attribute]"
-            :filteredOptions="filteredOptions[attribute]"
-            :filterCallback="filterCallback"
-            :hasFilter="() => hasFilterFor(attribute)"
-            :resetFilter="() => resetFilterFor(attribute)"
-          />
+    <Column
+      v-for="attribute in listAttributes"
+      :field="attribute"
+      :header="_upperCase(attribute)"
+      :showFilterMenu="false"
+      :sortable="true"
+    >
+      <template #filter="{ filterModel, filterCallback }">
+        <OptionsFilter
+          v-if="categoryAttributes.includes(attribute)"
+          v-model="filterModel.value"
+          :options="options[attribute]"
+          :filteredOptions="filteredOptions[attribute]"
+          :filterCallback="filterCallback"
+          :hasFilter="() => hasFilterFor(attribute)"
+          :resetFilter="() => resetFilterFor(attribute)"
+        />
 
-          <TextFilter
-            v-else
-            v-model="filterModel.value"
-            :filterCallback="filterCallback"
-          />
-        </template>
-      </Column>
-    </template>
+        <TextFilter
+          v-else
+          v-model="filterModel.value"
+          :filterCallback="filterCallback"
+        />
+      </template>
+    </Column>
 
     <template #footer>
       <ListToolbar
@@ -128,18 +124,32 @@
 
 <script setup>
 const charactersStore = useCharactersStore()
-const { characters, count, filters, hasAnyAttributeFilters, hasAnyFilters, hasGlobalFilter, options } = storeToRefs(charactersStore)
 const { hasFilterFor, resetFilterFor, resetFilters } = charactersStore
+
+const {
+  characters,
+  count,
+  filters,
+  hasAnyAttributeFilters,
+  hasAnyFilters,
+  hasGlobalFilter,
+  options
+} = storeToRefs(charactersStore)
 
 const showFilters = ref(false)
 const filteredCharacters = ref(characters.value)
+const elementHeights = ref("0px")
+
 const filteredCount = computed(() => _size(filteredCharacters.value))
 
-const filteredOptions = computed(() => _reduce(
-  categoryAttributes,
-  (acc, attribute) => _set(acc, attribute, uniqValues(filteredCharacters.value, attribute)),
-  {}
-))
+const filteredOptions = computed(() =>
+  mapObject(categoryAttributes, (attribute) =>
+    uniqValues(filteredCharacters.value, attribute)
+  )
+)
+
+onMounted(() => (elementHeights.value = totalElementHeights()))
+onUpdated(() => (elementHeights.value = totalElementHeights()))
 
 function updatefilteredCharacters(filteredValue) {
   filteredCharacters.value = filteredValue
@@ -149,16 +159,25 @@ async function showDetail({ id }) {
   await navigateTo({ name: "detail", params: { id } })
 }
 
-function clearFilters() {
-  resetFilters()
-  showFilters.value = false
-}
-
 function toggleShowFilters() {
   showFilters.value = !showFilters.value
 }
+
+function totalElementHeights() {
+  // total height of non-datatable elements
+  const elements = ["navbar", "datatable_header", "datatable_footer"]
+
+  let totalHeight = _reduce(
+    elements,
+    (acc, element) => acc + document?.getElementById(element)?.offsetHeight,
+    0
+  )
+
+  // plus 16px [--spacing(4)] bottom navbar margin
+  totalHeight += 16
+
+  return `${totalHeight}px`
+}
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
