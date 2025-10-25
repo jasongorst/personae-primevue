@@ -206,7 +206,7 @@ export default defineNuxtConfig({
     directives: {
       include: ["Tooltip"]
     },
-    importPT: { from: "~/passthrough/customPT.js" },
+    importPT: { from: "~/primevue/passthrough.js" },
     options: {
       ptOptions: {
         mergeSections: true,

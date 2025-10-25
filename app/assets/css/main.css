@@ -5,7 +5,7 @@
 
 @plugin "@tailwindcss/typography";
 
-@source "../../passthrough/customPT.js";
+@source "../../primevue/passthrough.js";
 
 body {
   @apply bg-(--p-surface-100) text-(--p-surface-950);

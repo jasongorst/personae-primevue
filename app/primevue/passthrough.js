@@ -1,4 +1,4 @@
-const customPT = {
+const passthrough = {
   autocomplete: {
     root: `inline-flex p-fluid:flex`,
     pcInputText: {
@@ -594,7 +594,7 @@ const customPT = {
   }
 }
 
-_set(customPT, "initialautocomplete", _cloneDeep(customPT.autocomplete))
-_set(customPT, "combobox", _cloneDeep(customPT.autocomplete))
+_set(passthrough, "initialautocomplete", _cloneDeep(passthrough.autocomplete))
+_set(passthrough, "combobox", _cloneDeep(passthrough.autocomplete))
 
-export default customPT
+export default passthrough
