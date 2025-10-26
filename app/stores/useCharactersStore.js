@@ -31,11 +31,11 @@ export const useCharactersStore = defineStore("characters", () => {
   const isLoaded = computed(() => !isEmpty(characters.value))
 
   const hasGlobalFilter = computed(() =>
-    isPresent(filters.value["global"].value)
+    isPresent(filters.value.global.value)
   )
 
   const hasAnyFilters = computed(() =>
-    _some(filters.value, (value) => isPresent(value.value))
+    _some(filters.value, (filter) => isPresent(filter.value))
   )
 
   const hasFilterByAttribute = computed(() =>
