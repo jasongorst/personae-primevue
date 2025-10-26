@@ -39,79 +39,24 @@
     @rowSelect="(event) => showDetail(event.data)"
   >
     <template #header>
-      <div class="flex justify-between gap-4 pb-2">
-        <SearchField
-          v-model="filters['global'].value"
-          placeholder="Search"
-          type="search"
-        />
-
-        <ClearFiltersButton
-          :disabled="!hasAnyFilters"
-          @click="resetFilters"
-          class="px-4"
-        />
-
-        <ToggleFilterButton
-          @click="toggleShowFilters"
-          class="px-4"
-          :showFilters="showFilters"
-        />
-      </div>
-
-      <FilterChips
-        v-if="hasAnyFilters && !showFilters"
-        class="pb-2"
+      <ListHeader
+        :showFilters="showFilters"
+        @toggleShowFilters="toggleShowFilters"
+        @updated="updateElementHeights"
       />
     </template>
 
     <template #empty>
-      <div class="text-center text-2xl">
-        <template v-if="hasGlobalFilter && !hasAnyAttributeFilters">
-          No characters matching
-          <span class="italic">
-            &ldquo;{{ filters["global"].value }}&rdquo;
-          </span>
-          .
-        </template>
-
-        <template v-else-if="hasGlobalFilter && hasAnyAttributeFilters">
-          No characters matching
-          <span class="italic">
-            &ldquo;{{ filters["global"].value }}&rdquo;
-          </span>
-          with the current filters.
-        </template>
-
-        <template v-else>No characters match the current filters.</template>
-      </div>
+      <ListEmpty :filters="filters"/>
     </template>
 
-    <Column
+    <ListColumn
       v-for="attribute in listAttributes"
-      :field="attribute"
-      :header="_upperCase(attribute)"
-      :showFilterMenu="false"
-      :sortable="true"
-    >
-      <template #filter="{ filterModel, filterCallback }">
-        <OptionsFilter
-          v-if="categoryAttributes.includes(attribute)"
-          v-model="filterModel.value"
-          :options="options[attribute]"
-          :filteredOptions="filteredOptions[attribute]"
-          :filterCallback="filterCallback"
-          :hasFilter="() => hasFilterFor(attribute)"
-          :resetFilter="() => resetFilterFor(attribute)"
-        />
-
-        <TextFilter
-          v-else
-          v-model="filterModel.value"
-          :filterCallback="filterCallback"
-        />
-      </template>
-    </Column>
+      :key="attribute"
+      :attribute="attribute"
+      :options="options[attribute]"
+      :filteredOptions="filteredOptions[attribute]"
+    />
 
     <template #footer>
       <ListToolbar
@@ -124,7 +69,7 @@
 
 <script setup>
 const charactersStore = useCharactersStore()
-const { hasFilterFor, resetFilterFor, resetFilters } = charactersStore
+const { resetFilters } = charactersStore
 
 const {
   characters,
@@ -148,8 +93,7 @@ const filteredOptions = computed(() =>
   )
 )
 
-onMounted(() => (elementHeights.value = totalElementHeights()))
-onUpdated(() => (elementHeights.value = totalElementHeights()))
+onUpdated(() => updateElementHeights())
 
 function updatefilteredCharacters(filteredValue) {
   filteredCharacters.value = filteredValue
@@ -163,8 +107,12 @@ function toggleShowFilters() {
   showFilters.value = !showFilters.value
 }
 
+function updateElementHeights() {
+  elementHeights.value = totalElementHeights()
+}
+
 function totalElementHeights() {
-  // total height of non-datatable elements
+  // total height of non-datatable elements (in pixels)
   const elements = ["navbar", "datatable_header", "datatable_footer"]
 
   let totalHeight = _reduce(

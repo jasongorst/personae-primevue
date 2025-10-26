@@ -7,10 +7,10 @@
   >
     <template #filter="{ filterModel, filterCallback }">
       <OptionsFilter
-        v-if="categoryAttributes.includes(attribute)"
+        v-if="_includes(categoryAttributes, attribute)"
         v-model="filterModel.value"
-        :options="options[attribute]"
-        :filteredOptions="filteredOptions[attribute]"
+        :options="options"
+        :filteredOptions="filteredOptions"
         :filterCallback="filterCallback"
         :hasFilter="() => hasFilterFor(attribute)"
         :resetFilter="() => resetFilterFor(attribute)"
@@ -43,10 +43,7 @@ const props = defineProps({
   }
 })
 
-const charactersStore = useCharactersStore()
-const { hasFilterFor, resetFilterFor } = charactersStore
+const { hasFilterFor, resetFilterFor } = useCharactersStore()
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
