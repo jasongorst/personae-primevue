@@ -15,8 +15,6 @@
     size="small"
     stateKey="datatable-state"
     stateStorage="session"
-    stripedRows
-    showGridlines
     resizableColumns
     :pt="{
       header: {
