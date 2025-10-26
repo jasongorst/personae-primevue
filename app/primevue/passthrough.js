@@ -76,10 +76,10 @@ const passthrough = {
     searchResultMessage: ``,
     selectedMessage: ``,
     transition: {
-      enterFromClass: 'opacity-0 scale-y-75',
-      enterActiveClass: 'transition duration-120 ease-[cubic-bezier(0,0,0.2,1)]',
-      leaveActiveClass: 'transition-opacity duration-100 ease-linear',
-      leaveToClass: 'opacity-0'
+      enterFromClass: `opacity-0 scale-y-75`,
+      enterActiveClass: `transition duration-120 ease-[cubic-bezier(0,0,0.2,1)]`,
+      leaveActiveClass: `transition-opacity duration-100 ease-linear`,
+      leaveToClass: `opacity-0`
     }
   },
 
@@ -134,7 +134,7 @@ const passthrough = {
         *:focus-visible:relative *:focus-visible:z-10 *:not-last:border-r-0`
   },
 
-  card:{
+  card: {
     root: `flex flex-col rounded-xl
         bg-surface-0 dark:bg-surface-900
         text-surface-700 dark:text-surface-0
@@ -165,10 +165,10 @@ const passthrough = {
         text-surface-700 dark:text-surface-0 shadow-lg`,
     mask: `bg-black/50 fixed top-0 start-0 w-full h-full`,
     transition: {
-      enterFromClass: 'opacity-0 scale-75',
-      enterActiveClass: 'transition-all duration-150 ease-[cubic-bezier(0,0,0.2,1)]',
-      leaveActiveClass: 'transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]',
-      leaveToClass: 'opacity-0 scale-75'
+      enterFromClass: `opacity-0 scale-75`,
+      enterActiveClass: `transition-all duration-150 ease-[cubic-bezier(0,0,0.2,1)]`,
+      leaveActiveClass: `transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]`,
+      leaveToClass: `opacity-0 scale-75`
     }
   },
 
@@ -180,8 +180,7 @@ const passthrough = {
         text-surface-700 dark:text-surface-100`,
     table: `border-spacing-0 w-full border-separate`,
     thead: `p-scrollable:bg-surface-0 dark:p-scrollable:bg-surface-900 p-scrollable:top-0 p-scrollable:z-10`,
-    tbody: `p-hoverable:*:hover:bg-surface-200 p-hoverable:*:hover:text-surface-900 dark:p-hoverable:*:hover:bg-surface-800 dark:p-hoverable:*:hover:text-surface-0
-          p-frozen:sticky p-frozen:z-10`,
+    tbody: `p-hoverable:*:hover:bg-primary/15 p-frozen:sticky p-frozen:z-10`,
     bodyRow: `bg-surface-0 odd:bg-surface-50 dark:bg-surface-900 dark:odd:bg-surface-950 text-surface-700 dark:text-surface-100 p-selectable:cursor-pointer p-selected:bg-highlight!`,
     tfoot: `p-scrollable:bg-surface-0 dark:p-scrollable:bg-surface-900 p-scrollable:bottom-0 p-scrollable:z-10`,
     footer: `py-3 px-4 border-b border-surface-200 dark:border-surface-700
@@ -305,10 +304,10 @@ const passthrough = {
     footer: `shrink-0 pt-0 px-5 pb-5 flex justify-end gap-2`,
     mask: `p-modal:bg-black/50 p-modal:fixed p-modal:top-0 p-modal:start-0 p-modal:w-full p-modal:h-full`,
     transition: {
-      enterFromClass: 'opacity-0 scale-75',
-      enterActiveClass: 'transition-all duration-150 ease-[cubic-bezier(0,0,0.2,1)]',
-      leaveActiveClass: 'transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]',
-      leaveToClass: 'opacity-0 scale-75'
+      enterFromClass: `opacity-0 scale-75`,
+      enterActiveClass: `transition-all duration-150 ease-[cubic-bezier(0,0,0.2,1)]`,
+      leaveActiveClass: `transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]`,
+      leaveToClass: `opacity-0 scale-75`
     }
   },
 
@@ -405,14 +404,14 @@ const passthrough = {
     submenuLabel: `bg-transparent px-4 py-2 text-primary dark:text-primary font-semibold`,
     separator: `border-t border-primary dark:border-primary`,
     transition: {
-      enterFromClass: 'opacity-0 scale-y-75',
-      enterActiveClass: 'transition duration-120 ease-[cubic-bezier(0,0,0.2,1)]',
-      leaveActiveClass: 'transition-opacity duration-100 ease-linear',
-      leaveToClass: 'opacity-0'
+      enterFromClass: `opacity-0 scale-y-75`,
+      enterActiveClass: `transition duration-120 ease-[cubic-bezier(0,0,0.2,1)]`,
+      leaveActiveClass: `transition-opacity duration-100 ease-linear`,
+      leaveToClass: `opacity-0`
     }
   },
 
-  message:{
+  message: {
     root: `rounded-md outline outline-1
         p-outlined:bg-transparent p-outlined:outline p-outlined:outline-1
         p-simple:bg-transparent p-simple:outline-none
@@ -457,11 +456,11 @@ const passthrough = {
         p-small:w-3.5 p-small:h-3.5 p-small:text-sm
         p-large:w-[1.125rem] p-large:h-[1.125rem] p-large:text-xl`,
     transition: {
-      enterFromClass: 'opacity-0',
-      enterActiveClass: 'transition-opacity duration-300',
-      leaveFromClass: 'max-h-40',
-      leaveActiveClass: 'overflow-hidden transition-all duration-300 ease-in',
-      leaveToClass: 'max-h-0 opacity-0 !m-0'
+      enterFromClass: `opacity-0`,
+      enterActiveClass: `transition-opacity duration-300`,
+      leaveFromClass: `max-h-40`,
+      leaveActiveClass: `overflow-hidden transition-all duration-300 ease-in`,
+      leaveToClass: `max-h-0 opacity-0 !m-0`
     }
   },
 
@@ -476,12 +475,12 @@ const passthrough = {
     content: `pt-0 pb-[1.125rem] px-[1.125rem] `,
     footer: `pt-0 pb-[1.125rem] px-[1.125rem] `,
     transition: {
-      enterFromClass: 'max-h-0',
-      enterActiveClass: 'overflow-hidden transition-[max-height] duration-1000 ease-[cubic-bezier(0.42,0,0.58,1)]',
-      enterToClass: 'max-h-[1000px]',
-      leaveFromClass: 'max-h-[1000px]',
-      leaveActiveClass: 'overflow-hidden transition-[max-height] duration-[450ms] ease-[cubic-bezier(0,1,0,1)]',
-      leaveToClass: 'max-h-0'
+      enterFromClass: `max-h-0`,
+      enterActiveClass: `overflow-hidden transition-[max-height] duration-1000 ease-[cubic-bezier(0.42,0,0.58,1)]`,
+      enterToClass: `max-h-[1000px]`,
+      leaveFromClass: `max-h-[1000px]`,
+      leaveActiveClass: `overflow-hidden transition-[max-height] duration-[450ms] ease-[cubic-bezier(0,1,0,1)]`,
+      leaveToClass: `max-h-0`
     }
   },
 
@@ -518,10 +517,10 @@ const passthrough = {
         p-strong:bg-green-500 dark:p-strong:bg-green-400`,
     meterText: ``,
     transition: {
-      enterFromClass: 'opacity-0 scale-y-75',
-      enterActiveClass: 'transition duration-120 ease-[cubic-bezier(0,0,0.2,1)]',
-      leaveActiveClass: 'transition-opacity duration-100 ease-linear',
-      leaveToClass: 'opacity-0'
+      enterFromClass: `opacity-0 scale-y-75`,
+      enterActiveClass: `transition duration-120 ease-[cubic-bezier(0,0,0.2,1)]`,
+      leaveActiveClass: `transition-opacity duration-100 ease-linear`,
+      leaveToClass: `opacity-0`
     }
   },
 
@@ -575,11 +574,11 @@ const passthrough = {
         p-contrast:hover:bg-surface-800 p-contrast:focus-visible:outline-surface-50 dark:p-contrast:hover:bg-surface-100 dark:p-contrast:focus-visible:outline-surface-950`,
     closeIcon: `text-base w-4 h-4`,
     transition: {
-      enterFromClass: 'opacity-0 translate-y-1/2',
-      enterActiveClass: 'transition-all duration-500',
-      leaveFromClass: 'max-h-[1000px]',
-      leaveActiveClass: 'transition-all duration-500',
-      leaveToClass: 'max-h-0 opacity-0 mb-0 overflow-hidden'
+      enterFromClass: `opacity-0 translate-y-1/2`,
+      enterActiveClass: `transition-all duration-500`,
+      leaveFromClass: `max-h-[1000px]`,
+      leaveActiveClass: `transition-all duration-500`,
+      leaveToClass: `max-h-0 opacity-0 mb-0 overflow-hidden`
     }
   },
 
