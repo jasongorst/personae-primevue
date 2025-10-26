@@ -1,10 +1,7 @@
 <template>
   <div class="contents">
     <div
-      :class="[
-        !disabled && 'hover:bg-primary/15 cursor-pointer',
-        isActive && 'hidden'
-      ]"
+      :class="isActive && 'hidden'"
       @click="activate"
       @keydown.enter.prevent="activate"
       @keydown.space.prevent="activate"

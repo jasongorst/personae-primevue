@@ -1,11 +1,12 @@
 <template>
   <div
-    class="flex flex-col"
+    class="group flex flex-col"
     :key="attribute"
   >
     <label
       :for="attribute"
-      class="ml-1 text-primary dark:text-primary text-sm"
+      class="text-primary dark:text-primary ml-1 text-sm"
+      :class="!disabled && 'cursor-pointer'"
     >
       {{ _startCase(attribute) }}
     </label>
@@ -18,14 +19,16 @@
       <template #inactive="{ activate }">
         <div
           v-if="isRichText"
-          class="px-3 py-2 border border-transparent trix-content"
+          class="trix-content border border-transparent px-3 py-2"
+          :class="!disabled && 'group-hover:bg-primary/15 cursor-pointer'"
           :tabindex="0"
           v-html="model || '&nbsp;'"
         />
 
         <div
           v-else
-          class="px-3 py-2 border border-transparent"
+          class="border border-transparent px-3 py-2"
+          :class="!disabled && 'group-hover:bg-primary/15 cursor-pointer'"
           :tabindex="0"
         >
           {{ model || "&nbsp;" }}
@@ -78,7 +81,7 @@ const props = defineProps({
     type: String,
     required: true,
     validator(value) {
-      return _includes([ "text", "autocomplete", "richText" ], value)
+      return _includes(["text", "autocomplete", "richText"], value)
     }
   },
 
@@ -139,6 +142,4 @@ function reset() {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
