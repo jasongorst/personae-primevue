@@ -11,7 +11,7 @@
   >
     <template #start>
       <Button
-        class="px-6!"
+        class="px-6! border-none"
         variant="text"
       >
         <NuxtLink

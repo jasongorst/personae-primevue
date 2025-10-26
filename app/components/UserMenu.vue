@@ -2,16 +2,14 @@
   <div>
     <Button
       v-if="isSignedIn"
-      class="px-6! py-[calc(--spacing(2)+3px)]"
+      class="border-none px-6! py-2.75"
       variant="text"
       aria-haspopup="true"
       aria-controls="user_menu"
       @click="toggleMenu"
     >
       <!--suppress JSUnresolvedReference -->
-      <span
-        class="font-semibold"
-      >
+      <span class="font-semibold">
         {{ user.username }}
       </span>
 
@@ -23,13 +21,11 @@
 
     <Button
       v-else
-      class="px-6! py-[calc(--spacing(2)+3px)]"
+      class="border-none px-6! py-2.75"
       variant="text"
       @click="doSignIn"
     >
-      <span class="font-semibold">
-        Sign In
-      </span>
+      <span class="font-semibold"> Sign In </span>
 
       <Icon
         name="ph:user-circle-light"
@@ -90,10 +86,10 @@ const menuItems = computed(() => {
     //     { label: "Sign Out", command: () => doSignOut() }
     //   ]
     // } else {
-      return [ { label: "Sign Out", command: () => doSignOut() } ]
+    return [{ label: "Sign Out", command: () => doSignOut() }]
     // }
   } else {
-    return [ { label: "Sign In", command: () => doSignIn() } ]
+    return [{ label: "Sign In", command: () => doSignIn() }]
   }
 })
 
@@ -124,6 +120,4 @@ function closeMenu(_) {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
