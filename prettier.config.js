@@ -3,6 +3,5 @@ export default {
   semi: false,
   trailingComma: "none",
   bracketSameLine: false,
-  htmlWhitespaceSensitivity: "ignore",
   singleAttributePerLine: true
 }
