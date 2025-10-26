@@ -3,7 +3,7 @@
     <template v-if="hasGlobalFilter">
       <!--suppress JSUnresolvedReference -->
       <Chip
-        :label="`Any &ldquo;${filters.global.value}&rdquo;`"
+        :label="`Anywhere: &ldquo;${filters.global.value}&rdquo;`"
         removable
         pt:root="bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-primary-0!"
         :ptOptions="{ mergeProps: ptViewMerge }"
@@ -26,7 +26,7 @@
     >
       <Chip
         v-if="hasFilterFor(attribute)"
-        :label="`${_startCase(attribute)} &ldquo;${filters[attribute].value}&rdquo;`"
+        :label="`${_startCase(attribute)}: &ldquo;${filters[attribute].value}&rdquo;`"
         removable
         pt:root="bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-primary-0!"
         :ptOptions="{ mergeProps: ptViewMerge }"
