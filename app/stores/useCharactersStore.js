@@ -30,9 +30,7 @@ export const useCharactersStore = defineStore("characters", () => {
   const count = computed(() => _size(characters.value))
   const isLoaded = computed(() => !isEmpty(characters.value))
 
-  const hasGlobalFilter = computed(() =>
-    isPresent(filters.value.global.value)
-  )
+  const hasGlobalFilter = computed(() => isPresent(filters.value.global.value))
 
   const hasAnyFilters = computed(() =>
     _some(filters.value, (filter) => isPresent(filter.value))
@@ -47,11 +45,11 @@ export const useCharactersStore = defineStore("characters", () => {
   const hasAnyNameFilters = computed(() =>
     _pick(hasFilterByAttribute.value, nameAttributes)
   )
-  
+
   const hasAnyCategoryFilters = computed(() =>
     _pick(hasFilterByAttribute.value, categoryAttributes)
   )
-  
+
   const hasAnyAttributeFilters = computed(() =>
     _some(hasFilterByAttribute.value)
   )
@@ -76,7 +74,10 @@ export const useCharactersStore = defineStore("characters", () => {
   }
 
   function removeFilterFrom(attribute, value) {
-    filters.value[attribute].value = _without(filters.value[attribute].value, value)
+    filters.value[attribute].value = _without(
+      filters.value[attribute].value,
+      value
+    )
   }
 
   function resetGlobalFilter() {
@@ -99,7 +100,9 @@ export const useCharactersStore = defineStore("characters", () => {
   }
 
   async function load() {
+    loading.value = true
     const response = await socket.emitWithAck("character:list")
+    loading.value = false
 
     if (_has(response, "data")) {
       data.value = response.data

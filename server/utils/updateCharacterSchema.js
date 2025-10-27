@@ -9,10 +9,8 @@ addMethod(string, "plainTextWhen", function plainTextWhen(field) {
     otherwise: (schema) =>
       schema
         .optional()
-        .test(
-          "isUndefined",
-          `not allowed without ${field}`,
-          (value) => _isUndefined(value)
+        .test("isUndefined", `not allowed without ${field}`, (value) =>
+          _isUndefined(value)
         )
   })
 })

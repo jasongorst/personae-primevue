@@ -1,7 +1,7 @@
 <template>
-  <ConfirmDialog class="flex flex-col p-4 gap-8">
+  <ConfirmDialog class="flex flex-col gap-8 p-4">
     <template #container="{ message, acceptCallback, rejectCallback }">
-      <div class="flex items-center justify-between shrink-0">
+      <div class="flex shrink-0 items-center justify-between">
         <span
           v-if="message.header"
           class="text-xl font-semibold text-primary"
@@ -15,11 +15,14 @@
           class="absolute -top-4 -right-4"
           @click="rejectCallback"
         >
-          <Icon name="ph:x-bold" size="0.875em" />
+          <Icon
+            name="ph:x-bold"
+            size="0.875em"
+          />
         </Button>
       </div>
 
-      <div class="overflow-y-auto flex items-center gap-3">
+      <div class="flex items-center gap-3 overflow-y-auto">
         <Icon
           v-if="message.icon"
           :name="message.icon"
@@ -64,10 +67,6 @@
   </ConfirmDialog>
 </template>
 
-<script setup>
+<script setup></script>
 
-</script>
-
-<style scoped>
-
-</style>
+<style scoped></style>

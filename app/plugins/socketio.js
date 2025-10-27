@@ -6,7 +6,7 @@ export default defineNuxtPlugin({
 
   async setup() {
     const config = useRuntimeConfig()
-    const { status, token} = useAuth()
+    const { status, token } = useAuth()
     const isSignedIn = computed(() => status.value === "authenticated")
 
     const opts = { auth: {} }

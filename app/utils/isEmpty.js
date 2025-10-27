@@ -3,12 +3,12 @@
 export default function isEmpty(value) {
   switch (checkType(value)) {
     case "string":
-      return (value === "")
+      return value === ""
     case "Array":
-      return (value.length === 0)
+      return value.length === 0
     case "Set":
     case "Map":
-      return (value.size === 0)
+      return value.size === 0
     default:
       return false
   }

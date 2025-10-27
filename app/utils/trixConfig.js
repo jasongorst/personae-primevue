@@ -2,7 +2,7 @@ export default {
   blockAttributes: {
     default: {
       tagName: "div",
-      parse: false,
+      parse: false
     }
   },
 

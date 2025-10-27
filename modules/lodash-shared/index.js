@@ -1,6 +1,11 @@
 // noinspection JSUnusedLocalSymbols,JSUnresolvedReference
 
-import { addImports, addServerImports, createResolver, defineNuxtModule } from "@nuxt/kit"
+import {
+  addImports,
+  addServerImports,
+  createResolver,
+  defineNuxtModule
+} from "@nuxt/kit"
 import * as lodash from "lodash-es"
 import excludeDefaults from "./exclude.js"
 
@@ -41,24 +46,26 @@ export default defineNuxtModule({
     const aliasMap = new Map(moduleOptions.alias)
     const excludes = [...moduleOptions.exclude, ...excludeDefaults]
 
-    const prefixSkip = moduleOptions.prefixSkip ?
-      lodash.isArray(moduleOptions.prefixSkip) ?
-        moduleOptions.prefixSkip
+    const prefixSkip = moduleOptions.prefixSkip
+      ? lodash.isArray(moduleOptions.prefixSkip)
+        ? moduleOptions.prefixSkip
         : [moduleOptions.prefixSkip]
       : []
 
     for (const name of Object.keys(lodash)) {
       if (!excludes.includes(name)) {
         const alias = aliasMap.has(name) ? aliasMap.get(name) : name
-        const prefix = (!prefixSkip.some(key => alias.startsWith(key)) && moduleOptions.prefix) || ""
+        const prefix =
+          (!prefixSkip.some((key) => alias.startsWith(key)) &&
+            moduleOptions.prefix) ||
+          ""
 
-        const as = prefix ?
-          prefix + (moduleOptions.upperAfterPrefix ?
-            lodash.upperFirst(alias)
-            : alias)
+        const as = prefix
+          ? prefix +
+            (moduleOptions.upperAfterPrefix ? lodash.upperFirst(alias) : alias)
           : alias
 
-        addImports({ name, as, from: resolve('./runtime/lodash') })
+        addImports({ name, as, from: resolve("./runtime/lodash") })
         addServerImports({ name, as, from: resolve("./runtime/lodash") })
       }
     }

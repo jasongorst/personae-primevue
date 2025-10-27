@@ -5,13 +5,11 @@
       <Chip
         :label="`Anywhere: &ldquo;${filters.global.value}&rdquo;`"
         removable
-        pt:root="bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-primary-0!"
-        :ptOptions="{ mergeProps: ptViewMerge }"
       >
         <template #removeicon>
           <Icon
             name="ph:x-bold"
-            class="hover:bg-primary-200 dark:hover:bg-primary-600 rounded-full p-0.5"
+            class="rounded-full p-0.5 hover:bg-primary-200 dark:hover:bg-primary-600"
             size="1.25em"
             @click="resetGlobalFilter"
           />
@@ -28,13 +26,11 @@
         v-if="hasFilterFor(attribute)"
         :label="`${_startCase(attribute)}: &ldquo;${filters[attribute].value}&rdquo;`"
         removable
-        pt:root="bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-primary-0!"
-        :ptOptions="{ mergeProps: ptViewMerge }"
       >
         <template #removeicon>
           <Icon
             name="ph:x-bold"
-            class="hover:bg-primary-200 dark:hover:bg-primary-600 rounded-full p-0.5"
+            class="rounded-full p-0.5 hover:bg-primary-200 dark:hover:bg-primary-600"
             size="1.25em"
             @click="resetFilterFor(attribute)"
           />
@@ -52,13 +48,11 @@
         v-for="value in filters[attribute].value"
         :label="value"
         removable
-        pt:root="bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-primary-0!"
-        :ptOptions="{ mergeProps: ptViewMerge }"
       >
         <template #removeicon>
           <Icon
             name="ph:x-bold"
-            class="hover:bg-primary-200 dark:hover:bg-primary-600 rounded-full p-0.5"
+            class="rounded-full p-0.5 hover:bg-primary-200 dark:hover:bg-primary-600"
             size="1.25em"
             @click="removeFilterFrom(attribute, value)"
           />

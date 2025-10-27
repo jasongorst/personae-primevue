@@ -5,5 +5,6 @@
 
 */
 -- AlterTable
-ALTER TABLE "Character" DROP COLUMN "lock",
-ADD COLUMN     "locked" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Character"
+    DROP COLUMN "lock",
+    ADD COLUMN "locked" BOOLEAN NOT NULL DEFAULT false;

@@ -3,7 +3,9 @@
     v-model:visible="visible"
     modal
     dismissableMask
-    pt:root="w-11/12 max-w-128"
+    :pt="{
+      root: 'w-11/12 max-w-128'
+    }"
     :ptOptions="{ mergeProps: ptViewMerge }"
   >
     <template #container>
@@ -19,7 +21,7 @@
         <div class="flex flex-col">
           <label
             for="signin_email"
-            class="ml-1 text-primary dark:text-primary text-sm"
+            class="ml-1 text-sm text-primary dark:text-primary"
           >
             Email Address
           </label>
@@ -46,7 +48,7 @@
         <div class="flex flex-col">
           <label
             for="signin_password"
-            class="ml-1 text-primary dark:text-primary text-sm"
+            class="ml-1 text-sm text-primary dark:text-primary"
           >
             Password
           </label>
@@ -63,7 +65,7 @@
             <!--suppress VueUnrecognizedSlot -->
             <template #maskicon="{ toggleCallback }">
               <Icon
-                class="end-3 text-surface-500 dark:text-surface-400 absolute top-1/2 -mt-2 w-4 h-4"
+                class="absolute end-3 top-1/2 -mt-2 h-4 w-4 text-surface-500 dark:text-surface-400"
                 name="ph:eye-slash-bold"
                 @click="toggleCallback"
               />
@@ -72,7 +74,7 @@
             <!--suppress VueUnrecognizedSlot -->
             <template #unmaskicon="{ toggleCallback }">
               <Icon
-                class="end-3 text-surface-500 dark:text-surface-400 absolute top-1/2 -mt-2 w-4 h-4"
+                class="absolute end-3 top-1/2 -mt-2 h-4 w-4 text-surface-500 dark:text-surface-400"
                 name="ph:eye-bold"
                 @click="toggleCallback"
               />
@@ -132,12 +134,17 @@ const toast = useToast()
 const { status, signIn } = useAuth()
 const isLoading = computed(() => status.value === "loading")
 
-const resolver = ref(yupResolver(
-  yup.object().shape({
-    email: yup.string().email("Not a valid email address.").required("Email Address can't be blank."),
-    password: yup.string().required("Password can't be blank.")
-  })
-))
+const resolver = ref(
+  yupResolver(
+    yup.object().shape({
+      email: yup
+        .string()
+        .email("Not a valid email address.")
+        .required("Email Address can't be blank."),
+      password: yup.string().required("Password can't be blank.")
+    })
+  )
+)
 
 const initialValues = ref({
   email: "",
@@ -177,6 +184,4 @@ function closeDialog() {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

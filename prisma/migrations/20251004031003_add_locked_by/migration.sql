@@ -1,2 +1,3 @@
 -- AlterTable
-ALTER TABLE "Character" ADD COLUMN     "lockedBy" TEXT;
+ALTER TABLE "Character"
+    ADD COLUMN "lockedBy" TEXT;

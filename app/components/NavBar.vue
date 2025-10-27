@@ -1,21 +1,20 @@
 <template>
   <Toolbar
     id="navbar"
-    pt:root="
-      bg-primary-0! dark:bg-primary-900! text-primary dark:text-primary
-      border-0 rounded-md p-0! mb-4
-    "
-    pt:start="grow gap-2"
-    pt:center="hidden"
-    pt:end="flex-none"
+    :pt="{
+      root: 'mb-4 rounded-t-none',
+      start: 'gap-2',
+      center: 'hidden',
+      end: 'flex-none'
+    }"
   >
     <template #start>
       <Button
-        class="px-6! border-none"
+        class="border-none px-6!"
         variant="text"
       >
         <NuxtLink
-          class="whitespace-nowrap text-[1.25rem] font-bold"
+          class="text-[1.25rem] font-bold whitespace-nowrap"
           data-testid="title"
           to="/"
         >
@@ -32,10 +31,6 @@
   </Toolbar>
 </template>
 
-<script setup>
+<script setup></script>
 
-</script>
-
-<style scoped>
-
-</style>
+<style scoped></style>

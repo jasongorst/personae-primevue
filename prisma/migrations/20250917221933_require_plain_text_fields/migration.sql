@@ -6,5 +6,6 @@
 
 */
 -- AlterTable
-ALTER TABLE "public"."Character" ALTER COLUMN "description" SET NOT NULL,
-ALTER COLUMN "notes" SET NOT NULL;
+ALTER TABLE "public"."Character"
+    ALTER COLUMN "description" SET NOT NULL,
+    ALTER COLUMN "notes" SET NOT NULL;

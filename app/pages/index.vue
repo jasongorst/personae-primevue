@@ -1,41 +1,32 @@
 <template>
   <DataTable
     :value="characters"
-    v-model:filters="filters"
-    :filterDisplay="showFilters ? 'row' : null"
-    :globalFilterFields="globalFilterAttributes"
+    dataKey="id"
+    :loading="loading"
     sortField="createdAt"
     :sortOrder="1"
     removableSort
-    rowHover
-    :scrollHeight="`calc(100vh - ${elementHeights})`"
-    scrollable
+    v-model:filters="filters"
+    :filterDisplay="showFilters ? 'row' : null"
+    :globalFilterFields="globalFilterAttributes"
     selectionMode="single"
-    dataKey="id"
-    size="small"
-    stateKey="datatable-state"
-    stateStorage="session"
     resizableColumns
+    stateStorage="session"
+    stateKey="datatable-state"
+    scrollable
+    :scrollHeight="`calc(100vh - ${elementHeights})`"
+    size="small"
     :pt="{
-      header: {
-        class: `pb-0!`,
-        id: 'datatable_header'
-      },
-      thead: `bg-surface-0! dark:bg-surface-950!`,
-      footer: {
-        class: `p-0!`,
-        id: 'datatable_footer'
-      },
-      headerRow: `first-of-type:bg-surface-0 dark:first-of-type:bg-surface-900 last:align-top
-                  first-of-type:*:border-r-2 last:*:border-r-0 nth-of-type-2:*:px-1 nth-of-type-2:*:py-2`,
-      column: {
-        bodyCell: `max-w-[8rem] truncate`,
-        headerCell: `bg-transparent! max-w-[8rem] truncate border-r-surface-200 dark:border-r-surface-700`
-      }
+      header: { id: 'datatable_header' },
+      footer: { id: 'datatable_footer' }
     }"
     @filter="(event) => updatefilteredCharacters(event.filteredValue)"
     @rowSelect="(event) => showDetail(event.data)"
   >
+    <!--    <template #loading>-->
+    <!--      <SpinnerModal :visible="loading" />-->
+    <!--    </template>-->
+
     <template #header>
       <ListHeader
         :showFilters="showFilters"
@@ -45,7 +36,7 @@
     </template>
 
     <template #empty>
-      <ListEmpty :filters="filters"/>
+      <ListEmpty :filters="filters" />
     </template>
 
     <ListColumn
@@ -76,6 +67,7 @@ const {
   hasAnyAttributeFilters,
   hasAnyFilters,
   hasGlobalFilter,
+  loading,
   options
 } = storeToRefs(charactersStore)
 

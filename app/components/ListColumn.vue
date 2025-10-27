@@ -22,6 +22,26 @@
         :filterCallback="filterCallback"
       />
     </template>
+
+    <template #sorticon="{ sorted, sortOrder }">
+      <Icon
+        v-if="sorted && sortOrder === 1"
+        name="ph:sort-ascending-bold"
+        size="1.25rem"
+      />
+
+      <Icon
+        v-else-if="sorted && sortOrder === -1"
+        name="ph:sort-descending-bold"
+        size="1.25rem"
+      />
+
+      <Icon
+        v-else
+        name="ph:arrows-down-up-bold"
+        size="1.25rem"
+      />
+    </template>
   </Column>
 </template>
 

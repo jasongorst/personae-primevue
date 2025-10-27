@@ -6,7 +6,8 @@
 
 */
 -- AlterTable
-ALTER TABLE "public"."Patch" ADD COLUMN     "clientOffset" TEXT NOT NULL;
+ALTER TABLE "public"."Patch"
+    ADD COLUMN "clientOffset" TEXT NOT NULL;
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Patch_clientOffset_key" ON "public"."Patch"("clientOffset");
+CREATE UNIQUE INDEX "Patch_clientOffset_key" ON "public"."Patch" ("clientOffset");

@@ -1,12 +1,11 @@
 <template>
   <Toolbar
-    pt:root="
-      min-h-11.5 w-full p-0! border-0 rounded-t-none rounded-b-md
-      bg-primary-0! dark:bg-primary-900! text-primary dark:text-primary
-    "
+    :pt="{
+      root: 'min-h-11.5 rounded-b-none'
+    }"
   >
     <template #start>
-      <div class="text-primary ps-6 text-sm whitespace-nowrap">
+      <div class="ps-6 text-sm whitespace-nowrap text-primary">
         Showing
         <strong class="font-semibold">{{ filteredCountValue }}</strong> of
         <strong class="font-semibold">{{ count }}</strong>

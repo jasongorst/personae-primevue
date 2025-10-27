@@ -19,14 +19,17 @@ export default function checkType(value) {
   }
 
   // If it's a function whose source code starts with the "class" keyword
-  if ((baseType === "function") && Function.prototype.toString.call(value).startsWith("class")) {
+  if (
+    baseType === "function" &&
+    Function.prototype.toString.call(value).startsWith("class")
+  ) {
     return "class"
   }
 
   // The name of the constructor; for example `Array`, `GeneratorFunction`,
   // `Number`, `String`, `Boolean` or `MyCustomClass`
   const className = value.constructor.name
-  if ((typeof className === "string") && (className !== "")) {
+  if (typeof className === "string" && className !== "") {
     return className
   }
 

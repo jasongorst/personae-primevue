@@ -4,18 +4,16 @@ export default async function authenticateToken(token) {
   let user = null
 
   try {
-    const session = await $fetch(
-      "/session", {
-        baseURL: config.auth.baseUrl,
-        headers: {
-          Authorization: token
-        }
+    const session = await $fetch("/session", {
+      baseURL: config.auth.baseUrl,
+      headers: {
+        Authorization: token
       }
-    )
-    
+    })
+
     // noinspection JSUnresolvedReference
     validatedToken = `Bearer ${session.access_token}`
-    user = _pick(session, [ "username", "email", "admin" ])
+    user = _pick(session, ["username", "email", "admin"])
   } catch (error) {
     if (error.statusCode === 401) {
       console.error("[authenticateJWT 401]", error)
@@ -28,6 +26,6 @@ export default async function authenticateToken(token) {
       throw error
     }
   }
-  
+
   return { token: validatedToken, user }
 }

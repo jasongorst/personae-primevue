@@ -7,9 +7,6 @@
       :options="options"
       multiple
       scrollHeight="12rem"
-      pt:root="text-sm"
-      pt:list="p-0!"
-      pt:option="pl-1 pr-1 py-1!"
       @change="filterCallback"
     >
       <template #option="{ option, selected, index }">

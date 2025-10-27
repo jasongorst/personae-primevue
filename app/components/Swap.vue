@@ -6,11 +6,17 @@
       @keydown.enter.prevent="activate"
       @keydown.space.prevent="activate"
     >
-      <slot name="inactive" :activate="activate" />
+      <slot
+        name="inactive"
+        :activate="activate"
+      />
     </div>
 
     <div :class="!isActive && 'hidden'">
-      <slot name="active" :close="close" />
+      <slot
+        name="active"
+        :close="close"
+      />
     </div>
   </div>
 </template>
@@ -28,11 +34,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits([
-  "active",
-  "inactive",
-  "update:active"
-])
+const emit = defineEmits(["active", "inactive", "update:active"])
 
 defineExpose({ activate, close })
 
@@ -53,6 +55,4 @@ function close(event) {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

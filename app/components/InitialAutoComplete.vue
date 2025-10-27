@@ -21,7 +21,12 @@ export default {
       this.focused = true
 
       if (this.overlayVisible) {
-        this.focusedOptionIndex = this.focusedOptionIndex !== -1 ? this.focusedOptionIndex : this.overlayVisible && this.autoOptionFocus ? this.findFirstFocusedOptionIndex() : -1
+        this.focusedOptionIndex =
+          this.focusedOptionIndex !== -1
+            ? this.focusedOptionIndex
+            : this.overlayVisible && this.autoOptionFocus
+              ? this.findFirstFocusedOptionIndex()
+              : -1
         this.scrollInView(this.focusedOptionIndex)
       }
 

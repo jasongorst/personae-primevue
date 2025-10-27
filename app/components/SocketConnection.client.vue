@@ -10,19 +10,21 @@
 </template>
 
 <script setup>
-const { $socketio: { socket, isConnected, transport } } = useNuxtApp()
+const {
+  $socketio: { socket, isConnected, transport }
+} = useNuxtApp()
 const { status } = useAuth()
 
 const auth = ref(socket.auth)
-watch(status, () => auth.value = socket.auth)
+watch(status, () => (auth.value = socket.auth))
 
-onMounted(() => socket.prependAny((eventName, ...args) => {
-  console.log("[ws event]", eventName, args)
-}))
+onMounted(() =>
+  socket.prependAny((eventName, ...args) => {
+    console.log("[ws event]", eventName, args)
+  })
+)
 
 onBeforeUnmount(() => socket.offAny())
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

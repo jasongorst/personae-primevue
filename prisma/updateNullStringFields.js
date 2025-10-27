@@ -23,7 +23,7 @@ async function main() {
         select: { id: true, [field]: true },
         where: { [field]: null }
       })
-      
+
       for (const character of characters) {
         await tx.character.update({
           where: { id: character.id },

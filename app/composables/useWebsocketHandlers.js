@@ -1,5 +1,7 @@
 export default function useWebsocketHandlers() {
-  const { $socketio: { socket } } = useNuxtApp()
+  const {
+    $socketio: { socket }
+  } = useNuxtApp()
   const { applyPatch } = useCharactersStore()
 
   // connection state recovery
@@ -11,7 +13,7 @@ export default function useWebsocketHandlers() {
       await useCharactersStore().load()
     }
   })
-  
+
   socket.on("character:patch", (patch) => {
     console.log("[character:patch]", patch)
 

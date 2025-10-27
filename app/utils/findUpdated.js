@@ -3,6 +3,6 @@ export default function findUpdated(source, target) {
     schemaAttributesList,
     (attribute) => source[attribute] === target[attribute]
   )
-  
+
   return _pick(target, updatedAttributes)
 }

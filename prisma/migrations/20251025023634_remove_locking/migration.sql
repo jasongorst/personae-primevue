@@ -7,6 +7,7 @@
 
 */
 -- AlterTable
-ALTER TABLE "Character" DROP COLUMN "locked",
-DROP COLUMN "lockedAt",
-DROP COLUMN "lockedBy";
+ALTER TABLE "Character"
+    DROP COLUMN "locked",
+    DROP COLUMN "lockedAt",
+    DROP COLUMN "lockedBy";

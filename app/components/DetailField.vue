@@ -5,7 +5,7 @@
   >
     <label
       :for="attribute"
-      class="text-primary dark:text-primary ml-1 text-sm"
+      class="ml-1 text-sm text-primary dark:text-primary"
       :class="!disabled && 'cursor-pointer'"
     >
       {{ _startCase(attribute) }}
@@ -20,7 +20,7 @@
         <div
           v-if="isRichText"
           class="trix-content border border-transparent px-3 py-2"
-          :class="!disabled && 'group-hover:bg-primary/15 cursor-pointer'"
+          :class="!disabled && 'cursor-pointer group-hover:bg-primary/15'"
           :tabindex="0"
           v-html="model || '&nbsp;'"
         />
@@ -28,7 +28,7 @@
         <div
           v-else
           class="border border-transparent px-3 py-2"
-          :class="!disabled && 'group-hover:bg-primary/15 cursor-pointer'"
+          :class="!disabled && 'cursor-pointer group-hover:bg-primary/15'"
           :tabindex="0"
         >
           {{ model || "&nbsp;" }}

@@ -4,8 +4,10 @@
     :closeOnEscape="false"
     modal
     :showHeader="false"
-    pt:root:class="bg-transparent! border-0"
-    pt:content:class="p-0!"
+    :pt="{
+      root: 'border-0 bg-transparent!',
+      content: 'p-0!'
+    }"
   >
     <ProgressSpinner
       class="p-progressspinner"
@@ -18,7 +20,6 @@
 const props = defineProps({
   visible: {
     type: Boolean,
-    required: true,
     default: false
   }
 })
