@@ -5,11 +5,21 @@ export default {
   trailingComma: "none",
 
   // plugins
-  plugins: ["prettier-plugin-tailwindcss", "prettier-plugin-prisma"],
+  plugins: [
+    "prettier-plugin-prisma",
+    "prettier-plugin-tailwindcss",
+    "prettier-plugin-classnames",
+    "prettier-plugin-merge"
+  ],
 
-  // prettier-plugin-tailwindcss options
+  // prettier-plugin-tailwindcss
   tailwindAttributes: ["pt"],
   tailwindFunctions: ["tw"],
   tailwindPreserveWhitespace: true,
-  tailwindStylesheet: "./app/assets/css/main.css"
+  tailwindStylesheet: "./app/assets/css/main.css",
+
+  // prettier-plugin-classnames
+  customAttributes: ["pt"],
+  customFunctions: ["tw"],
+  endingPosition: "relative"
 }
