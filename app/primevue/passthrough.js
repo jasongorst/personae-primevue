@@ -227,7 +227,7 @@ const passthrough = {
         p-sortable:focus-visible:outline-primary dark:p-sortable:hover:bg-surface-700
         dark:p-sortable:hover:text-surface-0 p-frozen:sticky p-frozen:z-10
         p-frozen:bg-surface-0 dark:p-frozen:bg-surface-900`,
-      columnHeaderContent: tw`flex items-center gap-2`,
+      columnHeaderContent: tw`flex items-center gap-1.5`,
       columnTitle: tw`block leading-[1.25rem] font-semibold`,
       bodyCell: tw`max-w-[8rem] truncate border-b border-surface-200 px-4 py-3 text-start
         dark:border-surface-800 p-frozen:sticky p-frozen:bg-surface-0
