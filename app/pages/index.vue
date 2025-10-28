@@ -23,10 +23,6 @@
     @filter="(event) => updatefilteredCharacters(event.filteredValue)"
     @rowSelect="(event) => showDetail(event.data)"
   >
-    <!--    <template #loading>-->
-    <!--      <SpinnerModal :visible="loading" />-->
-    <!--    </template>-->
-
     <template #header>
       <ListHeader
         :showFilters="showFilters"
@@ -49,7 +45,7 @@
 
     <template #footer>
       <ListToolbar
-        :filtered-count="filteredCount"
+        :filteredCount="filteredCount"
         :count="count"
       />
     </template>
@@ -57,19 +53,13 @@
 </template>
 
 <script setup>
-const charactersStore = useCharactersStore()
-const { resetFilters } = charactersStore
-
 const {
   characters,
   count,
   filters,
-  hasAnyAttributeFilters,
-  hasAnyFilters,
-  hasGlobalFilter,
   loading,
   options
-} = storeToRefs(charactersStore)
+} = storeToRefs(useCharactersStore())
 
 const showFilters = ref(false)
 const filteredCharacters = ref(characters.value)
