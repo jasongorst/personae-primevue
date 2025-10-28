@@ -54,7 +54,7 @@
             name="ph:x-bold"
             class="rounded-full p-0.5 hover:bg-primary-200 dark:hover:bg-primary-600"
             size="1.25em"
-            @click="removeFilterFrom(attribute, value)"
+            @click="removeFilterValueFrom(attribute, value)"
           />
         </template>
       </Chip>
@@ -64,8 +64,13 @@
 
 <script setup>
 const charactersStore = useCharactersStore()
-const { hasFilterFor, removeFilterFrom, resetFilterFor, resetGlobalFilter } =
-  charactersStore
+
+const {
+  hasFilterFor,
+  removeFilterValueFrom,
+  resetFilterFor,
+  resetGlobalFilter
+} = charactersStore
 
 const { filters, hasAnyCategoryFilters, hasAnyNameFilters, hasGlobalFilter } =
   storeToRefs(charactersStore)

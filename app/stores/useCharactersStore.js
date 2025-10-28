@@ -73,7 +73,7 @@ export const useCharactersStore = defineStore("characters", () => {
     filters.value[attribute] = _cloneDeep(emptyFilters[attribute])
   }
 
-  function removeFilterFrom(attribute, value) {
+  function removeFilterValueFrom(attribute, value) {
     filters.value[attribute].value = _without(
       filters.value[attribute].value,
       value
@@ -100,54 +100,76 @@ export const useCharactersStore = defineStore("characters", () => {
   }
 
   async function load() {
-    loading.value = true
-    const response = await socket.emitWithAck("character:list")
-    loading.value = false
+    try {
+      loading.value = true
+      const response = await socket.timeout(3000).emitWithAck("character:list")
 
-    if (_has(response, "data")) {
-      data.value = response.data
+      if (_has(response, "data")) {
+        data.value = response.data
+      }
+
+      return response
+    } catch (error) {
+      console.error("[useCharacterStore load]", error)
+
+      return error
+    } finally {
+      loading.value = false
     }
-
-    return response
   }
 
   async function create(character, token) {
-    const response = await socket.emitWithAck(
-      "character:create",
-      token,
-      character
-    )
+    try {
+      const response = await socket
+        .timeout(3000)
+        .emitWithAck("character:create", token, character)
 
-    if (_has(response, "data")) {
-      _set(data.value, response.data.id, response.data)
+      if (_has(response, "data")) {
+        _set(data.value, response.data.id, response.data)
+      }
+
+      return response
+    } catch (error) {
+      console.error("[useCharacterStore create]", error)
+
+      return error
     }
-
-    return response
   }
 
   async function update(id, character, token) {
-    const response = await socket.emitWithAck(
-      "character:update",
-      token,
-      id,
-      character
-    )
+    try {
+      const response = await socket
+        .timeout(3000)
+        .emitWithAck("character:update", token, id, character)
 
-    if (_has(response, "data")) {
-      _set(data.value, response.data.id, response.data)
+      if (_has(response, "data")) {
+        _set(data.value, response.data.id, response.data)
+      }
+
+      return response
+    } catch (error) {
+      console.error("[useCharacterStore update]", error)
+
+      return error
     }
-
-    return response
   }
 
   async function destroy(id, token) {
-    const response = await socket.emitWithAck("character:delete", token, id)
+    try {
+      const response = await socket
+        .timeout(3000)
+        .emitWithAck("character:delete", token, id)
 
-    if (_has(response, "data")) {
-      _unset(data.value, response.data.id)
+      if (_has(response, "data")) {
+        _unset(data.value, response.data.id)
+      }
+
+      return response
+    } catch (error) {
+      console.error("[useCharacterStore destroy]", error)
+
+      return error
     }
-
-    return response
   }
 
   return {
@@ -176,7 +198,7 @@ export const useCharactersStore = defineStore("characters", () => {
     getCharacter,
     hasFilterFor,
     load,
-    removeFilterFrom,
+    removeFilterValueFrom,
     resetFilterFor,
     resetFilters,
     resetGlobalFilter,
