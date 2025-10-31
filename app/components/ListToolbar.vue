@@ -7,7 +7,7 @@
     <template #start>
       <div class="ps-6 text-sm whitespace-nowrap text-primary">
         Showing
-        <strong class="font-semibold">{{ filteredCountValue }}</strong> of
+        <strong class="font-semibold">{{ filteredCountText }}</strong> of
         <strong class="font-semibold">{{ count }}</strong>
         {{ pluralize("character", count) }}
       </div>
@@ -24,7 +24,7 @@
           class="flex items-center gap-0.5"
           :to="{ name: 'create' }"
         >
-          <span class="font-semibold"> Add </span>
+          <span class="font-semibold">Add</span>
 
           <Icon name="ph:plus-bold" />
         </NuxtLink>
@@ -49,7 +49,7 @@ const props = defineProps({
 const { status } = useAuth()
 const isSignedIn = computed(() => status.value === "authenticated")
 
-const filteredCountValue = computed(() => {
+const filteredCountText = computed(() => {
   if (props.filteredCount === props.count) {
     return "all"
   } else if (props.filteredCount === 0) {

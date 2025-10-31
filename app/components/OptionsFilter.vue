@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="flex min-h-[calc(--spacing(3)+13.25rem+2px)] flex-col justify-between gap-2"
-  >
+  <div class="flex min-h-56.5 flex-col justify-between gap-2">
     <Listbox
       v-model="model"
       :options="options"
@@ -18,16 +16,11 @@
             'text-surface-400! dark:text-surface-500!'
           "
         >
-          <div>
+          <div class="min-w-[0.875em]">
             <Icon
               v-if="selected"
               name="ph:check-bold"
               size="0.875em"
-            />
-
-            <span
-              v-else
-              class="inline-block size-[0.875em]"
             />
           </div>
 
