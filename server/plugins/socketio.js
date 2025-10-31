@@ -10,7 +10,11 @@ export default defineNitroPlugin((nitroApp) => {
 
   const io = new Server({
     serveClient: false,
-    connectionStateRecovery: {}
+
+    connectionStateRecovery: {
+      maxDisconnectionDuration: 2 * 60 * 1000,
+      skipMiddlewares: false
+    }
   })
 
   io.bind(engine)
