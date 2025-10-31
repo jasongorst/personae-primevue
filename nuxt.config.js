@@ -21,7 +21,7 @@ export default defineNuxtConfig({
   },
 
   srcDir: "app/",
-  compatibilityDate: "2025-07-31",
+  compatibilityDate: "2025-10-29",
   css: ["~/assets/css/main.css"],
   devServer: { port: 3000 },
 
@@ -52,6 +52,7 @@ export default defineNuxtConfig({
   nitro: {
     experimental: {
       asyncContext: true,
+      tasks: true,
       websocket: true
     }
   },
