@@ -29,6 +29,7 @@ export const useCharactersStore = defineStore("characters", () => {
   const characters = computed(() => _values(data.value))
   const count = computed(() => _size(characters.value))
   const isLoaded = computed(() => !isEmpty(characters.value))
+  const isLoading = computed(() => loading.value || !isLoaded.value)
 
   const hasGlobalFilter = computed(() => isPresent(filters.value.global.value))
 
@@ -189,6 +190,7 @@ export const useCharactersStore = defineStore("characters", () => {
     hasFilterByAttribute,
     hasGlobalFilter,
     isLoaded,
+    isLoading,
     options,
 
     // actions
