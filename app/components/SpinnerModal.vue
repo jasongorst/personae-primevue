@@ -5,8 +5,9 @@
     modal
     :showHeader="false"
     :pt="{
-      root: 'border-0 bg-transparent!',
-      content: 'p-0!'
+      root: 'border-0 bg-transparent! shadow-none',
+      content: 'p-0!',
+      mask: mask
     }"
   >
     <ProgressSpinner
@@ -17,12 +18,21 @@
 </template>
 
 <script setup>
+import passthrough from "../primevue/passthrough.js"
+
 const props = defineProps({
   visible: {
     type: Boolean,
     default: false
+  },
+
+  maskClass: {
+    type: String,
+    required: false
   }
 })
+
+const mask = computed(() => twMerge([passthrough.dialog.mask, props.maskClass]))
 </script>
 
 <style scoped>
