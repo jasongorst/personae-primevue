@@ -1,7 +1,7 @@
 export default defineTask({
   meta: {
     name: "migration:replaceNulls",
-    description: "Set null values in Character fields to empty string."
+    description: "Set null values in Character to empty strings."
   },
 
   async run({ _payload, _context }) {
