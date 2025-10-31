@@ -410,7 +410,7 @@ const passthrough = {
     list: tw`m-0 flex list-none flex-col gap-[2px] p-0 outline-none`,
     optionGroup: tw`m-0 px-3 py-2 font-semibold text-surface-500 dark:text-surface-400`,
     option: tw`relative flex cursor-pointer items-center overflow-hidden rounded-sm border-none
-      p-1 text-surface-700 transition-colors duration-200
+      px-1 py-0.75 text-surface-700 transition-colors duration-200
       group-p-disabled:pointer-events-none group-p-disabled:text-surface-500
       hover:not-p-selected:bg-surface-100 hover:not-p-selected:text-surface-800
       dark:text-surface-0 dark:group-p-disabled:text-surface-400
