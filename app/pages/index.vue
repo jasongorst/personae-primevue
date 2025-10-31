@@ -2,7 +2,7 @@
   <DataTable
     :value="characters"
     dataKey="id"
-    :loading="loading"
+    :loading="isLoading"
     sortField="createdAt"
     :sortOrder="1"
     removableSort
@@ -23,18 +23,6 @@
     @filter="(event) => updatefilteredCharacters(event.filteredValue)"
     @rowSelect="(event) => showDetail(event.data)"
   >
-    <template #header>
-      <ListHeader
-        :showFilters="showFilters"
-        @toggleShowFilters="toggleShowFilters"
-        @updated="updateElementHeights"
-      />
-    </template>
-
-    <template #empty>
-      <ListEmpty :filters="filters" />
-    </template>
-
     <ListColumn
       v-for="attribute in listAttributes"
       :key="attribute"
@@ -43,8 +31,32 @@
       :filteredOptions="filteredOptions[attribute]"
     />
 
+    <template #header>
+      <ListFilters
+        :class="isLoading && 'hidden'"
+        :showFilters="showFilters"
+        @toggleShowFilters="toggleShowFilters"
+        @updated="updateElementHeights"
+      />
+    </template>
+
+    <template #empty>
+      <ListEmpty
+        :class="isLoading && 'hidden'"
+        :filters="filters"
+      />
+    </template>
+
+    <template #loading>
+      <SpinnerModal
+        :visible="true"
+        maskClass="bg-surface!"
+      />
+    </template>
+
     <template #footer>
       <ListToolbar
+        :class="isLoading && 'hidden'"
         :filteredCount="filteredCount"
         :count="count"
       />
@@ -57,7 +69,7 @@ const {
   characters,
   count,
   filters,
-  loading,
+  isLoading,
   options
 } = storeToRefs(useCharactersStore())
 
