@@ -9,15 +9,10 @@ export default defineNuxtPlugin({
     const { status, token } = useAuth()
     const isSignedIn = computed(() => status.value === "authenticated")
 
-    const opts = { auth: {} }
+    const socket = io(config.public.websocketHost, {
+      auth: { token: isSignedIn.value ? token.value : null }
+    })
 
-    if (isSignedIn.value) {
-      opts.auth.token = token.value
-    } else {
-      opts.auth.token = null
-    }
-
-    const socket = io(config.public.websocketHost, opts)
     const isConnected = ref(false)
     const transport = ref("N/A")
 
@@ -27,20 +22,6 @@ export default defineNuxtPlugin({
 
     socket.on("connect", onConnect)
     socket.on("disconnect", onDisconnect)
-
-    watch(status, async (newValue) => {
-      if (newValue !== "loading") {
-        if (newValue === "authenticated") {
-          socket.auth = { token: token.value }
-        } else {
-          socket.auth = { token: null }
-        }
-
-        // force reconnect
-        console.log("[auth status change, reconnecting]")
-        socket.disconnect().connect()
-      }
-    })
 
     function onConnect() {
       isConnected.value = true
@@ -66,7 +47,51 @@ export default defineNuxtPlugin({
     }
   },
 
-  hooks: {},
+  hooks: {
+    "app:mounted": () => {
+      const {
+        $socketio: { socket }
+      } = useNuxtApp()
+
+      // socket.on("connect", () => {
+      //   if (socket.recovered) {
+      //     console.log("[recovered connection]")
+      //   } else {
+      //     console.log("[new connection]")
+      //   }
+      // })
+
+      const { status, token } = useAuth()
+
+      watch(status, async (newValue) => {
+        let response
+
+        // update token on auth status change
+        switch (newValue) {
+          case "authenticated":
+            response = await socket.emitWithAck("auth:submitToken", token.value)
+            socket.auth.token = token.value
+            console.log("[auth:submitToken]", response)
+            break
+          case "unauthenticated":
+            response = await socket.emitWithAck("auth:revokeToken")
+            socket.auth.token = null
+            console.log("[auth:revokeToken]", response)
+            break
+          default:
+            return
+        }
+      })
+
+      useWebsocketHandlers()
+
+      console.log("[listeners]")
+
+      _forIn(socket._callbacks, (callbacks, event) => {
+        console.log(`${event}`, callbacks)
+      })
+    }
+  },
 
   env: {
     // Set this value to `false` if you don't want the plugin to run when rendering server-only or island components.
