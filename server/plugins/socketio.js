@@ -2,7 +2,7 @@
 
 import { Server as Engine } from "engine.io"
 import { Server } from "socket.io"
-import { authMiddleware } from "../socketio/middlewares"
+import * as middlewares from "../socketio/middlewares"
 import * as handlers from "../socketio/handlers"
 
 export default defineNitroPlugin((nitroApp) => {
@@ -11,16 +11,19 @@ export default defineNitroPlugin((nitroApp) => {
   const io = new Server({
     serveClient: false,
 
-    connectionStateRecovery: {
-      maxDisconnectionDuration: 2 * 60 * 1000,
-      skipMiddlewares: false
-    }
+    // connectionStateRecovery: {
+    //   maxDisconnectionDuration: 2 * 60 * 1000,
+    //   skipMiddlewares: false
+    // }
   })
 
   io.bind(engine)
 
   // middlewares
-  io.use(authMiddleware)
+  _forOwn(
+    middlewares,
+    (middleware) => io.use(middleware)
+  )
 
   nitroApp.hooks.hook("request", (event) => {
     // expose server instance
@@ -28,19 +31,27 @@ export default defineNitroPlugin((nitroApp) => {
   })
 
   io.on("connection", async (socket) => {
-    handlers.characterHandlers(io, socket)
-
-    socket.onAny((eventName, ...args) =>
-      console.log(eventName, ..._initial(args))
+    // register handlers
+    _forOwn(
+      handlers,
+      (handler) => handler(io, socket)
     )
-    socket.onAnyOutgoing((eventName, ...args) => console.log(eventName, args))
+
+    // log all incoming events
+    // socket.onAny((eventName, ...args) =>
+    //   console.log(eventName, ..._initial(args))
+    // )
+
+    // log all outgoing events
+    // socket.onAnyOutgoing((eventName, ...args) => console.log(eventName, args))
 
     console.log(
       "[connection]",
       socket.id,
       socket.data.user?.username || "unauthenticated"
     )
-    console.log("[connected]", io.of("/").sockets.size)
+
+    console.log("[# connected]", io.of("/").sockets.size)
   })
 
   nitroApp.router.use(
