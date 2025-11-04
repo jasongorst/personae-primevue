@@ -2,15 +2,9 @@ import { FilterMatchMode } from "@primevue/core/api"
 
 const emptyFilters = mapObject(filtersAttributes, (attribute) => {
   if (_includes(categoryAttributes, attribute)) {
-    return {
-      value: [],
-      matchMode: FilterMatchMode.IN
-    }
+    return { value: [], matchMode: FilterMatchMode.IN }
   } else {
-    return {
-      value: "",
-      matchMode: FilterMatchMode.CONTAINS
-    }
+    return { value: "", matchMode: FilterMatchMode.CONTAINS }
   }
 })
 
@@ -19,17 +13,33 @@ export const useCharactersStore = defineStore("characters", () => {
     $socketio: { socket }
   } = useNuxtApp()
 
+  const {
+    // state
+    data,
+    error: loadError,
+    status: loadStatus,
+
+    // actions
+    refresh: load
+  } = useAsyncData(
+    "characters",
+    async () => {
+      const { data: response } = await socket.timeout(3000).emitWithAck("character:list")
+      return response
+    },
+    { deep: true }
+  )
+
   // state
-  const data = ref({})
   const filters = ref(_cloneDeep(emptyFilters))
   const sort = ref({ attribute: "createdAt", order: "asc" })
-  const loading = ref(false)
 
   // getters
   const characters = computed(() => _values(data.value))
   const count = computed(() => _size(characters.value))
-  const isLoaded = computed(() => !isEmpty(characters.value))
-  const isLoading = computed(() => loading.value || !isLoaded.value)
+  const isLoaded = computed(() => !isEmpty(data.value))
+  const isLoading = computed(() => loadStatus.value === "pending")
+  const hasLoadError = computed(() => loadStatus.value === "error")
 
   const hasGlobalFilter = computed(() => isPresent(filters.value.global.value))
 
@@ -100,25 +110,6 @@ export const useCharactersStore = defineStore("characters", () => {
     jsonPatch.apply(data.value, patch)
   }
 
-  async function load() {
-    try {
-      loading.value = true
-      const response = await socket.timeout(3000).emitWithAck("character:list")
-
-      if (_has(response, "data")) {
-        data.value = response.data
-      }
-
-      return response
-    } catch (error) {
-      console.error("[useCharacterStore load]", error)
-
-      return error
-    } finally {
-      loading.value = false
-    }
-  }
-
   async function create(character, token) {
     try {
       const response = await socket
@@ -177,7 +168,8 @@ export const useCharactersStore = defineStore("characters", () => {
     // state
     data,
     filters,
-    loading,
+    loadError,
+    loadStatus,
     sort,
 
     // getters
@@ -189,6 +181,7 @@ export const useCharactersStore = defineStore("characters", () => {
     hasAnyNameFilters,
     hasFilterByAttribute,
     hasGlobalFilter,
+    hasLoadError,
     isLoaded,
     isLoading,
     options,
