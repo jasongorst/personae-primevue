@@ -1,11 +1,17 @@
 <template>
   <div>
-    <div>Status: {{ isConnected ? "connected" : "disconnected" }}</div>
-    <div>Transport: {{ transport }}</div>
-  </div>
+    <div>status: {{ isConnected ? "connected" : "disconnected" }}</div>
+    <div>transport: {{ transport }}</div>
+    <div>
+      <Button
+        size="small"
+        @click="refreshListeners"
+      >
+        listeners
+      </Button>
 
-  <div>
-    <div>auth: {{ auth }}</div>
+      {{ listeners }}
+    </div>
   </div>
 </template>
 
@@ -13,18 +19,20 @@
 const {
   $socketio: { socket, isConnected, transport }
 } = useNuxtApp()
-const { status } = useAuth()
-
-const auth = ref(socket.auth)
-watch(status, () => (auth.value = socket.auth))
 
 onMounted(() =>
   socket.prependAny((eventName, ...args) => {
-    console.log("[ws event]", eventName, args)
+    console.log("[socket.io event]", eventName, args)
   })
 )
 
 onBeforeUnmount(() => socket.offAny())
+
+const listeners = ref(socket._callbacks)
+
+function refreshListeners() {
+  listeners.value = socket._callbacks
+}
 </script>
 
 <style scoped></style>
