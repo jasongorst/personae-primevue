@@ -5,11 +5,11 @@
 </template>
 
 <script setup>
-onMounted(async () => {
-  if (import.meta.dev) {
-    await useAutoSignIn()
-  }
-})
+// onMounted(async () => {
+//   if (import.meta.dev) {
+//     await useAutoSignIn()
+//   }
+// })
 
 onUnmounted(() => useRemoveAllListeners())
 </script>
