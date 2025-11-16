@@ -3,9 +3,7 @@
     v-model:visible="visible"
     modal
     dismissableMask
-    :pt="{
-      root: 'w-11/12 max-w-128'
-    }"
+    :pt="{ root: 'w-11/12 max-w-128' }"
     :ptOptions="{ mergeProps: ptViewMerge }"
   >
     <template #container>
@@ -131,8 +129,7 @@ const props = defineProps({
 })
 
 const toast = useToast()
-const { status, signIn } = useAuth()
-const isLoading = computed(() => status.value === "loading")
+const { signIn } = useAuthClient()
 
 const resolver = ref(
   yupResolver(
@@ -151,6 +148,8 @@ const initialValues = ref({
   password: ""
 })
 
+const isLoading = ref(false)
+
 async function onFormSubmit({ valid, values }) {
   if (valid) {
     await signInWithPassword(values)
@@ -159,22 +158,28 @@ async function onFormSubmit({ valid, values }) {
 }
 
 async function signInWithPassword(values) {
-  try {
-    await signIn(values, { redirect: false })
+  if (isLoading.value) {
+    return
+  }
 
-    toast.add({
-      severity: "success",
-      summary: "Signed In.",
-      detail: "You are now signed in.",
-      life: 3000
-    })
-  } catch (error) {
-    console.log(error)
+  isLoading.value = true
+  const { error } = await signIn.email(values)
+  isLoading.value = false
+
+  if (error) {
+    console.error(error)
 
     toast.add({
       severity: "error",
       summary: "SignIn Error.",
       detail: error.data?.message || error.message
+    })
+  } else {
+    toast.add({
+      severity: "success",
+      summary: "Signed In.",
+      detail: "You are now signed in.",
+      life: 3000
     })
   }
 }

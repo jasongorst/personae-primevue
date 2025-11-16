@@ -110,11 +110,9 @@ export const useCharactersStore = defineStore("characters", () => {
     jsonPatch.apply(data.value, patch)
   }
 
-  async function create(character, token) {
+  async function create(character) {
     try {
-      const response = await socket
-        .timeout(3000)
-        .emitWithAck("character:create", token, character)
+      const response = await socket.timeout(3000).emitWithAck("character:create", character)
 
       if (_has(response, "data")) {
         _set(data.value, response.data.id, response.data)
@@ -128,11 +126,9 @@ export const useCharactersStore = defineStore("characters", () => {
     }
   }
 
-  async function update(id, character, token) {
+  async function update(id, character) {
     try {
-      const response = await socket
-        .timeout(3000)
-        .emitWithAck("character:update", token, id, character)
+      const response = await socket.timeout(3000).emitWithAck("character:update", id, character)
 
       if (_has(response, "data")) {
         _set(data.value, response.data.id, response.data)
@@ -146,11 +142,9 @@ export const useCharactersStore = defineStore("characters", () => {
     }
   }
 
-  async function destroy(id, token) {
+  async function destroy(id) {
     try {
-      const response = await socket
-        .timeout(3000)
-        .emitWithAck("character:delete", token, id)
+      const response = await socket.timeout(3000).emitWithAck("character:delete", id)
 
       if (_has(response, "data")) {
         _unset(data.value, response.data.id)

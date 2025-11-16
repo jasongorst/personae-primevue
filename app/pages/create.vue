@@ -28,9 +28,10 @@
 </template>
 
 <script setup>
+definePageMeta({ middleware: "user" })
+
 const confirm = useConfirm()
 const toast = useToast()
-const { token } = useAuth()
 const { create } = useCharactersStore()
 const detailView = useTemplateRef("detailView")
 
@@ -60,7 +61,7 @@ async function resetCharacter() {
 }
 
 async function saveCharacter() {
-  const { data, error } = await create(character.value, token.value)
+  const { data, error } = await create(character.value)
 
   if (data) {
     toast.add({

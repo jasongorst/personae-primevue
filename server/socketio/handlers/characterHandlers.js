@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export function characterHandlers(io, socket) {
   socket.on("character:read", readCharacter)
   socket.on("character:list", listCharacters)
@@ -18,15 +19,16 @@ export function characterHandlers(io, socket) {
     await _executeQuery({ query, mutator, callback })
   }
 
-  async function deleteCharacter(token, id, callback) {
+  async function deleteCharacter(id, callback) {
     const query = ({ id }) => prisma.character.delete({ where: { id } })
     const mutator = (rawResult) => _pick(rawResult, ["id"])
+    const permissions = ["delete"]
 
     const { previous, error } = await _executeQuery({
-      token,
       id,
       query,
       mutator,
+      permissions,
       callback
     })
 
@@ -35,19 +37,17 @@ export function characterHandlers(io, socket) {
     }
   }
 
-  async function createCharacter(token, payload, callback) {
+  async function createCharacter(payload, callback) {
     const data = addPlainTextAttributes(payload)
-
-    const validator = (character) =>
-      createCharacterSchema.validateSync(character)
-
+    const validator = (character) => createCharacterSchema.parse(character)
     const query = ({ data }) => prisma.character.create({ data })
+    const permissions = ["create"]
 
     const { previous, result, error } = await _executeQuery({
-      token,
       data,
       validator,
       query,
+      permissions,
       callback
     })
 
@@ -56,21 +56,21 @@ export function characterHandlers(io, socket) {
     }
   }
 
-  async function updateCharacter(token, id, payload, callback) {
+  async function updateCharacter(id, payload, callback) {
     const data = addPlainTextAttributes(payload)
-
-    const validator = (character) =>
-      updateCharacterSchema.validateSync(character)
+    const validator = (character) => updateCharacterSchema.parse(character)
 
     const query = ({ id, data }) =>
       prisma.character.update({ where: { id }, data })
 
+    const permissions = ["update"]
+
     const { previous, result, error } = await _executeQuery({
-      token,
       id,
       data,
       validator,
       query,
+      permissions,
       callback
     })
 
@@ -80,17 +80,34 @@ export function characterHandlers(io, socket) {
   }
 
   async function _executeQuery({
-    token,
     id,
     data,
     validator,
     query,
     mutator = _identity,
+    permissions,
     callback
   }) {
+    if (permissions) {
+      const permitted = await checkPermission(
+        socket.data?.user?.id,
+        "character",
+        permissions
+      )
+
+      if (!permitted) {
+        const error = new AuthError(
+          "This user is not permitted to modify characters.",
+          { resource: "character", permissions }
+        )
+
+        callback({ error })
+        return { error }
+      }
+    }
+
     try {
       const { previous, result: rawResult } = await _validateAndQuery({
-        token,
         id,
         data,
         validator,
@@ -109,16 +126,11 @@ export function characterHandlers(io, socket) {
   }
 
   async function _validateAndQuery({
-    token = null,
     id = null,
     data = null,
     validator = _identity,
     query = _noop
   }) {
-    if (token) {
-      await isAuthenticated(socket, token)
-    }
-
     let validId, validData
     let previous = {}
 
@@ -126,9 +138,7 @@ export function characterHandlers(io, socket) {
       validId = validateId(id)
 
       // on update/delete
-      if (token) {
-        previous = await prisma.character.findUnique({ where: { id: validId } })
-      }
+      previous = await prisma.character.findUnique({ where: { id: validId } })
     }
 
     if (data) {

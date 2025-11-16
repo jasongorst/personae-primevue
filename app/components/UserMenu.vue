@@ -25,7 +25,7 @@
       variant="text"
       @click="doSignIn"
     >
-      <span class="font-semibold"> Sign In </span>
+      <span class="font-semibold">Sign In</span>
 
       <Icon
         name="ph:user-circle-light"
@@ -36,7 +36,7 @@
     <Menu
       class="mt-0"
       id="user_menu"
-      :model="menuItems"
+      :model="[{ label: 'Sign Out', command: doSignOut }]"
       :popup="true"
       ref="menu"
     >
@@ -71,30 +71,13 @@
 </template>
 
 <script setup>
-const toast = useToast()
 const showSignIn = useState("showSignIn")
-const { data: user, signOut, status } = useAuth()
+const { isSignedIn, signOut, user } = useAuthClient()
+const toast = useToast()
 const menu = useTemplateRef("menu")
 
-const isSignedIn = computed(() => status.value === "authenticated")
-
-const menuItems = computed(() => {
-  if (isSignedIn.value) {
-    // if (user.value.admin) {
-    //   return [
-    //     { label: "Dashboard", route: "/" },
-    //     { label: "Sign Out", command: () => doSignOut() }
-    //   ]
-    // } else {
-    return [{ label: "Sign Out", command: () => doSignOut() }]
-    // }
-  } else {
-    return [{ label: "Sign In", command: () => doSignIn() }]
-  }
-})
-
 async function doSignOut() {
-  await signOut({ redirect: false })
+  await signOut()
 
   toast.add({
     severity: "success",

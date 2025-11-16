@@ -1,8 +1,6 @@
 <template>
   <Toolbar
-    :pt="{
-      root: 'min-h-11.5 rounded-b-none'
-    }"
+    :pt="{ root: 'min-h-11.5 rounded-b-none' }"
   >
     <template #start>
       <div class="ps-6 text-sm whitespace-nowrap text-primary">
@@ -46,8 +44,7 @@ const props = defineProps({
   }
 })
 
-const { status } = useAuth()
-const isSignedIn = computed(() => status.value === "authenticated")
+const { isSignedIn } = useAuthClient()
 
 const filteredCountText = computed(() => {
   if (props.filteredCount === props.count) {

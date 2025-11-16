@@ -1,12 +1,15 @@
+// noinspection JSUnusedGlobalSymbols
 export async function authMiddleware(socket, next) {
-  const token = socket.handshake.auth.token
+  // noinspection JSUnresolvedReference
+  const session = await auth.api.getSession({
+    headers: socket.handshake.headers
+  })
 
-  if (token) {
-    try {
-      socket.data = await authenticateToken(token)
-    } catch (error) {
-      console.error("[authMiddleware]", error)
-      socket.data = { token: null, user: null }
+  if (session) {
+    // access the session.session && session.user
+    socket.data = {
+      session: session.session,
+      user: session.user
     }
   }
 

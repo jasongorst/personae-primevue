@@ -1,7 +1,10 @@
+// noinspection SpellCheckingInspection
+
 import tailwindcss from "@tailwindcss/vite"
 
 const mockAuthModule = process.env.VITEST ? ["./test/mocks/setup.js"] : []
 
+// noinspection JSUnusedGlobalSymbols
 export default defineNuxtConfig({
   app: {
     head: {
@@ -45,7 +48,6 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "@pinia/nuxt",
     "@primevue/nuxt-module",
-    "@sidebase/nuxt-auth",
     ...mockAuthModule
   ],
 
@@ -58,11 +60,14 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    // placeholders to be overridden by env vars
-    auth: { baseUrl: "" },
     public: {
-      useApi: { baseURL: "" },
       api: { baseURL: "" },
+
+      auth: {
+        baseURL: "",
+        redirectTo: { guest: "", user: "" }
+      },
+
       websocketHost: ""
     }
   },
@@ -79,44 +84,6 @@ export default defineNuxtConfig({
       legalComments: "none"
     },
 
-    optimizeDeps: {
-      include: [
-        "@primevue/core/api",
-        "@primevue/forms",
-        "@primevue/forms/resolvers/yup",
-        "jsondiffpatch",
-        "jsondiffpatch/formatters/jsonpatch",
-        "lodash-es",
-        "primevue/autocomplete",
-        "primevue/button",
-        "primevue/card",
-        "primevue/chip",
-        "primevue/column",
-        "primevue/config",
-        "primevue/confirmationservice",
-        "primevue/confirmdialog",
-        "primevue/datatable",
-        "primevue/dialog",
-        "primevue/dialogservice",
-        "primevue/inputtext",
-        "primevue/listbox",
-        "primevue/menu",
-        "primevue/message",
-        "primevue/password",
-        "primevue/progressspinner",
-        "primevue/toast",
-        "primevue/toastservice",
-        "primevue/toolbar",
-        "primevue/useconfirm",
-        "primevue/usetoast",
-        "socket.io-client",
-        "tailwind-merge",
-        "trix",
-        "uuid",
-        "yup"
-      ]
-    },
-
     plugins: [tailwindcss()],
 
     vue: {
@@ -130,53 +97,6 @@ export default defineNuxtConfig({
   },
 
   // module configs
-  auth: {
-    isEnabled: true,
-    originEnvKey: "NUXT_AUTH_BASE_URL",
-
-    provider: {
-      type: "local",
-
-      endpoints: {
-        signUp: false,
-        signIn: { path: "/login", method: "post" },
-        signOut: { path: "/logout", method: "post" },
-        getSession: { path: "/session", method: "get" }
-      },
-
-      session: {
-        dataType: {
-          username: "string",
-          email: "string",
-          admin: "boolean"
-        }
-      },
-
-      token: {
-        headerName: "Authorization",
-        type: "Bearer",
-        signInResponseTokenPointer: "/access_token"
-      },
-
-      refresh: {
-        isEnabled: true,
-
-        endpoint: {
-          path: "/jwt-refresh",
-          method: "post"
-        },
-
-        refreshOnlyToken: false,
-
-        token: {
-          signInResponseRefreshTokenPointer: "/refresh_token",
-          refreshResponseTokenPointer: "/access_token",
-          refreshRequestTokenPointer: "/refresh_token"
-        }
-      }
-    }
-  },
-
   icon: {
     size: "1em",
     class: "inline",

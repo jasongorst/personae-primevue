@@ -1,23 +1,19 @@
 import { io } from "socket.io-client"
 
+// noinspection JSUnusedGlobalSymbols
 export default defineNuxtPlugin({
   name: "socketio",
   enforce: "pre",
 
   async setup() {
     const config = useRuntimeConfig()
-    const { status, token } = useAuth()
-    const isSignedIn = computed(() => status.value === "authenticated")
-
-    const socket = io(config.public.websocketHost, {
-      auth: { token: isSignedIn.value ? token.value : null }
-    })
+    const socket = io(config.public.websocketHost)
 
     const isConnected = ref(false)
     const transport = ref("N/A")
 
     if (socket.connected) {
-      await onConnect()
+      onConnect()
     }
 
     socket.on("connect", onConnect)
@@ -52,36 +48,6 @@ export default defineNuxtPlugin({
       const {
         $socketio: { socket }
       } = useNuxtApp()
-
-      // socket.on("connect", () => {
-      //   if (socket.recovered) {
-      //     console.log("[recovered connection]")
-      //   } else {
-      //     console.log("[new connection]")
-      //   }
-      // })
-
-      const { status, token } = useAuth()
-
-      watch(status, async (newValue) => {
-        let response
-
-        // update token on auth status change
-        switch (newValue) {
-          case "authenticated":
-            response = await socket.emitWithAck("auth:submitToken", token.value)
-            socket.auth.token = token.value
-            console.log("[auth:submitToken]", response)
-            break
-          case "unauthenticated":
-            response = await socket.emitWithAck("auth:revokeToken")
-            socket.auth.token = null
-            console.log("[auth:revokeToken]", response)
-            break
-          default:
-            return
-        }
-      })
 
       useWebsocketHandlers()
 

@@ -48,7 +48,7 @@ export default defineNitroPlugin((nitroApp) => {
     console.log(
       "[connection]",
       socket.id,
-      socket.data.user?.username || "unauthenticated"
+      socket.data.user?.username ?? "unauthenticated"
     )
 
     console.log("[# connected]", io.of("/").sockets.size)

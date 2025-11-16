@@ -43,8 +43,8 @@ definePageMeta({
 const id = _toInteger(useRoute().params?.id)
 const confirm = useConfirm()
 const toast = useToast()
+const { isSignedIn } = useAuthClient()
 
-const { status, token } = useAuth()
 const { destroy, getCharacter, update } = useCharactersStore()
 
 const detailView = useTemplateRef("detailView")
@@ -52,8 +52,6 @@ const detailView = useTemplateRef("detailView")
 const character = ref(await getCharacter(id))
 const originalCharacter = ref({})
 const beingEdited = ref(false)
-
-const isSignedIn = computed(() => status.value === "authenticated")
 
 const updatedFields = computed(() => {
   if (beingEdited.value) {
@@ -91,7 +89,7 @@ async function resetCharacter() {
 }
 
 async function saveCharacter() {
-  const { data, error } = await update(id, updatedFields.value, token.value)
+  const { data, error } = await update(id, updatedFields.value)
 
   if (data) {
     toast.add({
@@ -113,7 +111,7 @@ async function saveCharacter() {
 }
 
 async function deleteCharacter() {
-  const { data, error } = await destroy(id, token.value)
+  const { data, error } = await destroy(id)
 
   if (data) {
     toast.add({
