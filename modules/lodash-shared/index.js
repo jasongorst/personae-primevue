@@ -40,7 +40,7 @@ export default defineNuxtModule({
   moduleDependencies: {},
 
   // The function holding your module logic, it can be asynchronous
-  setup(moduleOptions, nuxt) {
+  setup(moduleOptions, _nuxt) {
     const { resolve } = createResolver(import.meta.url)
 
     const aliasMap = new Map(moduleOptions.alias)
