@@ -1,1 +1,1 @@
-export default characterSchema.omit(["id"])
+export default characterSchema.omit({ id: true })

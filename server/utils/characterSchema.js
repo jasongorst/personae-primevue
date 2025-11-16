@@ -1,19 +1,19 @@
-import { number, object, string } from "yup"
+import { int, object, string } from "zod"
 
 export default object({
-  id: number().positive().integer().required(),
-  player: string().trim().defined(),
-  mortalName: string().trim().defined(),
-  faeName: string().trim().defined(),
-  rank: string().trim().defined(),
-  kith: string().trim().defined(),
-  location: string().trim().defined(),
-  position: string().trim().defined(),
-  seeming: string().trim().defined(),
-  house: string().trim().defined(),
-  bannerhouse: string().trim().defined(),
-  description: string().trim().defined(),
-  notes: string().trim().defined(),
-  descriptionPlainText: string().trim().defined(),
-  notesPlainText: string().trim().defined()
+  id: int().positive(),
+  player: string().trim(),
+  mortalName: string().trim(),
+  faeName: string().trim(),
+  rank: string().trim(),
+  kith: string().trim(),
+  location: string().trim(),
+  position: string().trim(),
+  seeming: string().trim(),
+  house: string().trim(),
+  bannerhouse: string().trim(),
+  description: string().trim(),
+  notes: string().trim(),
+  descriptionPlainText: string().trim(),
+  notesPlainText: string().trim()
 })
