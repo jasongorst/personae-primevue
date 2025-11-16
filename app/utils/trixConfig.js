@@ -1,3 +1,6 @@
+// noinspection JSUnusedGlobalSymbols
+// noinspection XmlUnusedNamespaceDeclaration
+
 export default {
   blockAttributes: {
     default: {
