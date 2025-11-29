@@ -24,13 +24,21 @@ export default defineNuxtConfig({
   },
 
   srcDir: "app/",
-  compatibilityDate: "2025-10-29",
+  compatibilityDate: "2025-11-25",
   css: ["~/assets/css/main.css"],
   devServer: { port: 3000 },
 
   devtools: {
     enabled: true,
     timeline: { enabled: true }
+  },
+
+  experimental: {
+    asyncContext: true
+  },
+
+  future: {
+    compatibilityVersion: 5
   },
 
   imports: {
