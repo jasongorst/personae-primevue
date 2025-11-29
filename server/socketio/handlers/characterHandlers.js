@@ -88,25 +88,11 @@ export function characterHandlers(io, socket) {
     permissions,
     callback
   }) {
-    if (permissions) {
-      const permitted = await checkPermission(
-        socket.data?.user?.id,
-        "character",
-        permissions
-      )
-
-      if (!permitted) {
-        const error = new AuthError(
-          "This user is not permitted to modify characters.",
-          { resource: "character", permissions }
-        )
-
-        callback({ error })
-        return { error }
-      }
-    }
-
     try {
+      if (permissions) {
+        await _authorize(permissions)
+      }
+
       const { previous, result: rawResult } = await _validateAndQuery({
         id,
         data,
@@ -122,6 +108,25 @@ export function characterHandlers(io, socket) {
 
       callback({ error })
       return { error }
+    }
+  }
+
+  async function _authorize(permissions) {
+    if (_isNil(socket.data?.user)) {
+      throw new AuthError("You must be signed in to modify characters.")
+    }
+
+    const permitted = await checkPermission(
+      socket.data?.user?.id,
+      "character",
+      permissions
+    )
+
+    if (!permitted) {
+      throw new AuthError(
+        `${socket.data.user.username} isn't allowed to modify characters.`,
+        { resource: "character", permissions }
+      )
     }
   }
 
