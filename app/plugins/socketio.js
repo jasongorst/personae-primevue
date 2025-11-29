@@ -50,12 +50,14 @@ export default defineNuxtPlugin({
       } = useNuxtApp()
 
       useWebsocketHandlers()
-
       console.log("[listeners]")
 
       _forIn(socket._callbacks, (callbacks, event) => {
         console.log(`${event}`, callbacks)
       })
+
+      const { isSignedIn } = useAuthClient()
+      watch(isSignedIn, () => socket.disconnect().connect())
     }
   },
 
