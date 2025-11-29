@@ -1,8 +1,3 @@
 export default function findUpdated(source, target) {
-  const updatedAttributes = _reject(
-    schemaAttributesList,
-    (attribute) => source[attribute] === target[attribute]
-  )
-
-  return _pick(target, updatedAttributes)
+  return _pickBy(target, (value, key) => value !== source?.[key])
 }
