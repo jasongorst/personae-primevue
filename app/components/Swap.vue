@@ -12,16 +12,21 @@
       />
     </div>
 
-    <div :class="!isActive && 'hidden'">
+    <div
+      :class="!isActive && 'hidden'"
+      @blur="deactivate"
+    >
       <slot
         name="active"
-        :close="close"
+        :deactivate="deactivate"
       />
     </div>
   </div>
 </template>
 
 <script setup>
+defineExpose({ activate, deactivate })
+
 const props = defineProps({
   active: {
     type: Boolean,
@@ -34,24 +39,25 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(["active", "inactive", "update:active"])
+const emit = defineEmits([
+  "active",
+  "inactive"
+])
 
-defineExpose({ activate, close })
+const isActive = ref(!props.disabled && props.active)
 
-const isActive = ref(props.active)
-
-function activate(event) {
-  if (!props.disabled) {
+function activate() {
+  if (!props.disabled && !isActive.value) {
     isActive.value = true
-    emit("active", event)
-    emit("update:active", true)
+    emit("active")
   }
 }
 
-function close(event) {
-  isActive.value = false
-  emit("inactive", event)
-  emit("update:active", false)
+function deactivate() {
+  if (isActive.value) {
+    isActive.value = false
+    emit("inactive")
+  }
 }
 </script>
 
