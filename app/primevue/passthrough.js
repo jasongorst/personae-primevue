@@ -218,10 +218,10 @@ const passthrough = {
     bg-black/50 text-surface-200`,
     column: {
       root: tw``,
-      headerCell: tw`group relative max-w-[8rem] truncate border-b border-surface-200
-      border-r-surface-200 bg-transparent px-4 py-3 text-start font-normal
-      transition-colors duration-200 dark:border-surface-700 dark:border-r-surface-700
-      p-sortable:cursor-pointer p-sortable:select-none p-sortable:hover:bg-surface-100
+      headerCell: tw`group relative truncate border-b border-surface-200 border-r-surface-200
+      bg-transparent px-4 py-3 text-start font-normal transition-colors duration-200
+      dark:border-surface-700 dark:border-r-surface-700 p-sortable:cursor-pointer
+      p-sortable:select-none p-sortable:hover:bg-surface-100
       p-sortable:hover:text-surface-800 p-sortable:focus-visible:outline
       p-sortable:focus-visible:outline-1 p-sortable:focus-visible:-outline-offset-1
       p-sortable:focus-visible:outline-primary dark:p-sortable:hover:bg-surface-700
@@ -229,7 +229,7 @@ const passthrough = {
       p-frozen:bg-surface-0 dark:p-frozen:bg-surface-900`,
       columnHeaderContent: tw`flex items-center gap-1.5`,
       columnTitle: tw`block leading-[1.25rem] font-semibold`,
-      bodyCell: tw`max-w-[8rem] truncate border-b border-surface-200 px-4 py-3 text-start
+      bodyCell: tw`truncate border-b border-surface-200 px-4 py-3 text-start
       dark:border-surface-800 p-frozen:sticky p-frozen:bg-surface-0
       dark:p-frozen:bg-surface-900`,
       bodyCellContent: tw``,
@@ -580,6 +580,36 @@ const passthrough = {
       leaveActiveClass: tw`transition-opacity duration-100 ease-linear`,
       leaveToClass: tw`opacity-0`
     }
+  },
+
+  selectbutton: {
+    root: tw`inline-flex rounded-md select-none p-invalid:outline p-invalid:outline-offset-0
+    p-invalid:outline-red-400 dark:p-invalid:outline-red-300`,
+    pcToggleButton: {
+      root: tw`relative inline-flex grow cursor-pointer items-center justify-center
+      overflow-hidden rounded-none border border-surface-100 bg-surface-100 p-1
+      text-base font-medium text-surface-500 transition-colors duration-200
+      select-none first:rounded-s-md last:rounded-e-md focus-visible:relative
+      focus-visible:z-10 focus-visible:outline focus-visible:outline-1
+      focus-visible:outline-offset-2 focus-visible:outline-primary
+      disabled:cursor-default disabled:border-surface-200 disabled:bg-surface-200
+      disabled:text-surface-500 dark:border-surface-950 dark:bg-surface-950
+      dark:text-surface-400 disabled:dark:border-surface-700
+      disabled:dark:bg-surface-700 disabled:dark:text-surface-400
+      p-invalid:border-red-400 dark:p-invalid:border-red-300 p-small:text-sm
+      p-large:text-lg p-checked:text-surface-700 dark:p-checked:text-surface-0 `,
+      content: tw`relative inline-flex flex-auto items-center justify-center gap-2 rounded-md px-3
+      py-1 transition-colors duration-200 p-checked:bg-surface-0
+      p-checked:shadow-[0px_1px_2px_0px_rgba(0,0,0,0.02),0px_1px_2px_0px_rgba(0,0,0,0.04)]
+      dark:p-checked:bg-surface-800`,
+      icon: tw``,
+      label: tw``
+    }
+  },
+
+  skeleton: {
+    root: tw`overflow-hidden rounded-md bg-surface-200 dark:bg-surface-700
+    p-circle:rounded-full`
   },
 
   textarea: {
