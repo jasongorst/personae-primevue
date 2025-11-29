@@ -13,12 +13,14 @@
 
     <Swap
       :disabled="disabled"
-      @active="focusInput"
+      :emitRequests="true"
+      @active="focusControl"
+      @request:activate="editRequest()"
       ref="swap"
     >
       <template #inactive="{ activate }">
         <div
-          v-if="isRichText"
+          v-if="props.type === 'richText'"
           class="trix-content border border-transparent px-3 py-2"
           :class="!disabled && 'cursor-pointer group-hover:bg-primary/15'"
           :tabindex="0"
@@ -35,32 +37,41 @@
         </div>
       </template>
 
-      <template #active="{ close }">
+      <template #active="{ deactivate }">
         <TrixEditor
-          v-if="isRichText"
+          v-if="props.type === 'richText'"
           v-model="model"
           :id="attribute"
           :tabindex="0"
-          @blur="close"
+          @blur="deactivate"
           ref="trixEditor"
         />
 
-        <InputText
-          v-else-if="type === 'text'"
-          v-model="model"
-          :id="attribute"
-          :tabindex="0"
-          fluid
-          @blur="close"
-        />
-
         <ComboBox
-          v-else
+          v-if="props.type === 'autocomplete'"
           v-model="model"
           :tabindex="0"
           :inputId="attribute"
           :suggestions="suggestions"
-          @blur="onAutoCompleteBlur(close)"
+          @blur="onAutoCompleteBlur(deactivate)"
+        />
+
+        <SelectButton
+          v-if="props.type === 'selectButton'"
+          v-model="model"
+          :id="attribute"
+          :tabindex="0"
+          :options="suggestions"
+          @blur="deactivate"
+        />
+
+        <InputText
+          v-else
+          v-model="model"
+          :id="attribute"
+          :tabindex="0"
+          fluid
+          @blur="deactivate"
         />
       </template>
     </Swap>
@@ -68,6 +79,7 @@
 </template>
 
 <script setup>
+defineExpose({ activate, reset })
 const model = defineModel()
 
 // noinspection JSCheckFunctionSignatures
@@ -81,7 +93,17 @@ const props = defineProps({
     type: String,
     required: true,
     validator(value) {
-      return _includes(["text", "autocomplete", "richText"], value)
+      return _includes(
+        [
+          "text",
+          "autocomplete",
+          "richText",
+          "selectButton",
+          "toggle",
+          "dateTime"
+        ],
+        value
+      )
     }
   },
 
@@ -96,47 +118,53 @@ const props = defineProps({
   }
 })
 
-defineExpose({ activate, reset })
-
+const emit = defineEmits(["editRequest"])
 const swap = useTemplateRef("swap")
 const trixEditor = useTemplateRef("trixEditor")
 
-const isRichText = computed(() => props.type === "richText")
+async function focusControl() {
+  console.log("[focusControl]", props.attribute)
 
-async function focusInput() {
   // wait for Swap
   await nextTick()
 
-  // set focus to input
-  const input = document.getElementById(props.attribute)
-  input.focus()
+  const control = document.getElementById(props.attribute)
+  control.focus()
 
-  if (isRichText.value) {
+  if (props.type === "richText") {
     // wait for editor
     await nextTick()
 
     // place cursor at end of editor content
-    const length = input.editor.getDocument().getLength()
-    input.editor.setSelectedRange(length - 1)
-  } else {
+    const length = control.editor.getDocument().getLength()
+    control.editor.setSelectedRange(length - 1)
+  } else if (_includes(["text", "autocomplete"], props.type)) {
     // place cursor at end of input content
     const length = _isNull(model.value) ? 0 : model.value.length
-    input.setSelectionRange(length, length)
+    control.setSelectionRange(length, length)
   }
 }
 
-async function onAutoCompleteBlur(close) {
+async function onAutoCompleteBlur(deactivate) {
   // wait for autoComplete animation to complete before closing
   await sleep(200)
-  close()
+  deactivate()
+}
+
+function editRequest() {
+  if (!props.disabled) {
+    emit("editRequest", props.attribute)
+  }
 }
 
 function activate() {
-  swap.value.activate()
+  if (!props.disabled) {
+    swap.value.activate()
+  }
 }
 
 function reset() {
-  if (isRichText.value) {
+  if (props.type === "richText") {
     trixEditor.value.reset()
   }
 }

@@ -3,15 +3,16 @@
     <template #content>
       <div class="flex flex-col gap-2">
         <DetailField
-          v-for="{ attribute, type } in schemaAttributes"
-          v-model="character[attribute]"
+          v-for="{ attribute, type } in props.attributes"
+          v-model="model[attribute]"
           :key="attribute"
           :attribute="attribute"
           :type="type"
           :disabled="!editable"
           :suggestions="suggestions[attribute]"
-          @click.capture.stop="editRequest(attribute)"
+          @editRequest="editRequest(attribute)"
           :ref="(component) => (detailFields[attribute] = component)"
+          v-bind="$attrs"
         />
       </div>
     </template>
@@ -25,41 +26,56 @@
 </template>
 
 <script setup>
+defineOptions({ inheritAttrs: false })
 defineExpose({ activate, reset })
-const character = defineModel()
+const model = defineModel()
 
 const props = defineProps({
   editable: {
     type: Boolean,
     default: true
+  },
+
+  attributes: {
+    type: Object,
+    required: true
+  },
+
+  options: {
+    type: Object,
+    required: true
   }
 })
 
 const emit = defineEmits(["editRequest"])
 const detailFields = ref({})
-const { options } = storeToRefs(useCharactersStore())
-const suggestions = ref(_clone(options.value))
+const suggestions = ref(_clone(props.options))
 
 async function reset() {
-  await nextTick()
+  if (_some(props.attributes, { type: "richText"})) {
+    await nextTick()
 
-  // noinspection JSUnresolvedReference
-  _forEach(richTextAttributes, (attribute) =>
-    detailFields.value[attribute].reset()
-  )
+    _forEach(
+      _filter(props.attributes, { type: "richText"} ),
+      ({ attribute }) => {
+        // noinspection JSUnresolvedReference
+        detailFields.value[attribute].reset()
+      }
+    )
+  }
 }
 
 function activate(attribute) {
-  // noinspection JSUnresolvedReference
-  detailFields.value[attribute].activate()
+  if (props.editable) {
+    // noinspection JSUnresolvedReference
+    detailFields.value[attribute].activate()
+  }
 }
 
 function editRequest(attribute) {
-  if (!props.editable) {
-    return false
+  if (props.editable) {
+    emit("editRequest", attribute)
   }
-
-  emit("editRequest", attribute)
 }
 </script>
 
