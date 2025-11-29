@@ -18,9 +18,13 @@
     size="small"
     :pt="{
       header: { id: 'datatable_header' },
-      footer: { id: 'datatable_footer' }
+      footer: { id: 'datatable_footer' },
+      column: {
+        headerCell: 'max-w-[8rem]',
+        bodyCell: 'max-w-[8rem]'
+     }
     }"
-    @filter="(event) => updatefilteredCharacters(event.filteredValue)"
+    @filter="(event) => updateFilteredCharacters(event.filteredValue)"
     @rowSelect="(event) => showDetail(event.data)"
   >
     <ListColumn
@@ -65,13 +69,15 @@
 </template>
 
 <script setup>
+const charactersStore = useCharactersStore()
+
 const {
   characters,
   count,
   filters,
   isLoading,
   options
-} = storeToRefs(useCharactersStore())
+} = storeToRefs(charactersStore)
 
 const showFilters = ref(false)
 const filteredCharacters = ref(characters.value)
@@ -87,7 +93,7 @@ const filteredOptions = computed(() =>
 
 onUpdated(() => updateElementHeights())
 
-function updatefilteredCharacters(filteredValue) {
+function updateFilteredCharacters(filteredValue) {
   filteredCharacters.value = filteredValue
 }
 
