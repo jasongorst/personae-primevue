@@ -1,5 +1,6 @@
 import "dotenv/config"
 import { includes, isArray, isPlainObject, map, mapValues, omit } from "lodash-es"
+import { faker } from "@faker-js/faker"
 import prisma from "../shared/utils/prisma.js"
 import { serverAuth } from "../server/utils/auth.js"
 import characters from "./seeds/Character.json" with { type: "json" }
@@ -45,11 +46,11 @@ async function seedCharacter() {
     data: characterSeeds
   })
 
-  console.log(`${count} characters created.`)
+  console.log(`Created ${count} characters.`)
 }
 
-async function seedAuth() {
-  // noinspection JSUnresolvedReference
+async function seedAdmin() {
+  // noinspection JSUnresolvedReference,SpellCheckingInspection
   const { user } = await serverAuth().api.signUpEmail({
     body: {
       email: "jason@evilpaws.org",
@@ -64,12 +65,38 @@ async function seedAuth() {
     data: { role: "admin" }
   })
 
-  console.log("created admin user.\n", adminUser)
+  console.log("Created admin user.", adminUser)
+}
+
+async function seedUsers(n) {
+  for (let i = 1; i < n; i++ ) {
+    const firstName = faker.person.firstName()
+    const lastName = faker.person.lastName()
+    const name = faker.person.fullName({ firstName, lastName })
+    const username = faker.internet.username({ firstName, lastName })
+    const email = faker.internet.email({ firstName, lastName })
+    const password = faker.internet.password()
+
+    console.log(email, password, name, username)
+
+    // noinspection JSUnresolvedReference
+    const { user: { id } } = await serverAuth().api.signUpEmail({
+      body: { email, password, name, username },
+    })
+
+    await prisma.user.update({
+      where: { id },
+      data: { role: "user" }
+    })
+  }
+
+  console.log(`Created ${n} user(s).`)
 }
 
 async function main() {
   await seedCharacter()
-  await seedAuth()
+  await seedAdmin()
+  await seedUsers(1000)
 }
 
 main()
