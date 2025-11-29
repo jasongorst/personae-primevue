@@ -1,37 +1,98 @@
 <template>
-  <DetailView
-    v-model="character"
-    :editable="isSignedIn"
-    @editRequest="editRequest"
-    ref="detailView"
-  >
-    <template #buttons>
-      <template v-if="isUpdated">
-        <Button
-          severity="warn"
-          @click="confirmRevert"
+  <Card class="mx-auto max-w-prose">
+    <template #content>
+      <div class="flex flex-col gap-2">
+        <div
+          v-for="{ attribute, type } in schemaAttributes"
+          :key="attribute"
+          class="group flex flex-col"
         >
-          Revert
-        </Button>
+          <label
+            :for="attribute"
+            class="ml-1 text-sm text-primary dark:text-primary cursor-pointer"
+          >
+            {{ _startCase(attribute) }}
+          </label>
 
-        <Button @click="saveCharacter">Save</Button>
-      </template>
+          <Swap @active="focusFormControl({ attribute, type })">
+            <template #inactive="{ activate }">
+              <div
+                v-if="type === 'richText'"
+                class="trix-content border border-transparent px-3 py-2 cursor-pointer group-hover:bg-primary/15"
+                :tabindex="0"
+                v-html="character[attribute] || '&nbsp;'"
+              />
 
-      <template v-else>
-        <Button>
-          <NuxtLink to="/">Back</NuxtLink>
-        </Button>
+              <div
+                v-else
+                class="border border-transparent px-3 py-2 cursor-pointer group-hover:bg-primary/15"
+                :tabindex="0"
+              >
+                {{ character[attribute] || "&nbsp;" }}
+              </div>
+            </template>
 
-        <Button
-          v-if="isSignedIn"
-          severity="danger"
-          @click="confirmDelete"
-        >
-          Delete
-        </Button>
-      </template>
+            <template #active="{ deactivate }">
+              <TrixEditor
+                v-if="type === 'richText'"
+                v-model="character[attribute]"
+                :id="attribute"
+                :tabindex="0"
+                @blur="deactivate"
+                :ref="(trixEditor) => (trixEditors[attribute] = trixEditor)"
+              />
+
+              <ComboBox
+                v-else-if="type === 'autocomplete'"
+                v-model="character[attribute]"
+                :tabindex="0"
+                :inputId="attribute"
+                :suggestions="suggestions[attribute]"
+                @blur="onAutoCompleteBlur(deactivate)"
+              />
+
+              <InputText
+                v-else
+                v-model="character[attribute]"
+                :id="attribute"
+                :tabindex="0"
+                fluid
+                @blur="deactivate"
+              />
+            </template>
+          </Swap>
+        </div>
+      </div>
     </template>
-  </DetailView>
+
+    <template #footer>
+      <div class="mt-4 flex flex-row justify-end gap-3">
+        <template v-if="isUpdated">
+          <Button
+            severity="warn"
+            @click="confirmRevert"
+          >
+            Revert
+          </Button>
+
+          <Button @click="saveCharacter">Save</Button>
+        </template>
+
+        <template v-else>
+          <Button>
+            <NuxtLink to="/">Back</NuxtLink>
+          </Button>
+
+          <Button
+            severity="danger"
+            @click="confirmDelete"
+          >
+            Delete
+          </Button>
+        </template>
+      </div>
+    </template>
+  </Card>
 </template>
 
 <script setup>
@@ -40,52 +101,70 @@ definePageMeta({
   path: "/:id(\\d+)"
 })
 
+const trixEditors = ref({})
+
 const id = _toInteger(useRoute().params?.id)
 const confirm = useConfirm()
 const toast = useToast()
-const { isSignedIn } = useAuthClient()
 
-const { destroy, getCharacter, update } = useCharactersStore()
+const charactersStore = await useCharactersStore()
+const { destroy, getCharacter, update } = charactersStore
+const { options } = storeToRefs(charactersStore)
 
-const detailView = useTemplateRef("detailView")
+const {
+  model: character,
+  updatedFields,
+  isUpdated,
+  revert
+} = useEditor(await getCharacter(id))
 
-const character = ref(await getCharacter(id))
-const originalCharacter = ref({})
-const beingEdited = ref(false)
-
-const updatedFields = computed(() => {
-  if (beingEdited.value) {
-    return findUpdated(originalCharacter.value, character.value)
-  } else {
-    return {}
-  }
-})
-
-const isUpdated = computed(() => !_isEmpty(updatedFields.value))
+const isSaved = ref(false)
+const suggestions = ref(_clone(options.value))
 
 onBeforeRouteLeave(() => {
-  if (isUpdated.value && !confirmLeave()) {
+  if (isUpdated.value && !isSaved.value && !confirmLeave()) {
     return false
   }
 })
 
-async function editRequest(attribute) {
-  if (!beingEdited.value) {
-    originalCharacter.value = await getCharacter(id)
-    character.value = _clone(originalCharacter.value)
-    beingEdited.value = true
-  }
+async function focusFormControl({ attribute, type }) {
+  // wait for Swap
+  await nextTick()
 
-  detailView.value.activate(attribute)
+  const control = document.getElementById(attribute)
+  control.focus()
+
+  if (type === "richText") {
+    // wait for editor
+    await nextTick()
+
+    // place cursor at end of editor content
+    const length = control.editor.getDocument().getLength()
+    control.editor.setSelectedRange(length - 1)
+  } else if (_includes(["text", "autocomplete"], type)) {
+    // place cursor at end of input content
+    const length = _isNull(character.value[attribute]) ? 0 : character.value[attribute].length
+    control.setSelectionRange(length, length)
+  }
 }
 
-async function resetCharacter() {
-  originalCharacter.value = {}
-  character.value = await getCharacter(id)
-  beingEdited.value = false
+async function onAutoCompleteBlur(deactivate) {
+  // wait for animation to complete
+  await sleep(200)
+  deactivate()
+}
 
-  // reset the trix-editors
-  await detailView.value.reset()
+async function reset() {
+  revert()
+  await nextTick()
+
+  _forEach(
+    _filter(schemaAttributes, { type: "richText"} ),
+    ({ attribute }) => {
+      // noinspection JSUnresolvedReference
+      trixEditors.value[attribute].reset()
+    }
+  )
 }
 
 async function saveCharacter() {
@@ -99,7 +178,7 @@ async function saveCharacter() {
       life: 3000
     })
 
-    beingEdited.value = false
+    isSaved.value = true
     navigateTo("/")
   } else {
     toast.add({
@@ -121,7 +200,6 @@ async function deleteCharacter() {
       life: 3000
     })
 
-    beingEdited.value = false
     navigateTo("/")
   } else {
     toast.add({
@@ -148,7 +226,7 @@ function confirmRevert() {
       label: "Cancel"
     },
 
-    accept: async () => await resetCharacter(),
+    accept: async () => await reset(),
 
     reject: () =>
       toast.add({
