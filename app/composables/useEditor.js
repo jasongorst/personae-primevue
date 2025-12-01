@@ -1,12 +1,11 @@
+// noinspection JSUnresolvedReference
+
 export default function useEditor(initialValue) {
-  const original = ref(initialValue)
-  const model = ref(_cloneDeep(initialValue))
-  const updatedFields = computed(() => findUpdated(original.value, model.value))
+  const original = ref(toValue(initialValue))
+  const model = ref(_cloneDeep(original.value))
+  const updatedFields = computed(()=> findUpdated(original.value, model.value))
   const isUpdated = computed(() => !_isEmpty(updatedFields.value))
+  const revert = () => model.value = _cloneDeep(original.value)
 
-  const revert = () => {
-    model.value = _cloneDeep(original.value)
-  }
-
-  return { model, updatedFields, isUpdated, revert }
+  return { original, model, updatedFields, isUpdated, revert }
 }
