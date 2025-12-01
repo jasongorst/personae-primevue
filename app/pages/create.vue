@@ -109,8 +109,8 @@ const {
 const isSaved = ref(false)
 const suggestions = ref(_clone(options.value))
 
-onBeforeRouteLeave(() => {
-  if (isUpdated.value && !isSaved.value && !confirmLeave()) {
+onBeforeRouteLeave(async () => {
+  if (isUpdated.value && !isSaved.value && !(await confirmLeave())) {
     return false
   }
 })
@@ -131,6 +131,7 @@ async function focusFormControl({ attribute, type }) {
     control.editor.setSelectedRange(length - 1)
   } else if (_includes(["text", "autocomplete"], type)) {
     // place cursor at end of input content
+    // noinspection JSUnresolvedReference
     const length = _isNull(character.value[attribute]) ? 0 : character.value[attribute].length
     control.setSelectionRange(length, length)
   }
@@ -156,6 +157,7 @@ async function reset() {
 }
 
 async function saveCharacter() {
+  // noinspection JSUnresolvedReference
   const { data, error } = await create(character.value)
 
   if (data) {
@@ -179,7 +181,7 @@ async function saveCharacter() {
 
 function confirmReset() {
   confirm.require({
-    header: "Really?",
+    header: "Reset?",
     icon: "ph:warning-bold",
     message: "Do you want to reset this character?",
     defaultFocus: "reject",
@@ -193,7 +195,7 @@ function confirmReset() {
       label: "Cancel"
     },
 
-    accept: () => reset(),
+    accept: async () => await reset(),
 
     reject: () =>
       toast.add({
@@ -205,29 +207,29 @@ function confirmReset() {
   })
 }
 
-function confirmLeave() {
-  let result
+async function confirmLeave() {
+  const modal = new Promise((resolve) => {
+    confirm.require({
+      header: "Leave?",
+      icon: "ph:warning-bold",
+      message: "Do you want to abandon this character?",
+      defaultFocus: "reject",
 
-  confirm.require({
-    header: "Leave?",
-    icon: "ph:warning-bold",
-    message: "Do you want to abandon this character?",
-    defaultFocus: "reject",
+      acceptProps: {
+        label: "Leave",
+        severity: "danger"
+      },
 
-    acceptProps: {
-      label: "Leave",
-      severity: "danger"
-    },
+      rejectProps: {
+        label: "Cancel"
+      },
 
-    rejectProps: {
-      label: "Cancel"
-    },
-
-    accept: () => (result = true),
-    reject: () => (result = false)
+      accept: () => resolve(true),
+      reject: () => resolve(false)
+    })
   })
 
-  return result
+  return await modal
 }
 </script>
 
