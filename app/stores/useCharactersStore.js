@@ -22,7 +22,7 @@ export const useCharactersStore = defineStore("characters", () => {
     // actions
     refresh: load
   } = useAsyncData(
-    "characters",
+    "character:list",
     async () => {
       const { data: response } = await socket.timeout(3000).emitWithAck("character:list")
       return response
@@ -96,8 +96,11 @@ export const useCharactersStore = defineStore("characters", () => {
   }
 
   async function getCharacter(id) {
-    await ensureLoaded()
-    return data.value[id]
+    if (isLoaded.value) {
+      return data.value[id]
+    } else {
+      return await read(id)
+    }
   }
 
   async function ensureLoaded() {
@@ -108,6 +111,22 @@ export const useCharactersStore = defineStore("characters", () => {
 
   function applyPatch(patch) {
     jsonPatch.apply(data.value, patch)
+  }
+
+  async function read(id) {
+    const { data, error, status} = await useAsyncData(
+      `character:read:${id}`,
+      async () => {
+        const { data: response } = await socket.timeout(3000).emitWithAck("character:read", id)
+        return response
+      }
+    )
+
+    if (status.value === "error") {
+      return error
+    }
+
+    return data.value
   }
 
   async function create(character) {
@@ -182,6 +201,7 @@ export const useCharactersStore = defineStore("characters", () => {
 
     // actions
     applyPatch,
+    read,
     create,
     destroy,
     getCharacter,
