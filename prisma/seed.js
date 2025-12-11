@@ -1,7 +1,7 @@
 import "dotenv/config"
 import { includes, isArray, isPlainObject, map, mapValues, omit } from "lodash-es"
 import { faker } from "@faker-js/faker"
-import prisma from "../shared/utils/prisma.js"
+import prisma from "server/utils/prisma.js"
 import { serverAuth } from "../server/utils/auth.js"
 import characters from "./seeds/Character.json" with { type: "json" }
 
