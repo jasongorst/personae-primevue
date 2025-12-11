@@ -5,7 +5,7 @@ export default defineConfig({
   schema: "./prisma",
 
   datasource: {
-    url: env("PRISMA_DATABASE_URL")
+    url: env("NUXT_PRISMA_DATABASE_URL")
   },
 
   migrations: {

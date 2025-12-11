@@ -70,14 +70,19 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       api: { baseURL: "" },
-
       auth: {
         baseURL: "",
         redirectTo: { guest: "", user: "" }
       },
-
       websocketHost: ""
-    }
+    },
+
+    betterAuth: {
+      baseURL: "",
+      secret: ""
+    },
+
+    prismaDatabaseURL: ""
   },
 
   vite: {
