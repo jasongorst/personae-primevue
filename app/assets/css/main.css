@@ -12,6 +12,20 @@ body {
   @apply dark:bg-(--p-surface-950) dark:text-(--p-surface-100);
 }
 
+.skeleton-animation::after {
+  @apply absolute top-0 right-0 left-0 z-1 h-full -translate-x-full animate-[skeleton_1.2s_infinite] bg-linear-90
+  from-transparent via-white/40 to-transparent content-[''] dark:via-white/4;
+}
+
+@keyframes skeleton {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
 .trix-content {
   @apply prose leading-[1.5];
   @apply prose-h1:text-xl prose-h1:mt-0 prose-h1:mb-2;
