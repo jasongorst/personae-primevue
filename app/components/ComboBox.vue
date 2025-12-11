@@ -1,5 +1,5 @@
 <template>
-  <InitialAutoComplete
+  <PatchedAutoComplete
     v-model="model"
     v-bind="$attrs"
     :inputId="inputId"
