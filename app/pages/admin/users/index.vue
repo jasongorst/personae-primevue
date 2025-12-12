@@ -43,6 +43,7 @@
       <!--      </template>-->
 
       <template #footer>
+        <!--suppress JSValidateTypes -->
         <UserToolbar
           :class="loading && 'hidden'"
           :count="count"

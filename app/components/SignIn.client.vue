@@ -1,4 +1,5 @@
 <template>
+  <!--suppress JSValidateTypes -->
   <Dialog
     v-model:visible="visible"
     modal

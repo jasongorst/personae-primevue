@@ -1,3 +1,4 @@
+<!--suppress JSUnresolvedReference -->
 <template>
   <ConfirmDialog class="flex flex-col gap-8 p-4">
     <template #container="{ message, acceptCallback, rejectCallback }">

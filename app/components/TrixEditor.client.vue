@@ -143,6 +143,7 @@ function onTrixAttachmentRemove(file) {
 <style>
 @reference "~/assets/css/main.css";
 
+/*noinspection CssInvalidHtmlTagReference*/
 trix-editor {
   /* textarea.root */
   /* min-height: py-2 [--spacing(4)] + border [2 * 1px = 2px] + line-height [1.5rem] */

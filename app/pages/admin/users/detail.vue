@@ -1,4 +1,5 @@
 <template>
+  <!--suppress JSValidateTypes -->
   <UserEditor
     action="edit"
     :id="id"
