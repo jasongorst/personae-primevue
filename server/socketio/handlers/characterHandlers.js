@@ -140,9 +140,10 @@ export function characterHandlers(io, socket) {
     let previous = {}
 
     if (id) {
-      validId = validateId(id)
+      validId = characterSchema.shape.id.parse(id)
 
       // on update/delete
+      // TODO: this will also needlessly run on read
       previous = await prisma.character.findUnique({ where: { id: validId } })
     }
 

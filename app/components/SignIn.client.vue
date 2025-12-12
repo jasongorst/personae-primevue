@@ -163,7 +163,7 @@ async function signInWithPassword(values) {
   }
 
   isLoading.value = true
-  const { error } = await signIn.email(values)
+  const { error } = await signIn(values)
   isLoading.value = false
 
   if (error) {

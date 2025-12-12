@@ -40,10 +40,20 @@ export default function useAuthClient() {
     ? ref(false)
     : useState("auth:fetchingSession", () => false)
 
+  async function signIn({ email, password, rememberMe, redirectTo } = {}) {
+   // noinspection JSUnresolvedReference
+    const result = await authClient.signIn.email({ email, password, rememberMe })
+
+    if (redirectTo) {
+      await navigateTo(redirectTo)
+    }
+
+    return result
+  }
+
   async function signOut({ redirectTo } = {}) {
     // noinspection JSUnresolvedReference
     const result = await authClient.signOut()
-
     session.value = null
     user.value = null
 
@@ -62,8 +72,7 @@ export default function useAuthClient() {
 
     fetchingSession.value = true
     // noinspection JSUnresolvedReference
-    const { data } = await authClient.getSession({ fetchOptions: { headers }})
-
+    const { data } = await authClient.getSession({ fetchOptions: { headers } })
     session.value = data?.session || null
     user.value = data?.user || null
     fetchingSession.value = false
@@ -86,7 +95,7 @@ export default function useAuthClient() {
     session,
     user,
     isSignedIn,
-    signIn: authClient.signIn,
+    signIn: signIn,
     signUp: authClient.signUp,
     signOut,
     redirectTo,
