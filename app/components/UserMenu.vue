@@ -36,7 +36,7 @@
     <Menu
       class="mt-0"
       id="user_menu"
-      :model="[{ label: 'Sign Out', command: doSignOut }]"
+      :model="model"
       :popup="true"
       ref="menu"
     >
@@ -75,6 +75,16 @@ const showSignIn = useState("showSignIn")
 const { isSignedIn, signOut, user } = useAuthClient()
 const toast = useToast()
 const menu = useTemplateRef("menu")
+
+const model = computed(() => {
+  const menu = [{ label: "Sign Out", command: doSignOut }]
+
+  if (isSignedIn.value && user.value.role === "admin") {
+    menu.unshift({ label: "Dashboard", command: () => navigateTo("/admin/users") })
+  }
+
+  return menu
+})
 
 async function doSignOut() {
   await signOut()
