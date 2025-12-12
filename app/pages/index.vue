@@ -27,7 +27,7 @@
     @filter="(event) => updateFilteredCharacters(event.filteredValue)"
     @rowSelect="(event) => showDetail(event.data)"
   >
-    <ListColumn
+    <CharacterColumn
       v-for="attribute in listAttributes"
       :key="attribute"
       :attribute="attribute"
@@ -36,7 +36,7 @@
     />
 
     <template #header>
-      <ListFilters
+      <CharacterFilters
         :class="isLoading && 'hidden'"
         :showFilters="showFilters"
         @toggleShowFilters="toggleShowFilters"
@@ -45,7 +45,7 @@
     </template>
 
     <template #empty>
-      <ListEmpty
+      <CharacterEmpty
         :class="isLoading && 'hidden'"
         :filters="filters"
       />
@@ -59,7 +59,7 @@
     </template>
 
     <template #footer>
-      <ListToolbar
+      <CharacterToolbar
         :class="isLoading && 'hidden'"
         :filteredCount="filteredCount"
         :count="count"
@@ -91,6 +91,7 @@ const filteredOptions = computed(() =>
   )
 )
 
+onMounted(() => updateElementHeights())
 onUpdated(() => updateElementHeights())
 
 function updateFilteredCharacters(filteredValue) {
@@ -122,7 +123,7 @@ function totalElementHeights() {
   // plus 16px [--spacing(4)] bottom navbar margin
   totalHeight += 16
 
-  return `${totalHeight}px`
+  return _isNaN(totalHeight) ? 0 : `${totalHeight}px`
 }
 </script>
 
