@@ -110,7 +110,7 @@ export const useCharactersStore = defineStore("characters", () => {
   // }
 
   function applyPatch(patch) {
-    jsonPatch.apply(data.value, patch)
+    // jsonPatch.patch(data.value, patch)
   }
 
   async function read(id) {

@@ -1,9 +1,9 @@
 import { create } from "jsondiffpatch"
-import { format, patch as apply } from "jsondiffpatch/formatters/jsonpatch"
+import { format, patch } from "jsondiffpatch/formatters/jsonpatch"
 
 const jsonPatch = {
-  compare(left, right, diffOptions = {}) {
-    // add defaults (if undefined)
+  diff(left, right, diffOptions = {}) {
+    // default options
     _defaults(diffOptions, { omitRemovedValues: true })
 
     const jsonDiffPatch = create(diffOptions)
@@ -11,8 +11,8 @@ const jsonPatch = {
     return format(delta)
   },
 
-  // apply(target, patch)
-  apply
+  // patch(target, patch)
+  patch
 }
 
 export default jsonPatch

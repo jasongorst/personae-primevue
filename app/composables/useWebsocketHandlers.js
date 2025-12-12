@@ -3,11 +3,11 @@ export default function useWebsocketHandlers() {
     $socketio: { socket }
   } = useNuxtApp()
 
-  // const { applyPatch } = useCharactersStore()
+  const { applyPatch } = useCharactersStore()
 
   socket.on("character:patch", (patch) => {
     console.log("[character:patch]", patch)
 
-    // applyPatch(patch)
+    applyPatch(patch)
   })
 }
