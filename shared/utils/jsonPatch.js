@@ -6,8 +6,8 @@ const jsonPatch = {
     // add defaults (if undefined)
     _defaults(diffOptions, { omitRemovedValues: true })
 
-    const jsondiffpatch = create(diffOptions)
-    const delta = jsondiffpatch.diff(left, right)
+    const jsonDiffPatch = create(diffOptions)
+    const delta = jsonDiffPatch.diff(left, right)
     return format(delta)
   },
 

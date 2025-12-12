@@ -103,11 +103,11 @@ export const useCharactersStore = defineStore("characters", () => {
     }
   }
 
-  async function ensureLoaded() {
-    if (!isLoaded.value) {
-      await load()
-    }
-  }
+  // async function ensureLoaded() {
+  //   if (!isLoaded.value) {
+  //     await load()
+  //   }
+  // }
 
   function applyPatch(patch) {
     jsonPatch.apply(data.value, patch)
