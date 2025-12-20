@@ -1,5 +1,4 @@
 <template>
-  <div>{{ updatedFields }}</div>
   <Card class="mx-auto max-w-prose">
     <template #content>
       <div class="flex flex-col gap-2">
@@ -85,13 +84,22 @@
             <NuxtLink :to="{ name: 'admin:users' }">Back</NuxtLink>
           </Button>
 
-          <Button
-            v-if="props.action === 'edit'"
-            severity="danger"
-            @click="confirmDelete"
-          >
-            Delete
-          </Button>
+          <template v-if="props.action === 'edit'">
+            <Button
+              severity="warn"
+              @click="resetPassword"
+            >
+              Reset Password
+            </Button>
+
+            <Button
+              v-if="props.action === 'edit'"
+              severity="danger"
+              @click="confirmDelete"
+            >
+              Delete
+            </Button>
+          </template>
         </template>
       </div>
     </template>
@@ -125,28 +133,26 @@ const toast = useToast()
 const { authClient } = useAuthClient()
 
 const userAttributes = computed(() => {
-  let attr = [
-    { attribute: "name", type: "text" },
+  const attr = [
     { attribute: "email", type: "text" },
+    { attribute: "name", type: "text" },
     { attribute: "username", type: "text" },
-    { attribute: "password", type: "text" },
     { attribute: "role", type: "autocomplete" }
   ]
 
-  if (props.action === "edit") {
-    attr = _concat(attr, [
-      { attribute: "banned", type: "autocomplete" },
-      { attribute: "banReason", type: "text" },
-      { attribute: "banExpires", type: "text" }
-    ])
+  if (props.action === "create") {
+    attr.splice(1, 0, { attribute: "password", type: "text" })
   }
 
   return attr
 })
 
-const userAttributesList = computed(() =>
-  _map(userAttributes.value, ({ attribute }) => attribute)
-)
+const emptyUser = computed(() => {
+  _zipObject(
+    _map(userAttributes.value, "attribute"),
+    _fill(Array(userAttributes.value?.length), "")
+  )
+})
 
 async function getUser(id) {
   const { data: response } = await useAsyncData(
@@ -160,14 +166,15 @@ async function getUser(id) {
     { transform: deepParseTimestamps }
   )
 
-  // add empty password
-  response.value.password = ""
   return response.value
 }
 
 const initialValue =
   props.action === "create"
-    ? mapObject(userAttributesList.value, () => "")
+    ? _zipObject(
+        _map(userAttributes.value, "attribute"),
+        _fill(Array(userAttributes.value?.length), "")
+      )
     : await getUser(props.id)
 
 const {
@@ -178,8 +185,7 @@ const {
 } = useEditor(initialValue)
 
 const options = ref({
-  role: ["user", "admin"],
-  banned: ["true", "false"]
+  role: ["user", "admin"]
 })
 
 const isSaved = ref(false)
@@ -231,9 +237,32 @@ async function reset() {
   })
 }
 
-async function saveUser() {
-  console.log("[saveUser]")
+async function resetPassword() {
+  // noinspection JSUnresolvedReference
+  const { error } = await authClient.requestPasswordReset({
+    email: user.value.email,
+    redirectTo: "http://localhost:3000/user/change-password"
+  })
 
+  if (error) {
+    console.log(error)
+
+    toast.add({
+      severity: "error",
+      summary: "Password reset request error.",
+      detail: error.message
+    })
+  }
+
+  toast.add({
+    severity: "success",
+    summary: "Password Reset Sent.",
+    detail: `Sent an email to ${user.value.username} with a password reset link.`,
+    life: 3000
+  })
+}
+
+async function saveUser() {
   if (props.action === "create") {
     await createUser()
   } else {
@@ -266,10 +295,10 @@ async function createUser() {
 }
 
 async function updateUser() {
-  console.log("[updateUser]", props.id, user.value)
-
   try {
-    await socket.timeout(3000).emitWithAck("user:update", props.id, updatedFields.value)
+    await socket
+      .timeout(3000)
+      .emitWithAck("user:update", props.id, updatedFields.value)
   } catch (error) {
     console.log(error)
 
