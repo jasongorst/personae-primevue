@@ -23,7 +23,6 @@ export function characterHandlers(io, socket) {
     const query = ({ id }) => prisma.character.delete({ where: { id } })
     const mutator = (rawResult) => _pick(rawResult, ["id"])
     const permissions = ["delete"]
-
     const { previous, error } = await _executeQuery({
       id,
       query,
@@ -42,7 +41,6 @@ export function characterHandlers(io, socket) {
     const validator = (character) => createCharacterSchema.parse(character)
     const query = ({ data }) => prisma.character.create({ data })
     const permissions = ["create"]
-
     const { previous, result, error } = await _executeQuery({
       data,
       validator,
@@ -64,7 +62,6 @@ export function characterHandlers(io, socket) {
       prisma.character.update({ where: { id }, data })
 
     const permissions = ["update"]
-
     const { previous, result, error } = await _executeQuery({
       id,
       data,
@@ -97,9 +94,9 @@ export function characterHandlers(io, socket) {
         id,
         data,
         validator,
-        query
+        query,
+        permissions
       })
-
       const result = mutator(rawResult)
       callback({ data: result })
       return { previous, result }
@@ -117,7 +114,7 @@ export function characterHandlers(io, socket) {
     }
 
     const permitted = await checkPermission(
-      socket.data?.user?.id,
+      socket.data.user.id,
       "character",
       permissions
     )
@@ -131,10 +128,11 @@ export function characterHandlers(io, socket) {
   }
 
   async function _validateAndQuery({
-    id = null,
-    data = null,
+    id,
+    data,
     validator = _identity,
-    query = _noop
+    query = _noop,
+    permissions
   }) {
     let validId, validData
     let previous = {}
@@ -142,9 +140,12 @@ export function characterHandlers(io, socket) {
     if (id) {
       validId = characterSchema.shape.id.parse(id)
 
-      // on update/delete
-      // TODO: this will also needlessly run on read
-      previous = await prisma.character.findUnique({ where: { id: validId } })
+      if (
+        permissions &&
+        (_includes(permissions, "update") || _includes(permissions, "delete"))
+      ) {
+        previous = await prisma.character.findUnique({ where: { id: validId } })
+      }
     }
 
     if (data) {
