@@ -70,10 +70,12 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       api: { baseURL: "" },
+
       auth: {
         baseURL: "",
         redirectTo: { guest: "", user: "" }
       },
+
       websocketHost: ""
     },
 
@@ -82,6 +84,7 @@ export default defineNuxtConfig({
       secret: ""
     },
 
+    postmarkServerToken: "",
     prismaDatabaseURL: ""
   },
 
