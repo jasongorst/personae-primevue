@@ -333,6 +333,122 @@ const passthrough = {
     rowReorderIndicatorDown: tw`absolute hidden`
   },
 
+  datepicker: {
+    root: tw`relative inline-flex max-w-full p-fluid:flex`,
+    pcInputText: {
+      root: tw`w-[1%] flex-auto appearance-none rounded-md border border-surface-300
+      bg-surface-0 px-3 py-2 text-surface-700 shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
+      outline-hidden transition-colors duration-200 placeholder:text-surface-500
+      enabled:hover:border-surface-400 enabled:focus:border-primary
+      disabled:bg-surface-200 disabled:text-surface-500 dark:border-surface-700
+      dark:bg-surface-950 dark:text-surface-0 dark:placeholder:text-surface-400
+      dark:enabled:hover:border-surface-600 dark:disabled:bg-surface-700
+      dark:disabled:text-surface-400 p-invalid:border-red-400
+      p-invalid:placeholder:text-red-600 dark:p-invalid:border-red-300
+      dark:p-invalid:placeholder:text-red-400 p-small:px-[0.625rem]
+      p-small:py-[0.375rem] p-small:text-sm p-large:px-[0.875rem]
+      p-large:py-[0.625rem] p-large:text-lg p-fluid:w-full p-filled:bg-surface-50
+      dark:p-filled:bg-surface-800 p-has-e-icon:pe-10 p-has-dropdown:rounded-e-none`
+    },
+    dropdown: tw`relative inline-flex w-10 shrink-0 cursor-pointer items-center justify-center
+    overflow-hidden rounded-e-md border border-s-0 border-surface-300 bg-surface-100
+    text-surface-600 transition-colors duration-200 select-none
+    focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2
+    focus-visible:outline-primary enabled:hover:bg-surface-200
+    enabled:hover:text-surface-700 enabled:active:bg-surface-300
+    enabled:hover:active:text-surface-800 dark:border-surface-700
+    dark:bg-surface-800 dark:text-surface-300 dark:enabled:hover:bg-surface-700
+    dark:enabled:hover:text-surface-200 dark:enabled:active:bg-surface-600
+    dark:enabled:active:text-surface-100`,
+    inputIconContainer: tw`absolute end-3 top-1/2 -mt-2 cursor-pointer leading-none text-surface-400
+    p-small:*:size-[0.875rem] p-large:*:size-[1.125rem]`,
+    panel: tw`w-auto rounded-md border border-surface-200 bg-surface-0 p-3 text-surface-700
+    shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)]
+    dark:border-surface-700 dark:bg-surface-900 dark:text-surface-0
+    p-portal-self:min-w-full p-inline:inline-block p-inline:overflow-x-auto
+    p-inline:shadow-none`,
+    calendarContainer: tw`flex`,
+    calendar: tw`flex-auto gap-3 border-s border-surface-200 px-3 first:border-s-0 first:ps-0
+    last:pe-0 dark:border-surface-700`,
+    header: tw`flex items-center justify-between gap-2 border-b border-surface-200 bg-surface-0
+    px-0 pt-0 pb-2 font-medium text-surface-700 dark:border-surface-700
+    dark:bg-surface-900 dark:text-surface-0`,
+    title: tw`flex items-center justify-between gap-2 font-medium`,
+    selectMonth: tw`m-0 cursor-pointer rounded-md border-none bg-transparent px-2 py-1 font-medium
+    text-surface-700 transition-colors duration-200 focus-visible:outline
+    focus-visible:outline-1 focus-visible:outline-offset-2
+    focus-visible:outline-primary enabled:hover:bg-surface-100
+    enabled:hover:text-surface-800 dark:text-surface-0
+    dark:enabled:hover:bg-surface-800 dark:enabled:hover:text-surface-0`,
+    selectYear: tw`m-0 cursor-pointer rounded-md border-none bg-transparent px-2 py-1 font-medium
+    text-surface-700 transition-colors duration-200 focus-visible:outline
+    focus-visible:outline-1 focus-visible:outline-offset-2
+    focus-visible:outline-primary enabled:hover:bg-surface-100
+    enabled:hover:text-surface-800 dark:text-surface-0
+    dark:enabled:hover:bg-surface-800 dark:enabled:hover:text-surface-0`,
+    decade: tw`white-space-nowrap`,
+    dayView: tw`mx-0 mt-2 mb-0 w-full border-collapse text-base`,
+    tableHeader: tw``,
+    tableHeaderRow: tw``,
+    weekHeader: tw`p-1`,
+    weekHeaderLabel: tw`font-medium text-surface-700 opacity-60 dark:text-surface-0`,
+    tableHeaderCell: tw``,
+    weekDayCell: tw`p-1`,
+    weekDay: tw`font-medium text-surface-700 dark:text-surface-0`,
+    tableBody: tw``,
+    weekNumber: tw``,
+    weekLabelContainer: tw`flex h-8 w-8 justify-center p-1 opacity-60`,
+    weekLabel: tw``,
+    dayCell: tw`p-1`,
+    day: tw`relative mx-auto my-0 flex h-8 w-8 cursor-pointer items-center justify-center
+    overflow-hidden rounded-full border border-transparent p-1 text-surface-700
+    transition-colors duration-200 hover:bg-surface-100 hover:text-surface-800
+    focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2
+    focus-visible:outline-primary dark:text-surface-0 dark:hover:bg-surface-800
+    dark:hover:text-surface-0 p-disabled:pointer-events-none p-disabled:opacity-60
+    p-selected:bg-primary p-selected:text-primary-contrast p-today:bg-surface-200
+    p-today:text-surface-900 p-today:hover:bg-surface-100
+    p-today:hover:text-surface-800 dark:p-today:bg-surface-700
+    dark:p-today:text-surface-0 dark:p-today:hover:bg-surface-800
+    dark:p-today:hover:text-surface-0 p-today:p-selected:bg-primary
+    p-today:p-selected:text-primary-contrast`,
+    monthView: tw`mx-0 mt-2 mb-0`,
+    month: tw`relative inline-flex w-1/3 cursor-pointer items-center justify-center
+    overflow-hidden rounded-md p-[0.375rem] text-surface-700 transition-colors
+    duration-200 hover:bg-surface-100 hover:text-surface-800 focus-visible:outline
+    focus-visible:outline-1 focus-visible:outline-offset-2
+    focus-visible:outline-primary dark:text-surface-0 dark:hover:bg-surface-800
+    dark:hover:text-surface-0 p-selected:bg-primary p-selected:text-primary-contrast`,
+    yearView: tw`mx-0 mt-2 mb-0`,
+    year: tw`relative inline-flex w-1/2 cursor-pointer items-center justify-center
+    overflow-hidden rounded-md p-[0.375rem] text-surface-700 transition-colors
+    duration-200 hover:bg-surface-100 hover:text-surface-800 focus-visible:outline
+    focus-visible:outline-1 focus-visible:outline-offset-2
+    focus-visible:outline-primary dark:text-surface-0 dark:hover:bg-surface-800
+    dark:hover:text-surface-0 p-selected:bg-primary p-selected:text-primary-contrast`,
+    timePicker: tw`flex items-center justify-center gap-2 border-t border-surface-200 p-0
+    not-p-time-only:px-0 not-p-time-only:pt-2 not-p-time-only:pb-0
+    dark:border-surface-700`,
+    hourPicker: tw`flex flex-col items-center gap-1`,
+    hour: tw`text-base`,
+    separatorContainer: tw`flex flex-col items-center gap-1`,
+    separator: tw`text-base`,
+    minutePicker: tw`flex flex-col items-center gap-1`,
+    minute: tw`text-base`,
+    secondPicker: tw`flex flex-col items-center gap-1`,
+    second: tw`text-base`,
+    ampmPicker: tw`flex flex-col items-center gap-1`,
+    ampm: tw`text-base`,
+    buttonbar: tw`flex items-center justify-between border-t border-surface-200 px-0 pt-2 pb-0
+    dark:border-surface-700`,
+    transition: {
+      enterFromClass: tw`scale-y-75 opacity-0`,
+      enterActiveClass: tw`transition duration-120 ease-[cubic-bezier(0,0,0.2,1)]`,
+      leaveActiveClass: tw`transition-opacity duration-100 ease-linear`,
+      leaveToClass: tw`opacity-0`
+    }
+  },
+
   dialog: {
     root: tw`max-h-full max-w-screen rounded-xl border border-surface-100 bg-surface-200
     text-surface-700 shadow-lg dark:border-surface-800 dark:bg-surface-700
