@@ -3,7 +3,7 @@
     v-model="model"
     fluid
     type="search"
-    placeholder="Filter"
+    placeholder="Filter&hellip;"
     @input="filterCallback"
   />
 </template>
