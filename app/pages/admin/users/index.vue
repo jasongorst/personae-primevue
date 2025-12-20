@@ -65,7 +65,7 @@ const {
 
 const { authClient } = useAuthClient()
 const toast = useToast()
-const fields = ["name", "email", "username", "role", "createdAt"]
+const fields = ["email", "name", "username", "role", "createdAt"]
 const elementHeights = ref("0px")
 
 const { data: users, pending: loading } = useAsyncData(
