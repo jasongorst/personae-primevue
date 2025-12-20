@@ -10,19 +10,33 @@ export function userHandlers(io, socket) {
   socket.on("user:update", updateUser)
 
   async function readUser(id, callback) {
-    const query = ({ id }) => prisma.user.findUnique({ where: { id } })
+    const query = ({ id }) =>
+      prisma.user.findUnique({
+        omit: { banned: true, banReason: true, banExpires: true },
+        where: { id }
+      })
+
     await _executeQuery({ id, query, callback })
   }
 
   async function listUsers(callback) {
     const query = () =>
-      prisma.user.findMany({ orderBy: [{ createdAt: "asc" }] })
+      prisma.user.findMany({
+        omit: { banned: true, banReason: true, banExpires: true },
+        orderBy: [{ createdAt: "asc" }]
+      })
+
     await _executeQuery({ query, callback })
   }
 
   async function paginateUsers(skip, take, callback) {
     const query = () =>
-      prisma.user.findMany({ orderBy: [{ createdAt: "asc" }], skip, take })
+      prisma.user.findMany({
+        omit: { banned: true, banReason: true, banExpires: true },
+        orderBy: [{ createdAt: "asc" }],
+        skip,
+        take
+      })
 
     await _executeQuery({ query, callback })
   }
@@ -36,45 +50,21 @@ export function userHandlers(io, socket) {
     const query = ({ id }) => prisma.user.delete({ where: { id } })
     const mutator = (rawResult) => _pick(rawResult, ["id"])
     const permissions = ["delete"]
-
-    await _executeQuery({
-      id,
-      query,
-      mutator,
-      permissions,
-      callback
-    })
+    await _executeQuery({ id, query, mutator, permissions, callback })
   }
 
   async function createUser(data, callback) {
     const validator = (user) => createUserSchema.parse(user)
     const query = ({ data }) => prisma.user.create({ data })
     const permissions = ["create"]
-
-    await _executeQuery({
-      data,
-      validator,
-      query,
-      permissions,
-      callback
-    })
+    await _executeQuery({ data, validator, query, permissions, callback })
   }
 
   async function updateUser(id, data, callback) {
-    console.log("[updateUser]", data)
-
     const validator = (user) => updateUserSchema.parse(user)
     const query = ({ id, data }) => prisma.user.update({ where: { id }, data })
     const permissions = ["update"]
-
-    await _executeQuery({
-      id,
-      data,
-      validator,
-      query,
-      permissions,
-      callback
-    })
+    await _executeQuery({ id, data, validator, query, permissions, callback })
   }
 
   async function _executeQuery({
@@ -91,16 +81,10 @@ export function userHandlers(io, socket) {
         await _authorize(permissions)
       }
 
-      const { previous, result: rawResult } = await _validateAndQuery({
-        id,
-        data,
-        validator,
-        query
-      })
-
+      const { result: rawResult } = await _validateAndQuery({ id, data, validator, query })
       const result = mutator(rawResult)
       callback({ data: result })
-      return { previous, result }
+      return { result }
     } catch (error) {
       console.log(error)
 
@@ -114,7 +98,11 @@ export function userHandlers(io, socket) {
       throw new AuthError("You must be signed in to modify users.")
     }
 
-    const permitted = await checkPermission(socket.data.user.id, "user", permissions)
+    const permitted = await checkPermission(
+      socket.data.user.id,
+      "user",
+      permissions
+    )
 
     if (!permitted) {
       throw new AuthError(
@@ -124,38 +112,18 @@ export function userHandlers(io, socket) {
     }
   }
 
-  async function _validateAndQuery({
-    id = null,
-    data = null,
-    validator = _identity,
-    query = _noop
-  }) {
+  async function _validateAndQuery({ id, data, validator = _identity, query = _noop }) {
     let validId, validData
-    let previous = {}
 
     if (id) {
       validId = userSchema.shape.id.parse(id)
-
-      // on update/delete
-      // TODO: this will also needlessly run on read
-      previous = await prisma.user.findUnique({ where: { id: validId } })
     }
 
     if (data) {
       validData = validator(data)
     }
 
-    if (_has(validData, "password")) {
-      // noinspection JSUnresolvedReference
-      await auth.api.setUserPassword({
-        body: { newPassword: validData.password, userId: id },
-        headers: socket.handshake.headers
-      })
-
-      _unset(validData, "password")
-    }
-
     const result = await query({ id: validId, data: validData })
-    return { previous, result }
+    return { result }
   }
 }
