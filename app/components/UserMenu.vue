@@ -23,7 +23,7 @@
       v-else
       class="border-none px-6! py-2.75"
       variant="text"
-      @click="doSignIn"
+      @click="showSignInDialog"
     >
       <span class="font-semibold">Sign In</span>
 
@@ -71,23 +71,39 @@
 </template>
 
 <script setup>
-const showSignIn = useState("showSignIn")
-const { isSignedIn, signOut, user } = useAuthClient()
+const SignInDialog = defineLazyHydrationComponent(
+  "visible",
+  () => import("~/components/SignInDialog.vue")
+)
+
+const ChangePasswordDialog = defineLazyHydrationComponent(
+  "visible",
+  () => import("~/components/ChangePasswordDialog.vue")
+)
+
+const { isSignedIn, signOut: authClientSignOut, user } = useAuthClient()
+const dialog = useDialog()
 const toast = useToast()
 const menu = useTemplateRef("menu")
 
 const model = computed(() => {
-  const menu = [{ label: "Sign Out", command: doSignOut }]
+  const menu = [
+    { label: "Change Password", command: showChangePasswordDialog },
+    { label: "Sign Out", command: signOut }
+  ]
 
   if (isSignedIn.value && user.value.role === "admin") {
-    menu.unshift({ label: "Dashboard", command: () => navigateTo("/admin/users") })
+    menu.unshift({
+      label: "Dashboard",
+      command: () => navigateTo("/admin/users")
+    })
   }
 
   return menu
 })
 
-async function doSignOut() {
-  await signOut()
+async function signOut() {
+  await authClientSignOut()
 
   toast.add({
     severity: "success",
@@ -99,17 +115,46 @@ async function doSignOut() {
   closeMenu()
 }
 
-function doSignIn() {
-  closeMenu()
-  showSignIn.value = true
-}
-
 function toggleMenu(event) {
   menu.value.toggle(event)
 }
 
 function closeMenu(_) {
   menu.value.hide()
+}
+
+function showSignInDialog() {
+  closeMenu()
+
+  dialog.open(SignInDialog, {
+    props: {
+      modal: true,
+      dismissableMask: true,
+      showHeader: false,
+      pt: {
+        root: "z-90 w-11/12 max-w-128",
+        content: "p-0"
+      },
+      ptOptions: { mergeProps: ptViewMerge }
+    }
+  })
+}
+
+function showChangePasswordDialog() {
+  closeMenu()
+
+  dialog.open(ChangePasswordDialog, {
+    props: {
+      modal: true,
+      dismissableMask: true,
+      showHeader: false,
+      pt: {
+        root: "z-90 w-11/12 max-w-128",
+        content: "p-0"
+      },
+      ptOptions: { mergeProps: ptViewMerge }
+    }
+  })
 }
 </script>
 
