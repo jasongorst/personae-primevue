@@ -21,7 +21,7 @@ const auth = betterAuth({
     disableSignUp: true,
     minPasswordLength: 12,
     maxPasswordLength: 128,
-    sendResetPassword,
+    sendResetPassword: async ({user, url, _token}, _request) => sendResetPassword({ user, url }),
     onPasswordReset: async ({ user }) =>
       console.log("[onPasswordReset]", user.email)
   },
