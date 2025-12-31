@@ -13,10 +13,7 @@
         footer: { id: 'datatable_footer' },
         tbody: 'text-base'
       }"
-      @rowSelect="
-        async ({ data: { id } }) =>
-          navigateTo({ name: 'admin:userDetail', params: { id } })
-      "
+      @rowSelect="showUserDetail"
     >
       <Column
         v-for="field of fields"
@@ -56,7 +53,7 @@
 <script setup>
 definePageMeta({
   name: "admin:users",
-  middleware: "admin"
+  middleware: ["signed-in", "admin"]
 })
 
 const {
@@ -125,6 +122,10 @@ function totalElementHeights() {
   totalHeight += 16
 
   return _isNaN(totalHeight) ? 0 : `${totalHeight}px`
+}
+
+async function showUserDetail({ data: { id } }) {
+  await navigateTo({ name: 'admin:userDetail', params: { id } })
 }
 </script>
 
