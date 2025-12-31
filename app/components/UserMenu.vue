@@ -81,7 +81,8 @@ const ChangePasswordDialog = defineLazyHydrationComponent(
   () => import("~/components/ChangePasswordDialog.vue")
 )
 
-const { isSignedIn, signOut: authClientSignOut, user } = useAuthClient()
+const { isSignedIn, signOut: authSignOut, user } = useAuthClient()
+const route = useRoute()
 const dialog = useDialog()
 const toast = useToast()
 const menu = useTemplateRef("menu")
@@ -103,7 +104,8 @@ const model = computed(() => {
 })
 
 async function signOut() {
-  await authClientSignOut()
+  await authSignOut()
+  closeMenu()
 
   toast.add({
     severity: "success",
@@ -112,7 +114,13 @@ async function signOut() {
     life: 3000
   })
 
-  closeMenu()
+  // noinspection JSUnresolvedReference
+  if (
+    _includes(route.meta?.middleware, "signed-in") ||
+    _includes(route.meta?.middleware, "admin")
+  ) {
+    await navigateTo({ name: "characters" })
+  }
 }
 
 function toggleMenu(event) {
@@ -125,36 +133,12 @@ function closeMenu(_) {
 
 function showSignInDialog() {
   closeMenu()
-
-  dialog.open(SignInDialog, {
-    props: {
-      modal: true,
-      dismissableMask: true,
-      showHeader: false,
-      pt: {
-        root: "z-90 w-11/12 max-w-128",
-        content: "p-0"
-      },
-      ptOptions: { mergeProps: ptViewMerge }
-    }
-  })
+  useOpenDialog(dialog, SignInDialog)
 }
 
 function showChangePasswordDialog() {
   closeMenu()
-
-  dialog.open(ChangePasswordDialog, {
-    props: {
-      modal: true,
-      dismissableMask: true,
-      showHeader: false,
-      pt: {
-        root: "z-90 w-11/12 max-w-128",
-        content: "p-0"
-      },
-      ptOptions: { mergeProps: ptViewMerge }
-    }
-  })
+  useOpenDialog(dialog, ChangePasswordDialog)
 }
 </script>
 
