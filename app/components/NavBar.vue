@@ -13,10 +13,11 @@
         class="border-none px-6!"
         variant="text"
       >
+        <!--suppress HtmlUnknownTarget -->
         <NuxtLink
           class="text-[1.25rem] font-bold whitespace-nowrap"
           data-testid="title"
-          to="/"
+          :to="{ name: 'characters' }"
         >
           <Icon name="personae" />
 

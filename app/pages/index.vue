@@ -69,6 +69,9 @@
 </template>
 
 <script setup>
+definePageMeta({ name: "characters" })
+
+const { isSignedIn } = useAuthClient()
 const charactersStore = useCharactersStore()
 
 const {
@@ -99,7 +102,11 @@ function updateFilteredCharacters(filteredValue) {
 }
 
 async function showDetail({ id }) {
-  await navigateTo({ name: "detail", params: { id } })
+  if (isSignedIn.value) {
+    await navigateTo({ name: "characterEdit", params: { id } })
+  } else {
+    await navigateTo({ name: "characterView", params: { id } })
+  }
 }
 
 function toggleShowFilters() {
