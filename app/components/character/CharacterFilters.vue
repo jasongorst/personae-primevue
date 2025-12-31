@@ -20,7 +20,7 @@
       />
     </div>
 
-    <FilterChips
+    <CharacterFilterChips
       v-if="hasAnyFilters && !showFilters"
       class="pb-2"
     />
