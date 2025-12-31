@@ -9,29 +9,37 @@
         >
           <label
             :for="attribute"
-            class="ml-1 cursor-pointer text-sm text-primary dark:text-primary"
+            class="ml-1 text-sm text-primary dark:text-primary"
+            :class="(props.action !== 'view') && 'cursor-pointer'"
           >
             {{ _startCase(attribute) }}
           </label>
 
-          <Swap @active="focusFormControl({ attribute, type })">
+          <Swap
+            :disabled="props.action === 'view'"
+            @active="focusFormControl({ attribute, type })"
+          >
+            <!--suppress VueUnrecognizedSlot -->
             <template #inactive="{ activate }">
               <div
                 v-if="type === 'richText'"
-                class="trix-content cursor-pointer border border-transparent px-3 py-2 group-hover:bg-primary/15"
+                class="trix-content border border-transparent px-3 py-2 group-hover:bg-primary/15"
+                :class="(props.action !== 'view') && 'cursor-pointer'"
                 :tabindex="0"
                 v-html="character[attribute] || '&nbsp;'"
               />
 
               <div
                 v-else
-                class="cursor-pointer border border-transparent px-3 py-2 group-hover:bg-primary/15"
+                class="border border-transparent px-3 py-2 group-hover:bg-primary/15"
+                :class="(props.action !== 'view') && 'cursor-pointer'"
                 :tabindex="0"
               >
                 {{ character[attribute] || "&nbsp;" }}
               </div>
             </template>
 
+            <!--suppress VueUnrecognizedSlot -->
             <template #active="{ deactivate }">
               <TrixEditor
                 v-if="type === 'richText'"
@@ -80,7 +88,8 @@
 
         <template v-else>
           <Button>
-            <NuxtLink to="/">Back</NuxtLink>
+            <!--suppress HtmlUnknownTarget -->
+            <NuxtLink :to="{ name: 'characters' }">Back</NuxtLink>
           </Button>
 
           <Button
@@ -104,7 +113,7 @@ const props = defineProps({
   action: {
     type: String,
     default: "edit",
-    validator: (value) => _includes(["create", "edit"], value)
+    validator: (value) => _includes(["create", "edit", "view"], value)
   },
 
   id: {
@@ -200,7 +209,7 @@ async function createCharacter() {
     })
 
     isSaved.value = true
-    navigateTo("/")
+    await navigateTo({ name: "characters" })
   } else {
     toast.add({
       severity: "error",
@@ -222,7 +231,7 @@ async function updateCharacter() {
     })
 
     isSaved.value = true
-    navigateTo("/")
+    await navigateTo({ name: "characters" })
   } else {
     toast.add({
       severity: "error",
@@ -244,7 +253,7 @@ async function deleteCharacter() {
     })
 
     isSaved.value = true
-    navigateTo("/")
+    await navigateTo({ name: "characters" })
   } else {
     toast.add({
       severity: "error",
@@ -321,8 +330,8 @@ function confirmReset() {
           detail: "Revert cancelled.",
           life: 3000
         })
-  })
-}
+    })
+  }
 
   confirm.require(confirmOptions)
 }
