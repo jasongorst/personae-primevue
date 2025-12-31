@@ -5,8 +5,6 @@
 </template>
 
 <script setup>
-const { isLoading } = storeToRefs(useCharactersStore())
-
 // onMounted(async () => {
 //   if (import.meta.dev) {
 //     await useAutoSignIn()
