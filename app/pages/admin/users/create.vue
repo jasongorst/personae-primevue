@@ -5,7 +5,7 @@
 <script setup>
 definePageMeta({
   name: "admin:userCreate",
-  middleware: "admin"
+  middleware: ["signed-in", "admin"]
 })
 </script>
 
