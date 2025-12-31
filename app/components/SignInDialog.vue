@@ -185,18 +185,7 @@ async function resetPasswordRequest() {
 }
 
 function showResetPasswordRequestDialog() {
-  dialog.open(ResetPasswordRequestDialog, {
-    props: {
-      modal: true,
-      dismissableMask: true,
-      showHeader: false,
-      pt: {
-        root: "z-90 w-11/12 max-w-128",
-        content: "p-0"
-      },
-      ptOptions: { mergeProps: ptViewMerge }
-    }
-  })
+  useOpenDialog(dialog, ResetPasswordRequestDialog)
 }
 
 function closeDialog() {
