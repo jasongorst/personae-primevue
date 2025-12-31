@@ -5,7 +5,6 @@ import { ac, admin as adminRole, user as userRole } from "../../server/utils/aut
 
 // noinspection JSUnusedGlobalSymbols
 export default function useAuthClient() {
-  const config = useRuntimeConfig()
   const headers = import.meta.server ? useRequestHeaders() : undefined
 
   const authClient = createAuthClient({
@@ -24,13 +23,6 @@ export default function useAuthClient() {
       inferAdditionalFields(additionalFields)
     ]
   })
-
-  const defaultRedirectTo = {
-    redirectGuestTo: "/",
-    redirectUserTo: "/"
-  }
-
-  const redirectTo = _defaults(defaultRedirectTo, config.public.auth.redirectTo)
 
   const session = useState("auth:session", () => null)
   const user = useState("auth:user", () => null)
@@ -98,7 +90,6 @@ export default function useAuthClient() {
     signIn: signIn,
     signUp: authClient.signUp,
     signOut,
-    redirectTo,
     fetchSession,
     authClient
   }
