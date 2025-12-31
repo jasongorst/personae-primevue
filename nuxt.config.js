@@ -14,11 +14,13 @@ export default defineNuxtConfig({
         { rel: "manifest", href: "/manifest.json" },
         { rel: "mask-icon", href: "/theater-masks-solid.svg", color: "#6e0b75" }
       ],
+
       meta: [
         { charset: "UTF-8" },
         { name: "theme-color", content: "#6e0b75" },
         { name: "viewport", content: "width=device-width, initial-scale=1.0" }
       ],
+
       title: "Dramatis Personae"
     }
   },
@@ -33,13 +35,8 @@ export default defineNuxtConfig({
     timeline: { enabled: true }
   },
 
-  experimental: {
-    asyncContext: true
-  },
-
-  future: {
-    compatibilityVersion: 5
-  },
+  experimental: { asyncContext: true },
+  future: { compatibilityVersion: 5 },
 
   imports: {
     dirs: ["stores"],
@@ -70,20 +67,11 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       api: { baseURL: "" },
-
-      auth: {
-        baseURL: "",
-        redirectTo: { guest: "", user: "" }
-      },
-
+      auth: { baseURL: "" },
       websocketHost: ""
     },
 
-    betterAuth: {
-      baseURL: "",
-      secret: ""
-    },
-
+    betterAuth: { baseURL: "", secret: "" },
     postmarkServerToken: "",
     prismaDatabaseURL: ""
   },
@@ -96,10 +84,7 @@ export default defineNuxtConfig({
       }
     },
 
-    esbuild: {
-      legalComments: "none"
-    },
-
+    esbuild: { legalComments: "none" },
     plugins: [tailwindcss()],
 
     vue: {
@@ -135,20 +120,18 @@ export default defineNuxtConfig({
     upperAfterPrefix: false
   },
 
-  pinia: {
-    storesDirs: ["./app/stores/**"]
-  },
+  pinia: { storesDirs: ["./app/stores/**"] },
 
   primevue: {
-    directives: {
-      include: ["Tooltip"]
-    },
+    directives: { include: ["Tooltip"] },
     importPT: { from: "~/primevue/passthrough.js" },
+
     options: {
       ptOptions: {
         mergeSections: true,
         mergeProps: true
       },
+
       unstyled: true
     }
   }
