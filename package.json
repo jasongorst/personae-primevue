@@ -40,6 +40,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "@vue/language-server": "^3.2.1",
     "better-auth": "^1.4.9",
+    "defu": "^6.1.4",
     "dotenv": "^17.2.3",
     "engine.io": "^6.6.5",
     "html-to-text": "^9.0.5",

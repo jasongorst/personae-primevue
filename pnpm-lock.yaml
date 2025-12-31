@@ -69,6 +69,9 @@ importers:
       better-auth:
         specifier: ^1.4.9
         version: 1.4.9(@prisma/client@7.2.0(prisma@7.2.0(@types/react@19.2.7)(magicast@0.5.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.3))(typescript@5.9.3))(mysql2@3.15.3)(pg@8.16.3)(prisma@7.2.0(@types/react@19.2.7)(magicast@0.5.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.3))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(vue@3.5.26(typescript@5.9.3))
+      defu:
+        specifier: ^6.1.4
+        version: 6.1.4
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
