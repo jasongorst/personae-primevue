@@ -7,8 +7,9 @@
 
 <script setup>
 definePageMeta({
-  name: "detail",
-  path: "/:id(\\d+)"
+  name: "characterEdit",
+  path: "/edit/:id(\\d+)",
+  middleware: "signed-in"
 })
 
 const id = _toInteger(useRoute().params?.id)
