@@ -125,6 +125,8 @@
 </template>
 
 <script setup>
+definePageMeta({ name: "reset-password" })
+
 import { Form } from "@primevue/forms"
 // noinspection JSUnresolvedReference
 import { zodResolver } from "@primevue/forms/resolvers/zod"
