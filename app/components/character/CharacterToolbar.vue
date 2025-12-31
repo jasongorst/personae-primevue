@@ -20,7 +20,7 @@
         <!--suppress HtmlUnknownTarget -->
         <NuxtLink
           class="flex items-center gap-0.5"
-          :to="{ name: 'create' }"
+          :to="{ name: 'characterCreate' }"
         >
           <span class="font-semibold">Add</span>
 

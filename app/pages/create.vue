@@ -3,7 +3,10 @@
 </template>
 
 <script setup>
-definePageMeta({ middleware: "signedIn" })
+definePageMeta({
+  name: "characterCreate",
+  middleware: "signed-in"
+})
 </script>
 
 <style scoped></style>
