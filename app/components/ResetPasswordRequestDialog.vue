@@ -90,7 +90,7 @@ async function resetPasswordRequest(email) {
   // noinspection JSUnresolvedReference
   const { error } = await authClient.requestPasswordReset({
     email: email,
-    redirectTo: "/account/reset-password"
+    redirectTo: { name: "reset-password" }
   })
 
   isLoading.value = false
