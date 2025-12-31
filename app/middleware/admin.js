@@ -1,7 +1,16 @@
 export default defineNuxtRouteMiddleware(() => {
-  const { isSignedIn, user } = useAuthClient()
+  const { user } = useAuthClient()
 
-  if (!isSignedIn.value || user.value.role !== "admin") {
-    return abortNavigation("Not an admin.")
+  if (user.value.role !== "admin") {
+    const toast = useToast()
+
+    toast.add({
+      severity: "error",
+      summary: "Not An Admin.",
+      detail: "Only an admin can access that.",
+      life: 3000
+    })
+
+    return abortNavigation()
   }
 })
