@@ -37,7 +37,7 @@ const props = defineProps({
   id: {
     type: String,
     required: false,
-    default: () => uuid()
+    default: () => useId()
   },
 
   // override default editor config
