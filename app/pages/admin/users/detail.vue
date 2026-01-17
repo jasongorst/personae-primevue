@@ -2,18 +2,18 @@
   <!--suppress JSValidateTypes -->
   <UserEditor
     action="edit"
-    :id="id"
+    :userId="userId"
   />
 </template>
 
 <script setup>
 definePageMeta({
   name: "admin:userDetail",
-  path: "/admin/users/:id([a-zA-Z0-9]{32})",
+  path: "/admin/users/:userId([a-zA-Z0-9]{32})",
   middleware: ["signed-in", "admin"]
 })
 
-const id = useRoute().params?.id
+const userId = useRoute().params?.userId
 </script>
 
 <style scoped></style>
