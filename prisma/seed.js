@@ -1,7 +1,7 @@
 import "dotenv/config"
 import { includes, isArray, isPlainObject, map, mapValues, omit } from "lodash-es"
 import { faker } from "@faker-js/faker"
-import prisma from "server/utils/prisma.js"
+import prisma from "../server/utils/prisma.js"
 import { serverAuth } from "../server/utils/auth.js"
 import characters from "./seeds/Character.json" with { type: "json" }
 
@@ -37,7 +37,7 @@ function deepParseTimestamps(object) {
   return deepConvertValues(object, parseTimestamps)
 }
 
-async function seedCharacter() {
+async function seedCharacters() {
   const characterSeeds = deepParseTimestamps(
     map(characters, (character) => omit(character, ["id"]))
   )
@@ -51,25 +51,21 @@ async function seedCharacter() {
 
 async function seedAdmin() {
   // noinspection JSUnresolvedReference,SpellCheckingInspection
-  const { user } = await serverAuth().api.signUpEmail({
+  const adminUser = await serverAuth().api.createUser({
     body: {
       email: "jason@evilpaws.org",
       password: "Y.nQ!Xw.L3b9288twbh-dxY6nq7yoHp.",
       name: "Jason Gorst",
-      username: "gyrf"
-    },
-  })
-
-  const adminUser = await prisma.user.update({
-    where: { id: user.id },
-    data: { role: "admin" }
+      role: "admin",
+      data: { username: "gyrf" }
+    }
   })
 
   console.log("Created admin user.", adminUser)
 }
 
 async function seedUsers(n) {
-  for (let i = 1; i < n; i++ ) {
+  for (let i = 1; i <= n; i++ ) {
     const firstName = faker.person.firstName()
     const lastName = faker.person.lastName()
     const name = faker.person.fullName({ firstName, lastName })
@@ -80,13 +76,14 @@ async function seedUsers(n) {
     console.log(email, password, name, username)
 
     // noinspection JSUnresolvedReference
-    const { user: { id } } = await serverAuth().api.signUpEmail({
-      body: { email, password, name, username },
-    })
-
-    await prisma.user.update({
-      where: { id },
-      data: { role: "user" }
+    await serverAuth().api.createUser({
+      body: {
+        email,
+        password,
+        name,
+        role: "user",
+        data: { username }
+      }
     })
   }
 
@@ -94,9 +91,9 @@ async function seedUsers(n) {
 }
 
 async function main() {
-  await seedCharacter()
+  await seedCharacters()
   await seedAdmin()
-  await seedUsers(1000)
+  await seedUsers(5)
 }
 
 main()
