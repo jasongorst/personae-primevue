@@ -1,18 +1,18 @@
 <template>
   <CharacterEditor
     action="edit"
-    :id="id"
+    :characterId="characterId"
   />
 </template>
 
 <script setup>
 definePageMeta({
   name: "characterEdit",
-  path: "/edit/:id(\\d+)",
+  path: "/edit/:characterId(\\d+)",
   middleware: "signed-in"
 })
 
-const id = _toInteger(useRoute().params?.id)
+const characterId = _toInteger(useRoute().params?.characterId)
 </script>
 
 <style scoped></style>
