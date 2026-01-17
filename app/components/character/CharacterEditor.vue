@@ -1,3 +1,4 @@
+<!--suppress VueUnrecognizedSlot -->
 <template>
   <Card class="mx-auto max-w-prose">
     <template #content>
@@ -7,39 +8,45 @@
           :key="attribute"
           class="group flex flex-col"
         >
-          <label
-            :for="attribute"
-            class="ml-1 text-sm text-primary dark:text-primary"
-            :class="(props.action !== 'view') && 'cursor-pointer'"
-          >
-            {{ _startCase(attribute) }}
-          </label>
-
           <Swap
             :disabled="props.action === 'view'"
             @active="focusFormControl({ attribute, type })"
           >
-            <!--suppress VueUnrecognizedSlot -->
+            <template #default>
+              <label
+                :for="attribute"
+                class="ml-1 block text-sm text-primary dark:text-primary"
+                :class="props.action !== 'view' && 'cursor-pointer'"
+              >
+                {{ _startCase(attribute) }}
+              </label>
+            </template>
+
             <template #inactive="{ activate }">
               <div
                 v-if="type === 'richText'"
-                class="trix-content border border-transparent px-3 py-2 group-hover:bg-primary/15"
-                :class="(props.action !== 'view') && 'cursor-pointer'"
+                class="trix-content border border-transparent px-3 py-2"
+                :class="
+                  props.action !== 'view' &&
+                  'cursor-pointer group-hover:bg-primary/15'
+                "
                 :tabindex="0"
                 v-html="character[attribute] || '&nbsp;'"
               />
 
               <div
                 v-else
-                class="border border-transparent px-3 py-2 group-hover:bg-primary/15"
-                :class="(props.action !== 'view') && 'cursor-pointer'"
+                class="border border-transparent px-3 py-2"
+                :class="
+                  props.action !== 'view' &&
+                  'cursor-pointer group-hover:bg-primary/15'
+                "
                 :tabindex="0"
               >
                 {{ character[attribute] || "&nbsp;" }}
               </div>
             </template>
 
-            <!--suppress VueUnrecognizedSlot -->
             <template #active="{ deactivate }">
               <TrixEditor
                 v-if="type === 'richText'"
@@ -75,7 +82,7 @@
 
     <template #footer>
       <div class="mt-4 flex flex-row justify-end gap-3">
-        <template v-if="isUpdated">
+        <template v-if="isEdited">
           <Button
             severity="warn"
             @click="confirmReset"
@@ -116,7 +123,7 @@ const props = defineProps({
     validator: (value) => _includes(["create", "edit", "view"], value)
   },
 
-  id: {
+  characterId: {
     type: Number,
     validator: (value, props) => props.action !== "edit" || _isInteger(value)
   }
@@ -130,20 +137,20 @@ const { create, destroy, getCharacter, update } = charactersStore
 const { options } = storeToRefs(charactersStore)
 
 const initialValue =
-  props.action === "create" ? emptyCharacter : await getCharacter(props.id)
+  props.action === "create" ? emptyCharacter : await getCharacter(props.characterId)
 
 const {
   model: character,
-  updatedFields,
-  isUpdated,
+  editedFields,
+  isEdited,
   revert
-} = useEditor(initialValue)
+} = useRevertible(initialValue)
 
 const isSaved = ref(false)
 const suggestions = ref(_clone(options.value))
 
 onBeforeRouteLeave(async () => {
-  if (isUpdated.value && !isSaved.value && !(await confirmLeave())) {
+  if (isEdited.value && !isSaved.value && !(await confirmLeave())) {
     return false
   }
 })
@@ -220,7 +227,7 @@ async function createCharacter() {
 }
 
 async function updateCharacter() {
-  const { data, error } = await update(props.id, updatedFields.value)
+  const { data, error } = await update(props.characterId, editedFields.value)
 
   if (data) {
     toast.add({
@@ -242,7 +249,7 @@ async function updateCharacter() {
 }
 
 async function deleteCharacter() {
-  const { data, error } = await destroy(props.id)
+  const { data, error } = await destroy(props.characterId)
 
   if (data) {
     toast.add({
