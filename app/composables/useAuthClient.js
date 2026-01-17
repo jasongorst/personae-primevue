@@ -1,7 +1,12 @@
 import { createAuthClient } from "better-auth/client"
 import { adminClient, inferAdditionalFields } from "better-auth/client/plugins"
-import { additionalFields } from "../../server/utils/auth/additionalFields.js"
-import { ac, admin as adminRole, user as userRole } from "../../server/utils/auth/permissions.js"
+import { additionalFields } from "#shared/utils/auth/additionalFields.js"
+
+import {
+  ac,
+  admin as adminRole,
+  user as userRole
+} from "#shared/utils/auth/permissions.js"
 
 // noinspection JSUnusedGlobalSymbols
 export default function useAuthClient() {
@@ -11,15 +16,7 @@ export default function useAuthClient() {
     fetchOptions: { headers },
 
     plugins: [
-      adminClient({
-        ac,
-
-        roles: {
-          admin: adminRole,
-          user: userRole
-        }
-      }),
-
+      adminClient({ ac, roles: { admin: adminRole, user: userRole } }),
       inferAdditionalFields(additionalFields)
     ]
   })
@@ -33,11 +30,21 @@ export default function useAuthClient() {
     : useState("auth:fetchingSession", () => false)
 
   async function signIn({ email, password, rememberMe, redirectTo } = {}) {
-   // noinspection JSUnresolvedReference
-    const result = await authClient.signIn.email({ email, password, rememberMe })
+    // noinspection JSUnresolvedReference
+    const result = await authClient.signIn.email({
+      email,
+      password,
+      rememberMe
+    })
 
     if (redirectTo) {
       await navigateTo(redirectTo)
+    } else {
+      const route = useRoute()
+
+      if (route.name === "characterView") {
+        await navigateTo({ name: "characterEdit", params: route.params })
+      }
     }
 
     return result
@@ -51,6 +58,20 @@ export default function useAuthClient() {
 
     if (redirectTo) {
       await navigateTo(redirectTo)
+    } else {
+      const route = useRoute()
+
+      if (route.name === "characterEdit") {
+        await navigateTo({ name: "characterView", params: route.params })
+      } else {
+        // noinspection JSUnresolvedReference
+        if (
+          _includes(route.meta?.middleware, "signed-in") ||
+          _includes(route.meta?.middleware, "admin")
+        ) {
+          await navigateTo({ name: "characters" })
+        }
+      }
     }
 
     return result
@@ -87,7 +108,7 @@ export default function useAuthClient() {
     session,
     user,
     isSignedIn,
-    signIn: signIn,
+    signIn,
     signUp: authClient.signUp,
     signOut,
     fetchSession,

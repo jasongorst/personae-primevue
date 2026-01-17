@@ -81,7 +81,7 @@ const ChangePasswordDialog = defineLazyHydrationComponent(
   () => import("~/components/ChangePasswordDialog.vue")
 )
 
-const { isSignedIn, signOut: authSignOut, user } = useAuthClient()
+const { isSignedIn, signOut, user } = useAuthClient()
 const route = useRoute()
 const dialog = useDialog()
 const toast = useToast()
@@ -90,7 +90,7 @@ const menu = useTemplateRef("menu")
 const model = computed(() => {
   const menu = [
     { label: "Change Password", command: showChangePasswordDialog },
-    { label: "Sign Out", command: signOut }
+    { label: "Sign Out", command: doSignOut }
   ]
 
   if (isSignedIn.value && user.value.role === "admin") {
@@ -103,8 +103,8 @@ const model = computed(() => {
   return menu
 })
 
-async function signOut() {
-  await authSignOut()
+async function doSignOut() {
+  await signOut()
   closeMenu()
 
   toast.add({
@@ -113,14 +113,6 @@ async function signOut() {
     detail: "You've been signed out.",
     life: 3000
   })
-
-  // noinspection JSUnresolvedReference
-  if (
-    _includes(route.meta?.middleware, "signed-in") ||
-    _includes(route.meta?.middleware, "admin")
-  ) {
-    await navigateTo({ name: "characters" })
-  }
 }
 
 function toggleMenu(event) {
