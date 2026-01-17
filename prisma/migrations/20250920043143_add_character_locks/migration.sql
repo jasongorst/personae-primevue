@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "public"."Character"
-    ADD COLUMN "lock"     BOOLEAN NOT NULL DEFAULT false,
-    ADD COLUMN "lockedAt" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP;
