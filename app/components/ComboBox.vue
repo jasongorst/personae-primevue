@@ -1,7 +1,6 @@
 <template>
   <PatchedAutoComplete
     v-model="model"
-    v-bind="$attrs"
     :inputId="inputId"
     :suggestions="currentSuggestions"
     :minLength="0"
@@ -13,10 +12,6 @@
 </template>
 
 <script setup>
-defineOptions({
-  inheritAttrs: false
-})
-
 const model = defineModel()
 
 // noinspection JSCheckFunctionSignatures
@@ -24,7 +19,7 @@ const props = defineProps({
   inputId: {
     type: String,
     required: false,
-    default: () => uuid()
+    default: () => useId()
   },
 
   suggestions: {
