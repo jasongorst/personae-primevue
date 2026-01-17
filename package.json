@@ -13,7 +13,7 @@
     "preview": "nuxt preview -p 4001",
     "auth:generate": "cli generate --config ./server/utils/auth.js --output ./prisma/auth.prisma --yes",
     "prisma:generate": "prisma generate",
-    "migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
     "task:updatePlainTextFields": "tsx ./prisma/updatePlainTextFields.js",
     "task:updateNullStringFields": "tsx ./prisma/updateNullStringFields.js"
   },
@@ -22,11 +22,11 @@
     "vue": "^3.5.26"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.1.0",
+    "@faker-js/faker": "^10.2.0",
     "@iconify-json/fa6-solid": "^1.2.4",
     "@iconify-json/ph": "^1.2.2",
     "@nuxt/devtools": "3.1.1",
-    "@nuxt/icon": "^2.1.1",
+    "@nuxt/icon": "^2.2.0",
     "@nuxt/kit": "^4.2.2",
     "@nuxt/types": "^2.18.1",
     "@pinia/nuxt": "^0.11.3",
@@ -38,18 +38,18 @@
     "@tailwindcss/language-server": "^0.14.29",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.18",
-    "@vue/language-server": "^3.2.1",
-    "better-auth": "^1.4.9",
+    "@vue/language-server": "^3.2.2",
+    "better-auth": "^1.4.13",
     "defu": "^6.1.4",
     "dotenv": "^17.2.3",
     "engine.io": "^6.6.5",
     "html-to-text": "^9.0.5",
     "jsondiffpatch": "^0.7.3",
     "lodash-es": "^4.17.22",
-    "nitropack": "^2.12.9",
+    "nitropack": "^2.13.1",
     "pinia": "^3.0.4",
     "postmark": "^4.0.5",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.0",
     "prettier-plugin-classnames": "^0.8.6",
     "prettier-plugin-merge": "^0.8.0",
     "prettier-plugin-prisma": "^5.0.0",
@@ -61,10 +61,9 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
     "tailwindcss-primeui": "^0.6.1",
-    "trix": "^2.1.15",
-    "uuid": "^13.0.0",
-    "vite": "^7.3.0",
-    "zod": "^4.2.1"
+    "trix": "^2.1.16",
+    "vite": "^7.3.1",
+    "zod": "^4.3.5"
   },
-  "packageManager": "pnpm@10.26.2"
+  "packageManager": "pnpm@10.28.0"
 }
