@@ -1,11 +1,14 @@
 <template>
   <div class="contents">
     <div
+      data-name="inactive"
       :class="isActive && 'hidden'"
       @click="activate"
       @keydown.enter.prevent="activate"
       @keydown.space.prevent="activate"
     >
+      <slot name="default" />
+
       <slot
         name="inactive"
         :activate="activate"
@@ -13,9 +16,12 @@
     </div>
 
     <div
+      data-name="active"
       :class="!isActive && 'hidden'"
       @blur="deactivate"
     >
+      <slot name="default" />
+
       <slot
         name="active"
         :deactivate="deactivate"
