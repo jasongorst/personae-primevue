@@ -3,7 +3,7 @@
 import AutoComplete from "primevue/autocomplete"
 
 export default {
-  name: "PrimevueAutoComplete",
+  name: "PatchedAutoComplete",
   extends: AutoComplete,
 
   methods: {
