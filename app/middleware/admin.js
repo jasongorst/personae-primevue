@@ -1,16 +1,20 @@
-export default defineNuxtRouteMiddleware(() => {
-  const { user } = useAuthClient()
+export default defineNuxtRouteMiddleware(async () => {
+  const nuxtApp = useNuxtApp()
+  const { fetchSession, user } = useAuthClient()
+  await fetchSession()
 
   if (user.value.role !== "admin") {
-    const toast = useToast()
+    return nuxtApp.runWithContext(() => {
+      const toast = useToast()
 
-    toast.add({
-      severity: "error",
-      summary: "Not An Admin.",
-      detail: "Only an admin can access that.",
-      life: 3000
+      toast.add({
+        severity: "danger",
+        summary: "Not An Admin.",
+        detail: "Only an admin can access that.",
+        life: 3000
+      })
+
+      return abortNavigation()
     })
-
-    return abortNavigation()
   }
 })
