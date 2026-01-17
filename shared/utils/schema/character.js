@@ -1,5 +1,7 @@
 import * as z from "zod"
 
+zodConfig()
+
 export const characterSchema = z.object({
   id: z.int().positive(),
   player: z.string().trim(),
