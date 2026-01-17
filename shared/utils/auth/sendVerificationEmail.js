@@ -1,9 +1,8 @@
+import "dotenv/config"
 import * as postmark from "postmark"
 
-const config = useRuntimeConfig()
-
 export default async function sendVerificationEmail({ user, url }) {
-  const postmarkClient = new postmark.ServerClient(config.postmarkServerToken)
+  const postmarkClient = new postmark.ServerClient(process.env.NUXT_POSTMARK_SERVER_TOKEN)
 
   const response = await postmarkClient.sendEmail({
     From: "admin@evilpaws.org",
