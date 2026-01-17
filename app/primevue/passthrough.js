@@ -641,6 +641,117 @@ const passthrough = {
     }
   },
 
+  multiselect: {
+    root: tw`relative inline-flex cursor-pointer rounded-md border border-surface-300
+    bg-surface-0 shadow-[0_1px_2px_0_rgba(18,18,23,0.05)] transition-colors
+    duration-200 select-none hover:border-surface-400 dark:border-surface-600
+    dark:bg-surface-950 dark:hover:border-surface-700 p-invalid:border-red-400
+    dark:p-invalid:border-red-300 p-fluid:flex p-filled:bg-surface-50
+    dark:p-filled:bg-surface-800 p-disabled:pointer-events-none
+    p-disabled:bg-surface-200 p-disabled:text-surface-500
+    dark:p-disabled:bg-surface-700 dark:p-disabled:text-surface-400
+    p-focus:border-primary`,
+    labelContainer: tw`flex-auto overflow-hidden`,
+    label: tw`flex items-center gap-1 overflow-hidden px-3 py-2 text-ellipsis
+    whitespace-nowrap text-surface-700 dark:text-surface-0 p-small:px-[0.625rem]
+    p-small:py-[0.375rem] p-small:text-sm p-large:px-[0.875rem]
+    p-large:py-[0.625rem] p-large:text-lg p-disabled:text-surface-500
+    dark:p-disabled:text-surface-400 p-empty:overflow-hidden p-empty:opacity-0
+    p-placeholder:text-surface-500 dark:p-placeholder:text-surface-400
+    p-has-chip:px-[0.375rem] p-has-chip:py-1`,
+    chipItem: tw``,
+    pcChip: {
+      root: tw`inline-flex items-center gap-2 rounded-sm bg-surface-100 px-3 py-1
+      text-surface-800 has-[img]:pt-1 has-[img]:pb-1 dark:bg-surface-800
+      dark:text-surface-0 p-removable:pe-2`,
+      removeIcon: tw`h-4 w-4 cursor-pointer rounded-full text-base text-surface-800
+      dark:text-surface-0`
+    },
+    dropdown: tw`flex w-10 shrink-0 items-center justify-center rounded-e-md bg-transparent
+    text-surface-400`,
+    overlay: tw`absolute top-0 left-0 rounded-md border border-surface-200 bg-surface-0
+    text-surface-700
+    shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)]
+    dark:border-surface-700 dark:bg-surface-900 dark:text-surface-0
+    p-portal-self:min-w-full`,
+    header: tw`flex items-center gap-2 px-4 pt-2 pb-1`,
+    pcHeaderCheckbox: {
+      root: tw`relative inline-flex h-5 w-5 align-bottom select-none`,
+      input: tw`peer absolute start-0 top-0 z-10 m-0 h-full w-full cursor-pointer
+      appearance-none rounded-xs border border-transparent p-0 opacity-0
+      disabled:cursor-default`,
+      box: tw`flex h-5 w-5 items-center justify-center rounded-sm border border-surface-300
+      bg-surface-0 text-surface-700 shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
+      transition-colors duration-200 peer-focus-visible:outline
+      peer-focus-visible:outline-1 peer-focus-visible:outline-offset-2
+      peer-focus-visible:outline-primary peer-enabled:peer-hover:border-surface-400
+      dark:border-surface-700 dark:bg-surface-950 dark:text-surface-0
+      dark:peer-enabled:peer-hover:border-surface-600 p-checked:border-primary
+      p-checked:bg-primary p-checked:text-primary-contrast
+      peer-enabled:peer-hover:p-checked:border-primary-emphasis
+      peer-enabled:peer-hover:p-checked:bg-primary-emphasis
+      p-disabled:border-surface-300 p-disabled:bg-surface-200
+      p-disabled:text-surface-700 dark:p-disabled:border-surface-700
+      dark:p-disabled:bg-surface-400 dark:p-disabled:text-surface-400`,
+      icon: tw`h-[0.875rem] w-[0.875rem] text-sm transition-none`
+    },
+    pcFilterContainer: {
+      root: tw`relative flex-auto`
+    },
+    pcFilter: {
+      root: tw`w-full appearance-none rounded-md border border-surface-300 bg-surface-0 py-2
+      ps-3 pe-10 text-surface-700 shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
+      outline-hidden transition-colors duration-200 placeholder:text-surface-500
+      enabled:hover:border-surface-400 enabled:focus:border-primary
+      disabled:bg-surface-200 disabled:text-surface-500 dark:border-surface-700
+      dark:bg-surface-950 dark:text-surface-0 dark:placeholder:text-surface-400
+      dark:enabled:hover:border-surface-600 dark:disabled:bg-surface-700
+      dark:disabled:text-surface-400 p-fluid:w-full`
+    },
+    pcFilterIconContainer: {
+      root: tw`absolute end-3 top-1/2 z-1 -mt-2 leading-none`
+    },
+    listContainer: tw`overflow-auto`,
+    virtualScroller: tw``,
+    list: tw`m-0 flex list-none flex-col gap-[2px] p-1`,
+    optionGroup: tw`m-0 bg-transparent px-3 py-2 font-semibold text-surface-500
+    dark:text-surface-400`,
+    option: tw`relative flex cursor-pointer items-center gap-2 overflow-hidden rounded-sm
+    border-none bg-transparent px-3 py-2 font-normal whitespace-nowrap
+    text-surface-700 transition-colors duration-200 dark:text-surface-0
+    p-focus:bg-surface-100 p-focus:text-surface-800 dark:p-focus:bg-surface-800
+    dark:p-focus:text-surface-0`,
+    optionLabel: tw``,
+    pcOptionCheckbox: {
+      root: tw`relative inline-flex h-5 w-5 align-bottom select-none`,
+      input: tw`peer absolute start-0 top-0 z-10 m-0 h-full w-full cursor-pointer
+      appearance-none rounded-xs border border-transparent p-0 opacity-0
+      disabled:cursor-default`,
+      box: tw`flex h-5 w-5 items-center justify-center rounded-sm border border-surface-300
+      bg-surface-0 text-surface-700 shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
+      transition-colors duration-200 peer-focus-visible:outline
+      peer-focus-visible:outline-1 peer-focus-visible:outline-offset-2
+      peer-focus-visible:outline-primary peer-enabled:peer-hover:border-surface-400
+      dark:border-surface-700 dark:bg-surface-950 dark:text-surface-0
+      dark:peer-enabled:peer-hover:border-surface-600 p-checked:border-primary
+      p-checked:bg-primary p-checked:text-primary-contrast
+      peer-enabled:peer-hover:p-checked:border-primary-emphasis
+      peer-enabled:peer-hover:p-checked:bg-primary-emphasis
+      p-disabled:border-surface-300 p-disabled:bg-surface-200
+      p-disabled:text-surface-700 dark:p-disabled:border-surface-700
+      dark:p-disabled:bg-surface-400 dark:p-disabled:text-surface-400`,
+      icon: tw`h-[0.875rem] w-[0.875rem] text-sm transition-none`
+    },
+    emptyMessage: tw`px-3 py-2`,
+    transition: {
+      enterFromClass: "opacity-0 scale-y-75",
+      enterActiveClass:
+        "transition duration-120 ease-[cubic-bezier(0,0,0.2,1)]",
+      leaveActiveClass: "transition-opacity duration-100 ease-linear",
+      leaveToClass: "opacity-0"
+    }
+  },
+
   panel: {
     root: tw`rounded-md border border-surface-200 bg-surface-0 text-surface-700
     dark:border-surface-700 dark:bg-surface-900 dark:text-surface-0`,
@@ -695,6 +806,70 @@ const passthrough = {
       enterActiveClass: tw`transition duration-120 ease-[cubic-bezier(0,0,0.2,1)]`,
       leaveActiveClass: tw`transition-opacity duration-100 ease-linear`,
       leaveToClass: tw`opacity-0`
+    }
+  },
+
+  select: {
+    root: tw`relative inline-flex cursor-pointer rounded-md border border-surface-300
+    bg-surface-0 shadow-[0_1px_2px_0_rgba(18,18,23,0.05)] transition-colors
+    duration-200 select-none hover:border-surface-400 dark:border-surface-700
+    dark:bg-surface-950 dark:hover:border-surface-600 p-invalid:border-red-400
+    dark:p-invalid:border-red-300 p-fluid:flex p-filled:bg-surface-50
+    dark:p-filled:bg-surface-800 p-disabled:pointer-events-none
+    p-disabled:bg-surface-200 p-disabled:text-surface-500
+    dark:p-disabled:bg-surface-700 dark:p-disabled:text-surface-400
+    p-focus:border-primary`,
+    label: tw`block w-[1%] flex-auto overflow-hidden border-none bg-transparent px-3 py-2
+    overflow-ellipsis whitespace-nowrap text-surface-700 outline-none
+    dark:text-surface-0 p-small:px-[0.625rem] p-small:py-[0.375rem] p-small:text-sm
+    p-large:px-[0.875rem] p-large:py-[0.625rem] p-large:text-lg
+    p-disabled:text-surface-500 dark:p-disabled:text-surface-400
+    p-empty:overflow-hidden p-empty:opacity-0 p-placeholder:text-surface-500
+    dark:p-placeholder:text-surface-400 p-clearable:pe-7 p-editable:cursor-default`,
+    dropdown: tw`hidden`,
+    overlay: tw`absolute top-0 left-0 rounded-md border border-surface-200 bg-surface-50
+    text-surface-700
+    shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)]
+    dark:border-surface-700 dark:bg-surface-950 dark:text-surface-0
+    p-portal-self:min-w-full`,
+    header: tw`px-4 pt-2 pb-1`,
+    pcFilterContainer: {
+      root: tw`relative`
+    },
+    pcFilter: {
+      root: tw`w-full appearance-none rounded-md border border-surface-300 bg-surface-0 py-2
+      ps-3 pe-10 text-surface-700 shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
+      outline-hidden transition-colors duration-200 placeholder:text-surface-500
+      enabled:hover:border-surface-400 enabled:focus:border-primary
+      disabled:bg-surface-200 disabled:text-surface-500 dark:border-surface-700
+      dark:bg-surface-950 dark:text-surface-0 dark:placeholder:text-surface-400
+      dark:enabled:hover:border-surface-600 dark:disabled:bg-surface-700
+      dark:disabled:text-surface-400 p-fluid:w-full`
+    },
+    pcFilterIconContainer: {
+      root: tw`absolute end-3 top-1/2 z-1 -mt-2 leading-none`
+    },
+    listContainer: tw`overflow-auto`,
+    list: tw`m-0 flex list-none flex-col gap-[2px] p-1`,
+    optionGroup: tw`m-0 bg-transparent px-3 py-2 font-semibold text-surface-500
+    dark:text-surface-400`,
+    optionGroupLabel: tw``,
+    option: tw`relative flex cursor-pointer items-center overflow-hidden rounded-sm border-none
+    bg-transparent px-3 py-2 font-normal whitespace-nowrap text-surface-700
+    transition-colors duration-200 dark:text-surface-0 p-selected:bg-highlight
+    p-focus:bg-surface-100 p-focus:text-surface-800 dark:p-focus:bg-surface-800
+    dark:p-focus:text-surface-0 p-focus:p-selected:bg-highlight-emphasis`,
+    optionLabel: tw``,
+    optionCheckIcon: tw`relative -ms-[0.375rem] me-[0.375rem] text-surface-700 dark:text-surface-0`,
+    optionBlankIcon: tw``,
+    emptyMessage: tw`px-3 py-2`,
+    virtualScroller: tw``,
+    transition: {
+      enterFromClass: "opacity-0 scale-y-75",
+      enterActiveClass:
+        "transition duration-120 ease-[cubic-bezier(0,0,0.2,1)]",
+      leaveActiveClass: "transition-opacity duration-100 ease-linear",
+      leaveToClass: "opacity-0"
     }
   },
 
@@ -815,7 +990,6 @@ const passthrough = {
   }
 }
 
-_set(passthrough, "initialautocomplete", _cloneDeep(passthrough.autocomplete))
-_set(passthrough, "combobox", _cloneDeep(passthrough.autocomplete))
+_set(passthrough, "patchedautocomplete", _cloneDeep(passthrough.autocomplete))
 
 export default passthrough
