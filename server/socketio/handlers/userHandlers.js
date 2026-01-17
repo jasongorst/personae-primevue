@@ -19,6 +19,7 @@ export function userHandlers(io, socket) {
     await _executeQuery({ id, query, callback })
   }
 
+
   async function listUsers(callback) {
     const query = () =>
       prisma.user.findMany({
@@ -55,9 +56,31 @@ export function userHandlers(io, socket) {
 
   async function createUser(data, callback) {
     const validator = (user) => createUserSchema.parse(user)
-    const query = ({ data }) => prisma.user.create({ data })
     const permissions = ["create"]
-    await _executeQuery({ data, validator, query, permissions, callback })
+
+    try {
+      await _authorize(permissions)
+      const validData = validator(data)
+
+      // noinspection JSUnresolvedReference
+      const result = await serverAuth().api.createUser({
+        body: {
+          email: validData.email,
+          password: validData.password,
+          name: validData.name,
+          role: validData.role,
+          data: { username: validData.username }
+        }
+      })
+
+      callback({ data: result })
+      return { result }
+    } catch (error) {
+      console.log(error)
+
+      callback({ error })
+      return { error}
+    }
   }
 
   async function updateUser(id, data, callback) {
