@@ -1,26 +1,45 @@
+<!--suppress VueUnrecognizedSlot -->
 <template>
   <Card class="mx-auto max-w-prose">
     <template #content>
-      <div class="flex flex-col gap-2">
+      <Form
+        id="userForm"
+        v-slot="$form"
+        :initialValues="initialValues"
+        :resolver="resolver"
+        :validateOnValueUpdate="false"
+        :validateOnBlur="true"
+        :validateOnSubmit="true"
+        class="flex flex-col gap-2"
+        @submit="onFormSubmit"
+        ref="form"
+      >
         <div
-          v-for="{ attribute, type } in userAttributes"
+          v-for="({ type }, attribute) in userAttributes"
           :key="attribute"
           class="group flex flex-col"
         >
-          <label
-            :for="attribute"
-            class="ml-1 cursor-pointer text-sm text-primary dark:text-primary"
-          >
-            {{ _startCase(attribute) }}
-          </label>
-
           <Swap @active="focusFormControl({ attribute, type })">
+            <template #default>
+              <label
+                :for="attribute"
+                class="ml-1 block cursor-pointer text-sm text-primary dark:text-primary"
+              >
+                {{ _startCase(attribute) }}
+              </label>
+            </template>
+
             <template #inactive="{ activate }">
               <div
                 v-if="type === 'richText'"
-                class="trix-content cursor-pointer border border-transparent px-3 py-2 group-hover:bg-primary/15"
+                class="trix-content cursor-pointer border border-transparent px-3 py-2
+                  group-hover:bg-primary/15"
                 :tabindex="0"
-                v-html="user[attribute] || '&nbsp;'"
+                v-html="
+                  isEmptyOrWhitespace(form?.states[attribute].value)
+                    ? '&nbsp;'
+                    : form?.states[attribute].value
+                "
               />
 
               <div
@@ -28,46 +47,70 @@
                 class="cursor-pointer border border-transparent px-3 py-2 group-hover:bg-primary/15"
                 :tabindex="0"
               >
-                {{ user[attribute] || "&nbsp;" }}
+                {{
+                  isEmptyOrWhitespace(form?.states[attribute].value)
+                    ? "&nbsp;"
+                    : form?.states[attribute].value
+                }}
               </div>
             </template>
 
             <template #active="{ deactivate }">
               <TrixEditor
                 v-if="type === 'richText'"
-                v-model="user[attribute]"
+                :name="attribute"
                 :id="attribute"
                 :tabindex="0"
-                @blur="deactivate"
+                @blur="waitForAnimation(deactivate)"
                 :ref="(trixEditor) => (trixEditors[attribute] = trixEditor)"
+              />
+
+              <Select
+                v-else-if="type === 'select'"
+                :name="attribute"
+                :tabindex="0"
+                :labelId="attribute"
+                fluid
+                :options="options[attribute]"
+                @blur="waitForAnimation(deactivate)"
+                :ref="(select) => (selects[attribute] = select)"
               />
 
               <ComboBox
                 v-else-if="type === 'autocomplete'"
-                v-model="user[attribute]"
+                :name="attribute"
                 :tabindex="0"
                 :inputId="attribute"
                 :suggestions="suggestions[attribute]"
-                @blur="onAutoCompleteBlur(deactivate)"
+                @blur="waitForAnimation(deactivate)"
               />
 
               <InputText
                 v-else
-                v-model="user[attribute]"
+                :name="attribute"
                 :id="attribute"
                 :tabindex="0"
                 fluid
-                @blur="deactivate"
+                @blur="waitForAnimation(deactivate)"
               />
             </template>
           </Swap>
+
+          <Message
+            v-if="form?.states[attribute].invalid"
+            severity="error"
+            size="small"
+            variant="simple"
+          >
+            {{ form?.states[attribute].error?.message }}
+          </Message>
         </div>
-      </div>
+      </Form>
     </template>
 
     <template #footer>
       <div class="mt-4 flex flex-row justify-end gap-3">
-        <template v-if="isUpdated">
+        <template v-if="isEdited">
           <Button
             severity="warn"
             @click="confirmReset"
@@ -75,7 +118,13 @@
             Reset
           </Button>
 
-          <Button @click="saveUser">Save</Button>
+          <Button
+            type="submit"
+            form="userForm"
+            :disabled="!form.valid"
+          >
+            Save
+          </Button>
         </template>
 
         <template v-else>
@@ -93,7 +142,6 @@
             </Button>
 
             <Button
-              v-if="props.action === 'edit'"
               severity="danger"
               @click="confirmDelete"
             >
@@ -107,6 +155,11 @@
 </template>
 
 <script setup>
+// noinspection JSUnresolvedReference
+import { zodResolver } from "@primevue/forms/resolvers/zod"
+
+const form = useTemplateRef("form")
+const selects = ref({})
 const trixEditors = ref({})
 
 // noinspection JSCheckFunctionSignatures
@@ -117,7 +170,7 @@ const props = defineProps({
     validator: (value) => _includes(["create", "edit"], value)
   },
 
-  id: {
+  userId: {
     type: String,
     validator: (value, props) =>
       props.action !== "edit" || (_isString(value) && !_isEmpty(value))
@@ -132,106 +185,108 @@ const confirm = useConfirm()
 const toast = useToast()
 const { authClient } = useAuthClient()
 
-const userAttributes = computed(() => {
-  const attr = [
-    { attribute: "email", type: "text" },
-    { attribute: "name", type: "text" },
-    { attribute: "username", type: "text" },
-    { attribute: "role", type: "autocomplete" }
-  ]
-
+const resolver = ref((opts) => {
   if (props.action === "create") {
-    attr.splice(1, 0, { attribute: "password", type: "text" })
+    return zodResolver(createUserSchema)(opts)
+  } else {
+    return zodResolver(updateUserSchema)(opts)
   }
-
-  return attr
 })
 
-const emptyUser = computed(() => {
-  _zipObject(
-    _map(userAttributes.value, "attribute"),
-    _fill(Array(userAttributes.value?.length), "")
-  )
-})
+const userAttributes = {
+  email: { type: "text", initialValue: "" },
+  password: { type: "text", initialValue: "" },
+  name: { type: "text", initialValue: "" },
+  username: { type: "text", initialValue: "" },
 
-async function getUser(id) {
+  role: {
+    type: "select",
+    options: ["user", "admin"],
+    initialValue: "user"
+  }
+}
+
+if (props.action !== "create") {
+  _unset(userAttributes, "password")
+}
+
+const emptyUser = _mapValues(userAttributes, "initialValue")
+
+async function getUser(userId) {
   const { data: response } = await useAsyncData(
-    `user:read:${id}`,
+    `user:read:${userId}`,
     async () => {
       const { data: response } = await socket
         .timeout(3000)
-        .emitWithAck("user:read", id)
+        .emitWithAck("user:read", userId)
       return response
     },
     { transform: deepParseTimestamps }
   )
 
-  return response.value
+  return _pick(response.value, _keys(userAttributes))
 }
 
-const initialValue =
-  props.action === "create"
-    ? _zipObject(
-        _map(userAttributes.value, "attribute"),
-        _fill(Array(userAttributes.value?.length), "")
-      )
-    : await getUser(props.id)
+const initialValues =
+  props.action === "create" ? emptyUser : await getUser(props.userId)
 
-const {
-  model: user,
-  updatedFields,
-  isUpdated,
-  revert
-} = useEditor(initialValue)
+const options = _mapValues(userAttributes, "options")
 
-const options = ref({
-  role: ["user", "admin"]
-})
+const isEdited = computed(() =>
+  isUpdated(initialValues, _mapValues(form.value?.states, "value"))
+)
+
+const hasErrors = computed(
+  () => !form.value?.valid || _some(form.value?.states, "invalid")
+)
 
 const isSaved = ref(false)
 const suggestions = ref(_clone(options.value))
 
 onBeforeRouteLeave(async () => {
-  if (isUpdated.value && !isSaved.value && !(await confirmLeave())) {
+  if (isEdited.value && !isSaved.value && !(await confirmLeave())) {
     return false
   }
 })
 
 async function focusFormControl({ attribute, type }) {
-  // wait for Swap
   await nextTick()
-
   const control = document.getElementById(attribute)
   control.focus()
 
-  if (type === "richText") {
-    // wait for editor
-    await nextTick()
+  switch (type) {
+    case "select": {
+      // noinspection JSUnresolvedReference
+      selects.value[attribute].show()
+      break
+    }
 
-    // place cursor at end of editor content
-    const length = control.editor.getDocument().getLength()
-    control.editor.setSelectedRange(length - 1)
-  } else if (_includes(["text", "autocomplete"], type)) {
-    // place cursor at end of input content
-    // noinspection JSUnresolvedReference
-    const length = _isNull(user.value[attribute])
-      ? 0
-      : user.value[attribute].length
-    control.setSelectionRange(length, length)
+    case "richText": {
+      await nextTick()
+      const length = control.editor.getDocument().getLength()
+      control.editor.setSelectedRange(length - 1)
+      break
+    }
+
+    default: {
+      // noinspection JSUnresolvedReference
+      const length = _isNull(form.value?.states[attribute].value)
+        ? 0
+        : form.value?.states[attribute].value.length
+      control.setSelectionRange(length, length)
+    }
   }
 }
 
-async function onAutoCompleteBlur(deactivate) {
-  // wait for animation to complete
-  await sleep(200)
-  deactivate()
+async function waitForAnimation(deactivate) {
+  await callAfterDelay(deactivate, 200)
 }
 
 async function reset() {
-  revert()
+  form.value.reset()
   await nextTick()
 
-  _forEach(_filter(schemaAttributes, { type: "richText" }), ({ attribute }) => {
+  _forEach(_filter(userAttributes, { type: "richText" }), ({ attribute }) => {
     // noinspection JSUnresolvedReference
     trixEditors.value[attribute].reset()
   })
@@ -240,7 +295,7 @@ async function reset() {
 async function resetPassword() {
   // noinspection JSUnresolvedReference
   const { error } = await authClient.requestPasswordReset({
-    email: user.value.email,
+    email: form.value?.states.email.value,
     redirectTo: "http://localhost:3000/user/change-password"
   })
 
@@ -257,23 +312,35 @@ async function resetPassword() {
   toast.add({
     severity: "success",
     summary: "Password Reset Sent.",
-    detail: `Sent an email to ${user.value.username} with a password reset link.`,
+    detail: `Sent an email to ${form.value?.states.username.value} with a password reset link.`,
     life: 3000
   })
 }
 
-async function saveUser() {
-  if (props.action === "create") {
-    await createUser()
-  } else {
-    await updateUser()
+async function onFormSubmit({ valid, values }) {
+  if (valid) {
+    if (props.action === "create") {
+      await createUser(values)
+    } else {
+      await updateUser(findUpdated(initialValues, values))
+    }
   }
 }
 
-async function createUser() {
-  try {
-    await socket.timeout(3000).emitWithAck("user:create", user.value)
-  } catch (error) {
+async function createUser(user) {
+  const { data, error } = await socket.timeout(3000).emitWithAck("user:create", user)
+
+  if (data) {
+    toast.add({
+      severity: "success",
+      summary: "Saved.",
+      detail: "The user is saved.",
+      life: 3000
+    })
+
+    isSaved.value = true
+    await navigateTo({ name: "admin:users" })
+  } else {
     console.log(error)
 
     toast.add({
@@ -282,24 +349,22 @@ async function createUser() {
       detail: error.message
     })
   }
-
-  toast.add({
-    severity: "success",
-    summary: "Saved.",
-    detail: "The user is saved.",
-    life: 3000
-  })
-
-  isSaved.value = true
-  await navigateTo({ name: "admin:users" })
 }
 
-async function updateUser() {
-  try {
-    await socket
-      .timeout(3000)
-      .emitWithAck("user:update", props.id, updatedFields.value)
-  } catch (error) {
+async function updateUser(user) {
+  const { data, error } = await socket.timeout(3000).emitWithAck("user:update", props.userId, user)
+
+  if (data) {
+    toast.add({
+      severity: "success",
+      summary: "Updated.",
+      detail: "The user is updated.",
+      life: 3000
+    })
+
+    isSaved.value = true
+    await navigateTo({ name: "admin:users" })
+  } else {
     console.log(error)
 
     toast.add({
@@ -308,22 +373,22 @@ async function updateUser() {
       detail: error.message
     })
   }
-
-  toast.add({
-    severity: "success",
-    summary: "Updated.",
-    detail: "The user is updated.",
-    life: 3000
-  })
-
-  isSaved.value = true
-  await navigateTo({ name: "admin:users" })
 }
 
 async function deleteUser() {
-  try {
-    await socket.timeout(3000).emitWithAck("user:delete", props.id)
-  } catch (error) {
+  const { data, error } = await socket.timeout(3000).emitWithAck("user:delete", props.userId)
+
+  if (data) {
+    toast.add({
+      severity: "success",
+      summary: "Deleted.",
+      detail: "The user is deleted.",
+      life: 3000
+    })
+
+    isSaved.value = true
+    await navigateTo({ name: "admin:users" })
+  } else {
     console.log(error)
 
     toast.add({
@@ -332,16 +397,6 @@ async function deleteUser() {
       detail: error.message
     })
   }
-
-  toast.add({
-    severity: "success",
-    summary: "Deleted.",
-    detail: "The user is deleted.",
-    life: 3000
-  })
-
-  isSaved.value = true
-  await navigateTo({ name: "admin:users" })
 }
 
 function confirmDelete() {
