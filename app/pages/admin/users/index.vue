@@ -13,7 +13,7 @@
         footer: { id: 'datatable_footer' },
         tbody: 'text-base'
       }"
-      @rowSelect="showUserDetail"
+      @rowSelect="showUserEdit"
     >
       <Column
         v-for="field of fields"
@@ -124,8 +124,8 @@ function totalElementHeights() {
   return _isNaN(totalHeight) ? 0 : `${totalHeight}px`
 }
 
-async function showUserDetail({ data: { id } }) {
-  await navigateTo({ name: 'admin:userDetail', params: { id } })
+async function showUserEdit({ data: { id: userId } }) {
+  await navigateTo({ name: 'admin:userEdit', params: { userId } })
 }
 </script>
 
