@@ -1,17 +1,17 @@
 <template>
   <CharacterEditor
     action="view"
-    :id="id"
+    :characterId="characterId"
   />
 </template>
 
 <script setup>
 definePageMeta({
   name: "characterView",
-  path: "/show/:id(\\d+)"
+  path: "/show/:characterId(\\d+)"
 })
 
-const id = _toInteger(useRoute().params?.id)
+const characterId = _toInteger(useRoute().params?.characterId)
 </script>
 
 <style scoped></style>

@@ -101,11 +101,11 @@ function updateFilteredCharacters(filteredValue) {
   filteredCharacters.value = filteredValue
 }
 
-async function showDetail({ id }) {
+async function showDetail({ id: characterId }) {
   if (isSignedIn.value) {
-    await navigateTo({ name: "characterEdit", params: { id } })
+    await navigateTo({ name: "characterEdit", params: { characterId } })
   } else {
-    await navigateTo({ name: "characterView", params: { id } })
+    await navigateTo({ name: "characterView", params: { characterId } })
   }
 }
 
