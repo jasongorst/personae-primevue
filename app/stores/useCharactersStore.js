@@ -37,7 +37,7 @@ export const useCharactersStore = defineStore("characters", () => {
   // getters
   const characters = computed(() => _values(data.value))
   const count = computed(() => _size(characters.value))
-  const isLoaded = computed(() => !isEmpty(data.value))
+  const isLoaded = computed(() => loadStatus.value === "success")
   const isLoading = computed(() => loadStatus.value === "pending")
   const hasLoadError = computed(() => loadStatus.value === "error")
 
