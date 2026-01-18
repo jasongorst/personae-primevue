@@ -3,7 +3,7 @@ import * as z from "zod"
 zodConfig()
 
 export const characterSchema = z.object({
-  id: z.int().positive(),
+  id: z.coerce.number().int().positive(),
   player: z.string().trim(),
   mortalName: z.string().trim(),
   faeName: z.string().trim(),
