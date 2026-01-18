@@ -8,8 +8,8 @@
 
 <script setup>
 definePageMeta({
-  name: "admin:userDetail",
-  path: "/admin/users/:userId([a-zA-Z0-9]{32})",
+  name: "admin:userEdit",
+  path: "/admin/users/:userId([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})",
   middleware: ["signed-in", "admin"]
 })
 
