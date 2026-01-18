@@ -128,19 +128,7 @@
         </template>
 
         <template v-else>
-          <Button>
-            <!--suppress HtmlUnknownTarget -->
-            <NuxtLink :to="{ name: 'admin:users' }">Back</NuxtLink>
-          </Button>
-
           <template v-if="props.action === 'edit'">
-            <Button
-              severity="warn"
-              @click="resetPassword"
-            >
-              Reset Password
-            </Button>
-
             <Button
               severity="danger"
               @click="confirmDelete"
@@ -148,6 +136,11 @@
               Delete
             </Button>
           </template>
+
+          <Button>
+            <!--suppress HtmlUnknownTarget -->
+            <NuxtLink :to="{ name: 'admin:users' }"> Back </NuxtLink>
+          </Button>
         </template>
       </div>
     </template>
@@ -292,31 +285,6 @@ async function reset() {
   })
 }
 
-async function resetPassword() {
-  // noinspection JSUnresolvedReference
-  const { error } = await authClient.requestPasswordReset({
-    email: form.value?.states.email.value,
-    redirectTo: "http://localhost:3000/user/change-password"
-  })
-
-  if (error) {
-    console.log(error)
-
-    toast.add({
-      severity: "error",
-      summary: "Password reset request error.",
-      detail: error.message
-    })
-  }
-
-  toast.add({
-    severity: "success",
-    summary: "Password Reset Sent.",
-    detail: `Sent an email to ${form.value?.states.username.value} with a password reset link.`,
-    life: 3000
-  })
-}
-
 async function onFormSubmit({ valid, values }) {
   if (valid) {
     if (props.action === "create") {
@@ -328,7 +296,9 @@ async function onFormSubmit({ valid, values }) {
 }
 
 async function createUser(user) {
-  const { data, error } = await socket.timeout(3000).emitWithAck("user:create", user)
+  const { data, error } = await socket
+    .timeout(3000)
+    .emitWithAck("user:create", user)
 
   if (data) {
     toast.add({
@@ -352,7 +322,9 @@ async function createUser(user) {
 }
 
 async function updateUser(user) {
-  const { data, error } = await socket.timeout(3000).emitWithAck("user:update", props.userId, user)
+  const { data, error } = await socket
+    .timeout(3000)
+    .emitWithAck("user:update", props.userId, user)
 
   if (data) {
     toast.add({
@@ -376,7 +348,9 @@ async function updateUser(user) {
 }
 
 async function deleteUser() {
-  const { data, error } = await socket.timeout(3000).emitWithAck("user:delete", props.userId)
+  const { data, error } = await socket
+    .timeout(3000)
+    .emitWithAck("user:delete", props.userId)
 
   if (data) {
     toast.add({
