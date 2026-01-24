@@ -2,18 +2,7 @@
 <template>
   <Card class="mx-auto max-w-prose">
     <template #content>
-      <Form
-        id="userForm"
-        v-slot="$form"
-        :initialValues="initialValues"
-        :resolver="resolver"
-        :validateOnValueUpdate="false"
-        :validateOnBlur="true"
-        :validateOnSubmit="true"
-        class="flex flex-col gap-2"
-        @submit="onFormSubmit"
-        ref="form"
-      >
+      <div class="flex flex-col gap-2">
         <div
           v-for="({ type }, attribute) in userAttributes"
           :key="attribute"
@@ -35,11 +24,7 @@
                 class="trix-content cursor-pointer border border-transparent px-3 py-2
                   group-hover:bg-primary/15"
                 :tabindex="0"
-                v-html="
-                  isEmptyOrWhitespace(form?.states[attribute]?.value)
-                    ? '&nbsp;'
-                    : form?.states[attribute]?.value
-                "
+                v-html="user[attribute] || '&nbsp;'"
               />
 
               <div
@@ -47,18 +32,14 @@
                 class="cursor-pointer border border-transparent px-3 py-2 group-hover:bg-primary/15"
                 :tabindex="0"
               >
-                {{
-                  isEmptyOrWhitespace(form?.states[attribute]?.value)
-                    ? "&nbsp;"
-                    : form?.states[attribute]?.value
-                }}
+                {{ user[attribute] || "&nbsp;" }}
               </div>
             </template>
 
             <template #active="{ deactivate }">
               <TrixEditor
                 v-if="type === 'richText'"
-                :name="attribute"
+                v-model="user[attribute]"
                 :id="attribute"
                 :tabindex="0"
                 @blur="waitForAnimation(deactivate)"
@@ -67,7 +48,7 @@
 
               <Select
                 v-else-if="type === 'select'"
-                :name="attribute"
+                v-model="user[attribute]"
                 :tabindex="0"
                 :labelId="attribute"
                 fluid
@@ -78,7 +59,7 @@
 
               <ComboBox
                 v-else-if="type === 'autocomplete'"
-                :name="attribute"
+                v-model="user[attribute]"
                 :tabindex="0"
                 :inputId="attribute"
                 :suggestions="suggestions[attribute]"
@@ -87,7 +68,7 @@
 
               <InputText
                 v-else
-                :name="attribute"
+                v-model="user[attribute]"
                 :id="attribute"
                 :tabindex="0"
                 fluid
@@ -95,17 +76,8 @@
               />
             </template>
           </Swap>
-
-          <Message
-            v-if="form?.states[attribute]?.invalid"
-            severity="error"
-            size="small"
-            variant="simple"
-          >
-            {{ form?.states[attribute].error?.message }}
-          </Message>
         </div>
-      </Form>
+      </div>
     </template>
 
     <template #footer>
@@ -119,9 +91,8 @@
           </Button>
 
           <Button
-            type="submit"
             form="userForm"
-            :disabled="!form.valid"
+            @click="saveUser"
           >
             Save
           </Button>
@@ -147,10 +118,6 @@
 </template>
 
 <script setup>
-// noinspection JSUnresolvedReference
-import { zodResolver } from "@primevue/forms/resolvers/zod"
-
-const form = useTemplateRef("form")
 const selects = ref({})
 const trixEditors = ref({})
 
@@ -176,14 +143,6 @@ const {
 const confirm = useConfirm()
 const toast = useToast()
 const { authClient } = useAuthClient()
-
-const resolver = ref((opts) => {
-  if (props.action === "create") {
-    return zodResolver(createUserSchema)(opts)
-  } else {
-    return zodResolver(updateUserSchema)(opts)
-  }
-})
 
 const userAttributes = {
   email: { type: "text", initialValue: "" },
@@ -219,18 +178,17 @@ async function getUser(userId) {
   return _pick(response.value, _keys(userAttributes))
 }
 
-const initialValues =
+const initialValue =
   props.action === "create" ? emptyUser : await getUser(props.userId)
 
 const options = _mapValues(userAttributes, "options")
 
-const isEdited = computed(() =>
-  isUpdated(initialValues, _mapValues(form.value?.states, "value"))
-)
-
-const hasErrors = computed(
-  () => !form.value?.valid || _some(form.value?.states, "invalid")
-)
+const {
+  model: user,
+  editedFields,
+  isEdited,
+  revert
+} = useRevertible(initialValue)
 
 const isSaved = ref(false)
 const suggestions = ref(_clone(options.value))
@@ -261,10 +219,9 @@ async function focusFormControl({ attribute, type }) {
     }
 
     default: {
-      // noinspection JSUnresolvedReference
-      const length = _isNull(form.value?.states[attribute].value)
+      const length = _isNull(user.value[attribute])
         ? 0
-        : form.value?.states[attribute].value.length
+        : user.value[attribute].length
       control.setSelectionRange(length, length)
     }
   }
@@ -275,7 +232,7 @@ async function waitForAnimation(deactivate) {
 }
 
 async function reset() {
-  form.value.reset()
+  revert()
   await nextTick()
 
   _forEach(_filter(userAttributes, { type: "richText" }), ({ attribute }) => {
@@ -284,20 +241,16 @@ async function reset() {
   })
 }
 
-async function onFormSubmit({ valid, values }) {
-  if (valid) {
-    if (props.action === "create") {
-      await createUser(values)
-    } else {
-      await updateUser(findUpdated(initialValues, values))
-    }
+async function saveUser() {
+  if (props.action === "create") {
+    await createUser()
+  } else {
+    await updateUser()
   }
 }
 
-async function createUser(user) {
-  const { data, error } = await socket
-    .timeout(3000)
-    .emitWithAck("user:create", user)
+async function createUser() {
+  const { data, error } = await socket.timeout(3000).emitWithAck("user:create", user.value)
 
   if (data) {
     toast.add({
@@ -320,10 +273,10 @@ async function createUser(user) {
   }
 }
 
-async function updateUser(editedFields) {
+async function updateUser() {
   const { data, error } = await socket
     .timeout(3000)
-    .emitWithAck("user:update", props.userId, editedFields)
+    .emitWithAck("user:update", props.userId, editedFields.value)
 
   if (data) {
     toast.add({
