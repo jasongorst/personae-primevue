@@ -36,9 +36,9 @@
                   group-hover:bg-primary/15"
                 :tabindex="0"
                 v-html="
-                  isEmptyOrWhitespace(form?.states[attribute].value)
+                  isEmptyOrWhitespace(form?.states[attribute]?.value)
                     ? '&nbsp;'
-                    : form?.states[attribute].value
+                    : form?.states[attribute]?.value
                 "
               />
 
@@ -48,9 +48,9 @@
                 :tabindex="0"
               >
                 {{
-                  isEmptyOrWhitespace(form?.states[attribute].value)
+                  isEmptyOrWhitespace(form?.states[attribute]?.value)
                     ? "&nbsp;"
-                    : form?.states[attribute].value
+                    : form?.states[attribute]?.value
                 }}
               </div>
             </template>
@@ -97,7 +97,7 @@
           </Swap>
 
           <Message
-            v-if="form?.states[attribute].invalid"
+            v-if="form?.states[attribute]?.invalid"
             severity="error"
             size="small"
             variant="simple"
@@ -128,14 +128,13 @@
         </template>
 
         <template v-else>
-          <template v-if="props.action === 'edit'">
-            <Button
-              severity="danger"
-              @click="confirmDelete"
-            >
-              Delete
-            </Button>
-          </template>
+          <Button
+            v-if="props.action === 'edit'"
+            severity="danger"
+            @click="confirmDelete"
+          >
+            Delete
+          </Button>
 
           <Button>
             <!--suppress HtmlUnknownTarget -->
@@ -311,20 +310,20 @@ async function createUser(user) {
     isSaved.value = true
     await navigateTo({ name: "admin:users" })
   } else {
-    console.log(error)
+    console.error(error)
 
     toast.add({
       severity: "error",
       summary: "Create Error.",
-      detail: error.message
+      detail: error
     })
   }
 }
 
-async function updateUser(user) {
+async function updateUser(editedFields) {
   const { data, error } = await socket
     .timeout(3000)
-    .emitWithAck("user:update", props.userId, user)
+    .emitWithAck("user:update", props.userId, editedFields)
 
   if (data) {
     toast.add({
@@ -337,12 +336,12 @@ async function updateUser(user) {
     isSaved.value = true
     await navigateTo({ name: "admin:users" })
   } else {
-    console.log(error)
+    console.error(error)
 
     toast.add({
       severity: "error",
       summary: "Update Error.",
-      detail: error.message
+      detail: error
     })
   }
 }
@@ -363,12 +362,12 @@ async function deleteUser() {
     isSaved.value = true
     await navigateTo({ name: "admin:users" })
   } else {
-    console.log(error)
+    console.error(error)
 
     toast.add({
       severity: "error",
       summary: "Delete Error.",
-      detail: error.message
+      detail: error
     })
   }
 }
