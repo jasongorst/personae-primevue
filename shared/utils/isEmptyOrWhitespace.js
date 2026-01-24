@@ -1,4 +1,4 @@
-export default function isEmptyOrWhitespace(string) {
+export default function isEmptyOrWhitespace(value) {
   const re = /^\s+$/
-  return _isEmpty(string) || re.test(string)
+  return _isEmpty(value) || re.test(value)
 }
