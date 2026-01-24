@@ -24,7 +24,9 @@ export const useCharactersStore = defineStore("characters", () => {
   } = useAsyncData(
     "character:list",
     async () => {
-      const { data: response } = await socket.timeout(3000).emitWithAck("character:list")
+      const { data: response } = await socket
+        .timeout(3000)
+        .emitWithAck("character:list")
       return response
     },
     { deep: true }
@@ -114,16 +116,18 @@ export const useCharactersStore = defineStore("characters", () => {
   }
 
   async function read(id) {
-    const { data, error, status} = await useAsyncData(
+    const { data, error, status } = await useAsyncData(
       `character:read:${id}`,
       async () => {
-        const { data: response } = await socket.timeout(3000).emitWithAck("character:read", id)
+        const { data: response } = await socket
+          .timeout(3000)
+          .emitWithAck("character:read", id)
         return response
       }
     )
 
     if (status.value === "error") {
-      return error
+      return { error }
     }
 
     return data.value
@@ -131,7 +135,9 @@ export const useCharactersStore = defineStore("characters", () => {
 
   async function create(character) {
     try {
-      const response = await socket.timeout(3000).emitWithAck("character:create", character)
+      const response = await socket
+        .timeout(3000)
+        .emitWithAck("character:create", character)
 
       if (_has(response, "data")) {
         _set(data.value, response.data.id, response.data)
@@ -141,13 +147,15 @@ export const useCharactersStore = defineStore("characters", () => {
     } catch (error) {
       console.error("[useCharacterStore create]", error)
 
-      return error
+      return { error }
     }
   }
 
   async function update(id, character) {
     try {
-      const response = await socket.timeout(3000).emitWithAck("character:update", id, character)
+      const response = await socket
+        .timeout(3000)
+        .emitWithAck("character:update", id, character)
 
       if (_has(response, "data")) {
         _set(data.value, response.data.id, response.data)
@@ -157,13 +165,15 @@ export const useCharactersStore = defineStore("characters", () => {
     } catch (error) {
       console.error("[useCharacterStore update]", error)
 
-      return error
+      return { error }
     }
   }
 
   async function destroy(id) {
     try {
-      const response = await socket.timeout(3000).emitWithAck("character:delete", id)
+      const response = await socket
+        .timeout(3000)
+        .emitWithAck("character:delete", id)
 
       if (_has(response, "data")) {
         _unset(data.value, response.data.id)
@@ -173,7 +183,7 @@ export const useCharactersStore = defineStore("characters", () => {
     } catch (error) {
       console.error("[useCharacterStore destroy]", error)
 
-      return error
+      return { error }
     }
   }
 
