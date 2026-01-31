@@ -3,13 +3,15 @@
     <template v-if="hasGlobalFilter">
       <template v-if="hasAnyAttributeFilters">
         No characters matching
-        <span class="italic">&ldquo;{{ globalFilterValue }}&rdquo;</span>
+        <!--suppress JSUnresolvedReference -->
+        <span class="italic">&ldquo;{{ filters.global.value }}&rdquo;</span>
         with the current filters.
       </template>
 
       <template v-else>
         No characters matching
-        <span class="italic">&ldquo;{{ globalFilterValue }}&rdquo;</span>.
+        <!--suppress JSUnresolvedReference -->
+        <span class="italic">&ldquo;{{ filters.global.value }}&rdquo;</span>.
       </template>
     </template>
 
@@ -18,24 +20,8 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  filters: {
-    type: Object,
-    required: true
-  }
-})
-
-// noinspection JSUnresolvedReference
-const globalFilterValue = computed(() => props.filters.global.value)
-const hasGlobalFilter = computed(() => isPresent(globalFilterValue.value))
-
-const hasAnyAttributeFilters = computed(() =>
-  _some(listAttributes, (attribute) => hasFilterFor(attribute))
-)
-
-function hasFilterFor(attribute) {
-  return isPresent(props.filters[attribute].value)
-}
+const charactersStore = useCharactersStore()
+const { filters, hasGlobalFilter, hasAnyAttributeFilters } = storeToRefs(charactersStore)
 </script>
 
 <style scoped></style>
