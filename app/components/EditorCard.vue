@@ -3,16 +3,29 @@
   <Card class="mx-auto max-w-prose">
     <template #content>
       <div class="flex flex-col gap-2">
+        <Message
+          v-if="isPresent(formErrors)"
+          severity="error"
+          pt:root="border border-transparent"
+        >
+          {{ _join(formErrors, " ") }}
+        </Message>
+
         <div
-          v-for="{ attribute, type } in props.attributes"
+          v-for="({ type }, attribute) in props.attributes"
           :key="attribute"
           class="group flex flex-col"
         >
-          <Swap @active="focusFormControl({ attribute, type })">
+          <Swap
+            :disabled="props.action === 'view'"
+            @active="focusFormControl(attribute, type)"
+            @inactive="validate(attribute)"
+          >
             <template #default>
               <label
                 :for="attribute"
-                class="ml-1 block cursor-pointer text-sm text-primary dark:text-primary"
+                class="ml-1 block text-sm text-primary dark:text-primary"
+                :class="props.action !== 'view' && 'cursor-pointer'"
               >
                 {{ _startCase(attribute) }}
               </label>
@@ -21,19 +34,26 @@
             <template #inactive="{ activate }">
               <div
                 v-if="type === 'richText'"
-                class="trix-content cursor-pointer border border-transparent px-3 py-2
-                  group-hover:bg-primary/15"
+                class="trix-content border border-transparent px-3 py-2"
+                :class="
+                  props.action !== 'view' &&
+                  'cursor-pointer group-hover:bg-primary/15'
+                "
                 :tabindex="0"
                 v-html="model?.[attribute] || '&nbsp;'"
               />
 
-              <divz
+              <div
                 v-else
-                class="cursor-pointer border border-transparent px-3 py-2 group-hover:bg-primary/15"
+                class="border border-transparent px-3 py-2"
+                :class="
+                  props.action !== 'view' &&
+                  'cursor-pointer group-hover:bg-primary/15'
+                "
                 :tabindex="0"
               >
                 {{ model?.[attribute] || "&nbsp;" }}
-              </divz>
+              </div>
             </template>
 
             <template #active="{ deactivate }">
@@ -42,8 +62,19 @@
                 v-model="model[attribute]"
                 :id="attribute"
                 :tabindex="0"
-                @blur="deactivate"
+                @blur="waitForAnimation(deactivate)"
                 :ref="(trixEditor) => (trixEditors[attribute] = trixEditor)"
+              />
+
+              <Select
+                v-else-if="type === 'select'"
+                v-model="model[attribute]"
+                :tabindex="0"
+                :labelId="attribute"
+                fluid
+                :options="options?.[attribute]"
+                @blur="waitForAnimation(deactivate)"
+                :ref="(select) => (selects[attribute] = select)"
               />
 
               <ComboBox
@@ -51,8 +82,8 @@
                 v-model="model[attribute]"
                 :tabindex="0"
                 :inputId="attribute"
-                :suggestions="suggestions[attribute]"
-                @blur="onAutoCompleteBlur(deactivate)"
+                :suggestions="suggestions?.[attribute]"
+                @blur="waitForAnimation(deactivate)"
               />
 
               <InputText
@@ -61,74 +92,115 @@
                 :id="attribute"
                 :tabindex="0"
                 fluid
-                @blur="deactivate"
+                @blur="waitForAnimation(deactivate)"
               />
             </template>
           </Swap>
+
+          <Message
+            v-if="fieldErrors?.[attribute]"
+            severity="error"
+            size="small"
+            variant="simple"
+            class="ml-1"
+          >
+            {{ _join(fieldErrors?.[attribute], " ") }}
+          </Message>
         </div>
       </div>
     </template>
 
     <template #footer>
       <div class="mt-4 flex flex-row justify-end gap-3">
-        <slot
-          name="actions"
-          :isEdited="isEdited"
-        >
-          <template v-if="isEdited">
-            <Button
-              severity="warn"
-              @click="confirmReset"
-            >
-              Reset
-            </Button>
+        <template v-if="isEdited">
+          <Button
+            severity="warn"
+            @click="confirmReset"
+          >
+            Reset
+          </Button>
 
-            <Button @click="save">Save</Button>
-          </template>
+          <Button
+            :disabled="!valid"
+            @click="save"
+          >
+            Save
+          </Button>
+        </template>
 
-          <template v-else>
-            <Button @click="emit('back', isEdited)">Back</Button>
+        <template v-else>
+          <Button
+            v-if="props.action === 'edit'"
+            severity="danger"
+            @click="confirmDelete"
+          >
+            Delete
+          </Button>
 
-            <Button
-              v-if="props.action === 'edit'"
-              severity="danger"
-              @click="confirmDelete"
-            >
-              Delete
-            </Button>
-          </template>
-        </slot>
+          <Button>
+            <!--suppress HtmlUnknownTarget, JSValidateTypes -->
+            <NuxtLink :to="props.redirectBack">Back</NuxtLink>
+          </Button>
+        </template>
       </div>
     </template>
   </Card>
 </template>
 
 <script setup>
+import * as z from "zod"
+
+const selects = ref({})
 const trixEditors = ref({})
 
 const props = defineProps({
+  name: {
+    type: String,
+    required: true
+  },
+
+  modelId: {
+    type: [String, Number],
+    required: false,
+    validator: (value, props) => props.action === "create" || isPresent(value)
+  },
+
   action: {
     type: String,
+    required: false,
     default: "edit",
     validator: (value) => _includes(["create", "edit", "view"], value)
   },
 
   attributes: {
-    type: Array,
+    type: Object,
     required: true
   },
 
   initialValue: {
-    type: Object
+    type: Object,
+    required: true
   },
 
   options: {
-    type: Object
+    type: Object,
+    default: {},
+    required: false
   },
 
   isSaved: {
     type: Boolean,
-    default: false
+    required: true
+  },
+
+  redirectBack: {
+    type: [String, Object],
+    required: true
+  },
+
+  schema: {
+    type: Object,
+    required: true
   }
 })
 
@@ -143,59 +215,99 @@ const { model, editedFields, isEdited, revert } = useRevertible(
 
 const suggestions = ref(_clone(props.options))
 
+const valid = ref(true)
+const formErrors = ref([])
+const fieldErrors = ref({})
+
 onBeforeRouteLeave(async () => {
   if (isEdited.value && !props.isSaved && !(await confirmLeave())) {
     return false
   }
 })
 
-async function focusFormControl({ attribute, type }) {
-  // wait for Swap
+async function focusFormControl(attribute, type) {
   await nextTick()
-
   const control = document.getElementById(attribute)
   control.focus()
 
-  if (type === "richText") {
-    // wait for editor
-    await nextTick()
+  switch (type) {
+    case "select": {
+      // noinspection JSUnresolvedReference
+      selects.value[attribute].show()
+      break
+    }
 
-    // place cursor at end of editor content
-    const length = control.editor.getDocument().getLength()
-    control.editor.setSelectedRange(length - 1)
-  } else if (_includes(["text", "autocomplete"], type)) {
-    // place cursor at end of input content
-    // noinspection JSUnresolvedReference
-    const length = _isNull(model.value[attribute])
-      ? 0
-      : model.value[attribute].length
-    control.setSelectionRange(length, length)
+    case "richText": {
+      await nextTick()
+      const length = control.editor.getDocument().getLength()
+      control.editor.setSelectedRange(length - 1)
+      break
+    }
+
+    default: {
+      const length = _isNull(model.value[attribute])
+        ? 0
+        : model.value[attribute].length
+      control.setSelectionRange(length, length)
+    }
   }
 }
 
-async function onAutoCompleteBlur(deactivate) {
-  // wait for animation to complete
-  await sleep(200)
-  deactivate()
+async function waitForAnimation(deactivate) {
+  await callAfterDelay(deactivate, 200)
 }
 
 async function reset() {
   revert()
+  formErrors.value = []
+  fieldErrors.value = {}
   await nextTick()
 
-  _forEach(_filter(schemaAttributes, { type: "richText" }), ({ attribute }) => {
-    // noinspection JSUnresolvedReference
-    trixEditors.value[attribute].reset()
-  })
+  _forEach(
+    _keys(_pickBy(props.attributes, { type: "richText" })),
+    (attribute) => {
+      // noinspection JSUnresolvedReference
+      trixEditors.value[attribute].reset()
+    }
+  )
 
   emit("reset")
 }
 
-function save() {
-  if (props.action === "create") {
-    emit("create", model.value)
+function validate(attribute = null) {
+  const result = props.schema.safeParse(
+    props.action === "create" ? model.value : editedFields.value
+  )
+
+  if (result.success) {
+    valid.value = true
+    formErrors.value = []
+    fieldErrors.value = {}
   } else {
-    emit("update", editedFields.value)
+    valid.value = false
+    const flattened = z.flattenError(result.error)
+    formErrors.value = flattened.formErrors
+
+    if (attribute) {
+      fieldErrors.value[attribute] = flattened.fieldErrors[attribute]
+    } else {
+      fieldErrors.value = flattened.fieldErrors
+    }
+  }
+
+  return result
+}
+
+function save() {
+  const result = validate()
+
+  if (result.success) {
+    emit(props.action, result.data)
+  } else {
+    console.error(
+      "save() called with invalid data",
+      z.flattenError(result.error)
+    )
   }
 }
 
@@ -203,7 +315,7 @@ function confirmDelete() {
   confirm.require({
     header: "Really?",
     icon: "ph:warning-bold",
-    message: "Do you want to delete this user?",
+    message: `Do you want to delete this ${props.name}?`,
     defaultFocus: "reject",
 
     acceptProps: {
@@ -229,7 +341,7 @@ function confirmReset() {
   const confirmOptions = {
     header: "Reset?",
     icon: "ph:warning-bold",
-    message: "Do you want to reset this user?",
+    message: `Do you want to reset this ${props.name}?`,
     defaultFocus: "reject",
 
     acceptProps: {
@@ -278,7 +390,7 @@ async function confirmLeave() {
     const confirmOptions = {
       header: "Leave?",
       icon: "ph:warning-bold",
-      message: "Do you want to abandon this user?",
+      message: `Do you want to abandon this ${props.name}?`,
       defaultFocus: "reject",
 
       acceptProps: {
