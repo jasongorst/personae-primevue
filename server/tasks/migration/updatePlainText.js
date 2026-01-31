@@ -7,6 +7,8 @@ export default defineTask({
   async run({ _payload, _context }) {
     console.log("Running migration task updatePlainText...")
 
+    const richTextAttributes = _keys(_pickBy(characterAttributes, { type: "richText" }))
+
     try {
       await prisma.$transaction(async (tx) => {
         console.log("begin transaction")
