@@ -1,18 +1,11 @@
 import { FilterMatchMode } from "@primevue/core/api"
 
-const emptyFilters = mapObject(filtersAttributes, (attribute) => {
-  if (_includes(categoryAttributes, attribute)) {
-    return { value: [], matchMode: FilterMatchMode.IN }
-  } else {
-    return { value: "", matchMode: FilterMatchMode.CONTAINS }
-  }
-})
-
 export const useCharactersStore = defineStore("characters", () => {
   const {
     $socketio: { socket }
   } = useNuxtApp()
 
+  // fetch characters
   const {
     // state
     data,
@@ -27,13 +20,32 @@ export const useCharactersStore = defineStore("characters", () => {
       const { data: response } = await socket
         .timeout(3000)
         .emitWithAck("character:list")
+
       return response
     },
     { deep: true }
   )
 
   // state
-  const filters = ref(_cloneDeep(emptyFilters))
+
+  // attribute groups
+  const categoryAttributes = ref(_pickBy(characterAttributes, { type: "autocomplete" }))
+  const datatableAttributes = ref(_pickBy(characterAttributes, { showColumn: true }))
+  const nameAttributes = ref(_pickBy(characterAttributes, { type: "text" }))
+  const datatableCategoryAttributes = ref(_pickBy(datatableAttributes.value, { type: "autocomplete" }))
+
+  // empty filters object
+  const emptyFilters = ref(_mapValues(
+    datatableAttributes.value,
+    ({ type }) =>
+      type === "autocomplete"
+        ? { value: [], matchMode: FilterMatchMode.IN }
+        : { value: "", matchMode: FilterMatchMode.CONTAINS }
+  ))
+
+  emptyFilters.value.global = { value: "", matchMode: FilterMatchMode.CONTAINS }
+
+  const filters = ref(_cloneDeep(emptyFilters.value))
   const sort = ref({ attribute: "createdAt", order: "asc" })
 
   // getters
@@ -44,46 +56,39 @@ export const useCharactersStore = defineStore("characters", () => {
   const hasLoadError = computed(() => loadStatus.value === "error")
 
   const hasGlobalFilter = computed(() => isPresent(filters.value.global.value))
-
-  const hasAnyFilters = computed(() =>
-    _some(filters.value, (filter) => isPresent(filter.value))
-  )
+  const hasAnyFilters = computed(() => hasAnyFiltersFor(_keys(filters.value)))
+  const hasAnyNameFilters = computed(() => hasAnyFiltersFor(_keys(nameAttributes.value)))
+  const hasAnyCategoryFilters = computed(() => hasAnyFiltersFor(_keys(datatableCategoryAttributes.value)))
+  const hasAnyAttributeFilters = computed(() => hasAnyFiltersFor(_keys(datatableAttributes.value)))
 
   const hasFilterByAttribute = computed(() =>
-    mapObject(listAttributes, (attribute) =>
-      isPresent(filters.value[attribute].value)
-    )
-  )
-
-  const hasAnyNameFilters = computed(() =>
-    _pick(hasFilterByAttribute.value, nameAttributes)
-  )
-
-  const hasAnyCategoryFilters = computed(() =>
-    _pick(hasFilterByAttribute.value, categoryAttributes)
-  )
-
-  const hasAnyAttributeFilters = computed(() =>
-    _some(hasFilterByAttribute.value)
+    _mapValues(filters.value, ({ value }) => isPresent(value))
   )
 
   const options = computed(() =>
-    mapObject(optionsAttributes, (attribute) =>
+    _mapValues(categoryAttributes.value, (_, attribute) =>
       uniqValues(characters.value, attribute)
     )
   )
 
   // actions
+  function hasAnyFiltersFor(attributes) {
+    return _some(
+      _pick(filters.value, attributes),
+      ({ value }) => isPresent(value)
+    )
+  }
+
   function hasFilterFor(attribute) {
     return hasFilterByAttribute.value[attribute]
   }
 
   function resetFilters() {
-    filters.value = _cloneDeep(emptyFilters)
+    filters.value = _cloneDeep(emptyFilters.value)
   }
 
   function resetFilterFor(attribute) {
-    filters.value[attribute] = _cloneDeep(emptyFilters[attribute])
+    filters.value[attribute] = _cloneDeep(emptyFilters.value[attribute])
   }
 
   function removeFilterValueFrom(attribute, value) {
@@ -97,19 +102,16 @@ export const useCharactersStore = defineStore("characters", () => {
     filters.value.global.value = ""
   }
 
-  async function getCharacter(id) {
-    if (isLoaded.value) {
-      return data.value[id]
-    } else {
-      return await read(id)
+  async function ensureLoaded() {
+    if (!isLoaded.value) {
+      await load()
     }
   }
 
-  // async function ensureLoaded() {
-  //   if (!isLoaded.value) {
-  //     await load()
-  //   }
-  // }
+  async function getCharacter(id) {
+    await ensureLoaded()
+    return data.value[id]
+  }
 
   function applyPatch(patch) {
     // jsonPatch.patch(data.value, patch)
@@ -194,6 +196,11 @@ export const useCharactersStore = defineStore("characters", () => {
     loadError,
     loadStatus,
     sort,
+    categoryAttributes,
+    datatableAttributes,
+    nameAttributes,
+    datatableCategoryAttributes,
+    emptyFilters,
 
     // getters
     characters,
@@ -210,10 +217,12 @@ export const useCharactersStore = defineStore("characters", () => {
     options,
 
     // actions
+    hasAnyFiltersFor,
     applyPatch,
     read,
     create,
     destroy,
+    ensureLoaded,
     getCharacter,
     hasFilterFor,
     load,
