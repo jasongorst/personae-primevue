@@ -19,7 +19,7 @@
 
     <template
       v-if="hasAnyNameFilters"
-      v-for="attribute in nameAttributes"
+      v-for="attribute in _keys(nameAttributes)"
       :key="attribute"
     >
       <Chip
@@ -40,7 +40,7 @@
 
     <template
       v-if="hasAnyCategoryFilters"
-      v-for="attribute in categoryAttributes"
+      v-for="attribute in _keys(datatableCategoryAttributes)"
       :key="attribute"
     >
       <Chip
@@ -72,8 +72,14 @@ const {
   resetGlobalFilter
 } = charactersStore
 
-const { filters, hasAnyCategoryFilters, hasAnyNameFilters, hasGlobalFilter } =
-  storeToRefs(charactersStore)
+const {
+  filters,
+  hasAnyCategoryFilters,
+  hasAnyNameFilters,
+  hasGlobalFilter,
+  nameAttributes,
+  datatableCategoryAttributes
+} = storeToRefs(charactersStore)
 </script>
 
 <style scoped></style>
