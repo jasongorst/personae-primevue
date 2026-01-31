@@ -7,7 +7,7 @@
   >
     <template #filter="{ filterModel, filterCallback }">
       <OptionsFilter
-        v-if="_includes(categoryAttributes, attribute)"
+        v-if="_isMatch(characterAttributes[attribute], { type: 'autocomplete' })"
         v-model="filterModel.value"
         :options="options"
         :filteredOptions="filteredOptions"
@@ -20,6 +20,8 @@
         v-else
         v-model="filterModel.value"
         :filterCallback="filterCallback"
+        :hasFilter="() => hasFilterFor(attribute)"
+        :resetFilter="() => resetFilterFor(attribute)"
       />
     </template>
 
