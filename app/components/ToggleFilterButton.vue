@@ -1,18 +1,25 @@
 <template>
   <Button variant="outlined">
     <Icon
-      v-if="showFilters"
-      name="ph:eye-slash-bold"
+      name="ph:funnel-simple-bold"
       size="1.25rem"
     />
 
-    <Icon
-      v-else
-      name="ph:eye-bold"
-      size="1.25rem"
-    />
+    <div class="flex flex-col">
+      <div
+        class="overflow-hidden"
+        :class="showFilters && 'h-0!'"
+      >
+        Show
+      </div>
 
-    Filter
+      <div
+        class="overflow-hidden"
+        :class="!showFilters && 'h-0!'"
+      >
+        Hide
+      </div>
+    </div>
   </Button>
 </template>
 
