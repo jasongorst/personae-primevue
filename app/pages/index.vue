@@ -8,7 +8,7 @@
     removableSort
     v-model:filters="filters"
     :filterDisplay="showFilters ? 'row' : null"
-    :globalFilterFields="globalFilterAttributes"
+    :globalFilterFields="globalFilterFields"
     selectionMode="single"
     resizableColumns
     stateStorage="session"
@@ -22,13 +22,14 @@
       column: {
         headerCell: 'max-w-[8rem]',
         bodyCell: 'max-w-[8rem]'
-     }
+      }
     }"
     @filter="(event) => updateFilteredCharacters(event.filteredValue)"
     @rowSelect="(event) => showDetail(event.data)"
   >
+    <!--suppress JSUnusedLocalSymbols -->
     <CharacterColumn
-      v-for="attribute in listAttributes"
+      v-for="(_, attribute) in columnAttributes"
       :key="attribute"
       :attribute="attribute"
       :options="options[attribute]"
@@ -45,10 +46,7 @@
     </template>
 
     <template #empty>
-      <CharacterEmpty
-        :class="isLoading && 'hidden'"
-        :filters="filters"
-      />
+      <CharacterEmpty :class="isLoading && 'hidden'" />
     </template>
 
     <template #loading>
@@ -74,13 +72,14 @@ definePageMeta({ name: "characters" })
 const { isSignedIn } = useAuthClient()
 const charactersStore = useCharactersStore()
 
-const {
-  characters,
-  count,
-  filters,
-  isLoading,
-  options
-} = storeToRefs(charactersStore)
+const { characters, count, filters, isLoading, options } =
+  storeToRefs(charactersStore)
+
+const columnAttributes = _pickBy(characterAttributes, { showColumn: true })
+
+const globalFilterFields = _map(characterAttributes, ({ type }, attribute) =>
+  type === "richText" ? `${attribute}PlainText` : attribute
+)
 
 const showFilters = ref(false)
 const filteredCharacters = ref(characters.value)
@@ -89,8 +88,9 @@ const elementHeights = ref("0px")
 const filteredCount = computed(() => _size(filteredCharacters.value))
 
 const filteredOptions = computed(() =>
-  mapObject(categoryAttributes, (attribute) =>
-    uniqValues(filteredCharacters.value, attribute)
+  _mapValues(
+    _pickBy(columnAttributes, { type: "autocomplete" }),
+    (_, attribute) => uniqValues(filteredCharacters.value, attribute)
   )
 )
 
