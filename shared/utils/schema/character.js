@@ -4,7 +4,7 @@ zodConfig()
 
 export const characterSchema = z.object({
   id: z.coerce.number().int().positive(),
-  player: z.string().trim(),
+  player: z.string().trim().min(1),
   mortalName: z.string().trim(),
   faeName: z.string().trim(),
   rank: z.string().trim(),
@@ -15,9 +15,7 @@ export const characterSchema = z.object({
   house: z.string().trim(),
   bannerhouse: z.string().trim(),
   description: z.string().trim(),
-  notes: z.string().trim(),
-  descriptionPlainText: z.string().trim(),
-  notesPlainText: z.string().trim()
+  notes: z.string().trim()
 })
 
 export const createCharacterSchema = characterSchema.omit({ id: true })
