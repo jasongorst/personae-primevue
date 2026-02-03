@@ -83,7 +83,7 @@ const globalFilterFields = _map(characterAttributes, ({ type }, attribute) =>
 
 const showFilters = ref(false)
 const filteredCharacters = ref(characters.value)
-const elementHeights = ref("0px")
+const elementHeights = ref("160px")
 
 const filteredCount = computed(() => _size(filteredCharacters.value))
 
