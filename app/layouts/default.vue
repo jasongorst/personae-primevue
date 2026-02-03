@@ -1,4 +1,6 @@
 <template>
+  <PiniaColadaDevtools />
+
   <ToastContainer />
 
   <ConfirmContainer />
@@ -12,6 +14,8 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { PiniaColadaDevtools } from "@pinia/colada-devtools"
+</script>
 
 <style scoped></style>
