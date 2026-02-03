@@ -49,7 +49,8 @@ export default defineNuxtPlugin({
         $socketio: { socket }
       } = useNuxtApp()
 
-      useWebsocketHandlers()
+      const { isSignedIn } = useAuthClient()
+      useHandlers()
 
       // console.log("[listeners]")
       //
@@ -57,7 +58,6 @@ export default defineNuxtPlugin({
       //   console.log(`${event}`, callbacks)
       // })
 
-      const { isSignedIn } = useAuthClient()
       watch(isSignedIn, () => socket.disconnect().connect())
     }
   },

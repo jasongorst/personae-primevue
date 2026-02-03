@@ -1,4 +1,4 @@
-export default function useWebsocketHandlers() {
+export default function useHandlers() {
   const {
     $socketio: { socket }
   } = useNuxtApp()
