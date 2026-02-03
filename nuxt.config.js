@@ -2,8 +2,6 @@
 
 import tailwindcss from "@tailwindcss/vite"
 
-const mockAuthModule = process.env.VITEST ? ["./test/mocks/setup.js"] : []
-
 // noinspection JSUnusedGlobalSymbols
 export default defineNuxtConfig({
   app: {
@@ -40,20 +38,14 @@ export default defineNuxtConfig({
 
   imports: {
     dirs: ["stores"],
-
-    presets: [
-      {
-        from: "tailwind-merge",
-        imports: ["twJoin", "twMerge"]
-      }
-    ]
+    presets: [{ from: "tailwind-merge", imports: ["twJoin", "twMerge"] }]
   },
 
   modules: [
     "@nuxt/icon",
     "@pinia/nuxt",
-    "@primevue/nuxt-module",
-    ...mockAuthModule
+    "@pinia/colada-nuxt",
+    "@primevue/nuxt-module"
   ],
 
   nitro: {
