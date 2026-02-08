@@ -24,7 +24,7 @@ export default defineNuxtConfig({
   },
 
   srcDir: "app/",
-  compatibilityDate: "2025-11-25",
+  // compatibilityDate: "2025-11-25",
   css: ["~/assets/css/main.css"],
   devServer: { port: 3000 },
 
@@ -34,7 +34,7 @@ export default defineNuxtConfig({
   },
 
   experimental: { asyncContext: true },
-  future: { compatibilityVersion: 5 },
+  // future: { compatibilityVersion: 5 },
 
   imports: {
     dirs: ["mutations", "queries", "stores"],
