@@ -69,11 +69,15 @@
 <script setup>
 definePageMeta({ name: "characters" })
 
+await usePrefetchCharacters()
+
 const { isSignedIn } = useAuthClient()
 const charactersStore = useCharactersStore()
 
-const { characters, count, filters, isLoading, options } =
+const { characters, count, filters, options } =
   storeToRefs(charactersStore)
+
+const isLoading = computed(() => useQueryCache().get(characterQuery.key).asyncStatus.value === "loading")
 
 const columnAttributes = _pickBy(characterAttributes, { showColumn: true })
 
