@@ -37,8 +37,12 @@ export default defineNuxtConfig({
   future: { compatibilityVersion: 5 },
 
   imports: {
-    dirs: ["stores"],
-    presets: [{ from: "tailwind-merge", imports: ["twJoin", "twMerge"] }]
+    dirs: ["mutations", "queries", "stores"],
+
+    presets: [{
+      from: "tailwind-merge",
+      imports: ["twJoin", "twMerge"]
+    }]
   },
 
   modules: [
@@ -94,10 +98,7 @@ export default defineNuxtConfig({
     size: "1em",
     class: "inline",
     mode: "svg",
-
-    aliases: {
-      personae: "fa6-solid:masks-theater"
-    },
+    aliases: { personae: "fa6-solid:masks-theater" },
 
     clientBundle: {
       icons: [],
@@ -119,11 +120,7 @@ export default defineNuxtConfig({
     importPT: { from: "~/primevue/passthrough.js" },
 
     options: {
-      ptOptions: {
-        mergeSections: true,
-        mergeProps: true
-      },
-
+      ptOptions: { mergeSections: true, mergeProps: true },
       unstyled: true
     }
   }
