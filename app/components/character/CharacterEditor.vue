@@ -9,9 +9,9 @@
     :isSaved="isSaved"
     :redirectBack="{ name: 'characters' }"
     :schema="schema"
-    @create="createCharacter"
-    @update="updateCharacter"
-    @delete="deleteCharacter"
+    @create="create"
+    @update="update"
+    @delete="destroy"
   />
 </template>
 
@@ -30,94 +30,64 @@ const props = defineProps({
 })
 
 const toast = useToast()
+const { createCharacter } = useCreateCharacter()
+const { updateCharacter } = useUpdateCharacter()
+const { deleteCharacter } = useDeleteCharacter()
 
-const charactersStore = await useCharactersStore()
-const { create, destroy, getCharacter, update } = charactersStore
-const { options } = storeToRefs(charactersStore)
-
-const emptyCharacter = _mapValues(characterAttributes, () => "")
+const charactersStore = useCharactersStore()
+const { getCharacter } = charactersStore
+const { emptyCharacter, options } = storeToRefs(charactersStore)
 
 const initialValue =
   props.action === "create"
-    ? emptyCharacter
-    : await getCharacter(props.characterId)
+    ? emptyCharacter.value
+    : getCharacter(props.characterId)
 
 const schema =
   props.action === "create" ? createCharacterSchema : updateCharacterSchema
 
 const isSaved = ref(false)
 
-async function createCharacter(character) {
-  // noinspection JSUnresolvedReference
-  const { data, error } = await create(character)
+async function create(character) {
+  createCharacter(character)
+  isSaved.value = true
 
-  if (data) {
-    toast.add({
-      severity: "success",
-      summary: "Saved.",
-      detail: "The character is saved.",
-      life: 3000
-    })
+  toast.add({
+    severity: "success",
+    summary: "Saved.",
+    detail: "The character is saved.",
+    life: 3000
+  })
 
-    isSaved.value = true
-    await navigateTo({ name: "characters" })
-  } else {
-    console.error(error)
-
-    toast.add({
-      severity: "error",
-      summary: "Create Error.",
-      detail: error
-    })
-  }
+  await navigateTo({ name: "characters" })
 }
 
-async function updateCharacter(editedFields) {
-  const { data, error } = await update(props.characterId, editedFields)
+async function update(editedFields) {
+  updateCharacter(props.characterId, editedFields)
+  isSaved.value = true
 
-  if (data) {
-    toast.add({
-      severity: "success",
-      summary: "Updated.",
-      detail: "The character is updated.",
-      life: 3000
-    })
+  toast.add({
+    severity: "success",
+    summary: "Updated.",
+    detail: "The character is updated.",
+    life: 3000
+  })
 
-    isSaved.value = true
-    await navigateTo({ name: "characters" })
-  } else {
-    console.error(error)
-
-    toast.add({
-      severity: "error",
-      summary: "Update Error.",
-      detail: error
-    })
-  }
+  await navigateTo({ name: "characters" })
 }
 
-async function deleteCharacter() {
-  const { data, error } = await destroy(props.characterId)
+async function destroy() {
+  deleteCharacter(props.characterId)
+  isSaved.value = true
 
-  if (data) {
-    toast.add({
-      severity: "success",
-      summary: "Deleted.",
-      detail: "The character is deleted.",
-      life: 3000
-    })
+  toast.add({
+    severity: "success",
+    summary: "Deleted.",
+    detail: "The character is deleted.",
+    life: 3000
+  })
 
-    isSaved.value = true
-    await navigateTo({ name: "characters" })
-  } else {
-    console.error(error)
-
-    toast.add({
-      severity: "error",
-      summary: "Delete Error.",
-      detail: error
-    })
-  }
+  await navigateTo({ name: "characters" })
 }
 </script>
 
