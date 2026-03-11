@@ -5,11 +5,14 @@ import { Server } from "socket.io"
 import * as middlewares from "../socketio/middlewares"
 import * as handlers from "../socketio/handlers"
 
+const LOG_CONNECTIONS = false
+const LOG_EVENTS = false
+
 export default defineNitroPlugin((nitroApp) => {
   const engine = new Engine()
 
   const io = new Server({
-    serveClient: false,
+    serveClient: false
 
     // connectionStateRecovery: {
     //   maxDisconnectionDuration: 2 * 60 * 1000,
@@ -19,45 +22,57 @@ export default defineNitroPlugin((nitroApp) => {
 
   io.bind(engine)
 
-  // middlewares
-  _forOwn(
-    middlewares,
-    (middleware) => io.use(middleware)
-  )
+  // register middlewares
+  _forOwn(middlewares, (middleware) => io.use(middleware))
 
-  nitroApp.hooks.hook("request", (event) => {
-    // expose server instance
-    event.context.io = io
-  })
+  // expose server instance
+  nitroApp.hooks.hook("request", (event) => (event.context.io = io))
 
   io.on("connection", async (socket) => {
     // register handlers
-    _forOwn(
-      handlers,
-      (handler) => handler(io, socket)
-    )
+    _forOwn(handlers, (handler) => handler(io, socket))
 
-    // log all incoming events
-    // socket.onAny((eventName, ...args) =>
-    //   console.log(eventName, ..._initial(args))
-    // )
+    if (LOG_CONNECTIONS) {
+      // log connection
+      console.log(
+        "[server socketio] [connection]",
+        socket.id,
+        socket.data.user?.username ?? "unauthenticated"
+      )
 
-    // log all outgoing events
-    // socket.onAnyOutgoing((eventName, ...args) => console.log(eventName, args))
+      console.log(
+        "[server socketio] [# connected]",
+        io.of("/").sockets.size
+      )
 
-    console.log(
-      "[connection]",
-      socket.id,
-      socket.data.user?.username ?? "unauthenticated"
-    )
+      socket.on("disconnect", (reason) => {
+        console.log(
+          "[server socketio] [disconnect]",
+          reason,
+          socket.id,
+          socket.data.user?.username ?? "unauthenticated"
+        )
+      })
+    }
 
-    console.log("[# connected]", io.of("/").sockets.size)
+    if (LOG_EVENTS) {
+      // log all incoming events
+      socket.onAny((eventName, ...args) =>
+        console.log("[server socketio] [incoming]", eventName, ..._initial(args))
+      )
+
+      // log all outgoing events
+      socket.onAnyOutgoing((eventName, ...args) =>
+        console.log("[server socketio] [outgoing]", eventName, args)
+      )
+    }
   })
 
   nitroApp.router.use(
     "/socket.io/",
+
     defineEventHandler({
-      handler(event) {
+      handler: (event) => {
         engine.handleRequest(event.node.req, event.node.res)
         event._handled = true
       },
