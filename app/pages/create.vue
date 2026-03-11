@@ -1,5 +1,8 @@
 <template>
-  <CharacterEditor action="create" />
+  <CharacterEditor
+    action="create"
+    :initialValue="emptyCharacter"
+  />
 </template>
 
 <script setup>
