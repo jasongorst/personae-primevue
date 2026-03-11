@@ -79,7 +79,7 @@ export default function useAuthClient() {
 
   async function fetchSession() {
     if (fetchingSession.value) {
-      console.log("already fetching session")
+      console.log("[useAuthClient] [fetchSession] already fetching session")
       return
     }
 
