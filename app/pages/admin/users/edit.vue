@@ -1,9 +1,17 @@
 <template>
-  <!--suppress JSValidateTypes -->
-  <UserEditor
-    action="edit"
-    :userId="userId"
-  />
+  <div>
+    <SpinnerModal
+      v-if="isLoading"
+      :visible="true"
+    />
+
+    <UserEditor
+      v-else
+      action="update"
+      :userId="userId"
+      :initialValue="user"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -14,6 +22,8 @@ definePageMeta({
 })
 
 const userId = useRoute().params?.userId
+const { data: usersList, isLoading } = await useQuery(userListQuery)
+const user = _find(usersList.value, { id: userId })
 </script>
 
 <style scoped></style>
