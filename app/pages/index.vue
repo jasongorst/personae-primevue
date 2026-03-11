@@ -1,4 +1,5 @@
 <template>
+  <!--suppress JSValidateTypes -->
   <DataTable
     :value="characters"
     dataKey="id"
@@ -14,7 +15,7 @@
     stateStorage="session"
     stateKey="datatable-state"
     scrollable
-    :scrollHeight="`calc(100vh - ${elementHeights})`"
+    :scrollHeight="`calc(100vh - ${elementHeights}px)`"
     size="small"
     :pt="{
       header: { id: 'datatable_header' },
@@ -27,26 +28,110 @@
     @filter="(event) => updateFilteredCharacters(event.filteredValue)"
     @rowSelect="(event) => showDetail(event.data)"
   >
-    <!--suppress JSUnusedLocalSymbols -->
-    <CharacterColumn
-      v-for="(_, attribute) in columnAttributes"
+    <Column
+      v-for="attribute in _keys(datatableAttributes)"
       :key="attribute"
-      :attribute="attribute"
-      :options="options[attribute]"
-      :filteredOptions="filteredOptions[attribute]"
-    />
+      :field="attribute"
+      :header="_upperCase(attribute)"
+      :showFilterMenu="false"
+      :sortable="true"
+    >
+      <template #filter="{ filterModel, filterCallback }">
+        <OptionsFilter
+          v-if="
+            _isMatch(characterAttributes[attribute], { type: 'autocomplete' })
+          "
+          v-model="filterModel.value"
+          :options="options[attribute]"
+          :filteredOptions="filteredOptions[attribute]"
+          :filterCallback="filterCallback"
+          :hasFilter="() => hasFilterFor(attribute)"
+          :resetFilter="() => resetFilterFor(attribute)"
+        />
+
+        <TextFilter
+          v-else
+          v-model="filterModel.value"
+          :filterCallback="filterCallback"
+          :hasFilter="() => hasFilterFor(attribute)"
+          :resetFilter="() => resetFilterFor(attribute)"
+        />
+      </template>
+
+      <template #sorticon="{ sorted, sortOrder }">
+        <Icon
+          v-if="sorted && sortOrder === 1"
+          name="ph:sort-ascending-bold"
+          size="1.25rem"
+        />
+
+        <Icon
+          v-else-if="sorted && sortOrder === -1"
+          name="ph:sort-descending-bold"
+          size="1.25rem"
+        />
+
+        <Icon
+          v-else
+          name="ph:arrows-down-up-bold"
+          size="1.25rem"
+        />
+      </template>
+    </Column>
 
     <template #header>
-      <CharacterFilters
-        :class="isLoading && 'hidden'"
-        :showFilters="showFilters"
-        @toggleShowFilters="toggleShowFilters"
-        @updated="updateElementHeights"
-      />
+      <div :class="isLoading && 'hidden'">
+        <div class="flex justify-between gap-4 pb-2">
+          <SearchField
+            v-model="filters['global'].value"
+            placeholder="Search"
+            type="search"
+            id="global_filter"
+          />
+
+          <ClearFiltersButton
+            :disabled="!hasAnyFilters"
+            @click="resetFilters"
+            class="px-4"
+          />
+
+          <ToggleFilterButton
+            @click="toggleShowFilters"
+            class="px-4"
+            :showFilters="showFilters"
+          />
+        </div>
+
+        <CharacterFilterChips
+          v-if="hasAnyFilters && !showFilters"
+          class="pb-2"
+        />
+      </div>
     </template>
 
     <template #empty>
-      <CharacterEmpty :class="isLoading && 'hidden'" />
+      <div
+        class="text-center text-2xl"
+        :class="isLoading && 'hidden'"
+      >
+        <template v-if="hasGlobalFilter">
+          <template v-if="hasAnyAttributeFilters">
+            No characters matching
+            <!--suppress JSUnresolvedReference -->
+            <span class="italic">&ldquo;{{ filters.global.value }}&rdquo;</span>
+            with the current filters.
+          </template>
+
+          <template v-else>
+            No characters matching
+            <!--suppress JSUnresolvedReference -->
+            <span class="italic">&ldquo;{{ filters.global.value }}&rdquo;</span
+            >.
+          </template>
+        </template>
+
+        <template v-else>No characters match the current filters.</template>
+      </div>
     </template>
 
     <template #loading>
@@ -69,34 +154,42 @@
 <script setup>
 definePageMeta({ name: "characters" })
 
-await usePrefetchCharacters()
-
 const { isSignedIn } = useAuthClient()
-const charactersStore = useCharactersStore()
+const filtersStore = useFiltersStore()
 
-const { characters, count, filters, options } =
-  storeToRefs(charactersStore)
+const {
+  hasAnyAttributeFilters,
+  hasAnyFilters,
+  hasFilterFor,
+  hasGlobalFilter,
+  resetFilterFor,
+  resetFilters,
+  toggleShowFilters
+} = filtersStore
 
-const isLoading = computed(() => useQueryCache().get(characterQuery.key).asyncStatus.value === "loading")
+const { filters, showFilters } = storeToRefs(filtersStore)
 
-const columnAttributes = _pickBy(characterAttributes, { showColumn: true })
+const { data: characters, isLoading: isLoadingCharacters } =
+  useQuery(characterListQuery)
 
-const globalFilterFields = _map(characterAttributes, ({ type }, attribute) =>
-  type === "richText" ? `${attribute}PlainText` : attribute
+const { data: options, isLoading: isLoadingOptions } = useQuery(
+  characterOptionsQuery
 )
 
-const showFilters = ref(false)
-const filteredCharacters = ref(characters.value)
-const elementHeights = ref("160px")
+const isLoading = computed(
+  () => isLoadingCharacters.value || isLoadingOptions.value
+)
 
+const count = computed(() => _size(characters.value))
 const filteredCount = computed(() => _size(filteredCharacters.value))
+const filteredCharacters = ref(_cloneDeep(characters.value))
 
 const filteredOptions = computed(() =>
-  _mapValues(
-    _pickBy(columnAttributes, { type: "autocomplete" }),
-    (_, attribute) => uniqValues(filteredCharacters.value, attribute)
-  )
+  characterOptions(filteredCharacters.value)
 )
+
+const DEFAULT_ELEMENT_HEIGHTS = 168
+const elementHeights = ref(DEFAULT_ELEMENT_HEIGHTS)
 
 onMounted(() => updateElementHeights())
 onUpdated(() => updateElementHeights())
@@ -113,10 +206,6 @@ async function showDetail({ id: characterId }) {
   }
 }
 
-function toggleShowFilters() {
-  showFilters.value = !showFilters.value
-}
-
 function updateElementHeights() {
   elementHeights.value = totalElementHeights()
 }
@@ -125,16 +214,17 @@ function totalElementHeights() {
   // total height of non-datatable elements (in pixels)
   const elements = ["navbar", "datatable_header", "datatable_footer"]
 
-  let totalHeight = _reduce(
+  // noinspection JSUnresolvedReference
+  let totalHeights = _reduce(
     elements,
     (acc, element) => acc + document?.getElementById(element)?.offsetHeight,
     0
   )
 
   // plus 16px [--spacing(4)] bottom navbar margin
-  totalHeight += 16
+  totalHeights += 16
 
-  return _isNaN(totalHeight) ? 0 : `${totalHeight}px`
+  return _isNaN(totalHeights) ? DEFAULT_ELEMENT_HEIGHTS : totalHeights
 }
 </script>
 
