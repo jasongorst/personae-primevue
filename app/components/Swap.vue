@@ -54,6 +54,7 @@ const isActive = ref(!props.disabled && props.active)
 
 function activate() {
   if (!props.disabled && !isActive.value) {
+    // noinspection JSValidateTypes
     isActive.value = true
     emit("active")
   }
