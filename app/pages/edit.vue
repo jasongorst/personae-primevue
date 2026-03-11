@@ -1,15 +1,17 @@
 <template>
-  <SpinnerModal
-    v-if="isLoading"
-    :visible="true"
-  />
+  <div>
+    <SpinnerModal
+      v-if="isLoading"
+      :visible="true"
+    />
 
-  <CharacterEditor
-    v-else
-    action="update"
-    :characterId="characterId"
-    :initialValue="character"
-  />
+    <CharacterEditor
+      v-else
+      action="update"
+      :characterId="characterId"
+      :initialValue="character"
+    />
+  </div>
 </template>
 
 <script setup>
