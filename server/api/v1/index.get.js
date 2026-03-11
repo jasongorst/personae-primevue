@@ -4,7 +4,9 @@ export default defineEventHandler(async () => {
       orderBy: [{ createdAt: "asc" }]
     })
 
-    return reshapeCharacters(characters)
+    const keyById = _curryRight(_keyBy)("id")
+
+    return keyById(characters)
   } catch (error) {
     throw createError({
       statusCode: 500,
