@@ -4,9 +4,9 @@
     <DataTable
       :value="users"
       datakey="id"
-      :loading="loading"
+      :loading="isLoading"
       scrollable
-      :scrollHeight="`calc(100vh - ${elementHeights})`"
+      :scrollHeight="`calc(100vh - ${elementHeights}px)`"
       selectionMode="single"
       :pt="{
         header: { id: 'datatable_header' },
@@ -16,33 +16,33 @@
       @rowSelect="showUserEdit"
     >
       <Column
-        v-for="field of fields"
-        :key="field"
-        :field="field"
-        :header="_upperCase(field)"
+        v-for="column of columns"
+        :key="column"
+        :field="column"
+        :header="_upperCase(column)"
       >
         <template #body="slotProps">
-          <template v-if="_isDate(slotProps.data?.[field])">
-            {{ toNumericDate(slotProps.data?.[field]) }}
+          <template v-if="_isDate(slotProps.data?.[column])">
+            {{ toNumericDate(slotProps.data?.[column]) }}
           </template>
 
           <template v-else>
-            {{ slotProps.data?.[field] }}
+            {{ slotProps.data?.[column] }}
           </template>
         </template>
       </Column>
 
-      <!--        TODO: fix spinner-->
-      <!--      <template #loading>-->
-      <!--        <SpinnerModal-->
-      <!--          :visible="true"-->
-      <!--        />-->
-      <!--      </template>-->
+      <template #loading>
+        <SpinnerModal
+          :visible="true"
+          maskClass="bg-surface!"
+        />
+      </template>
 
       <template #footer>
         <!--suppress JSValidateTypes -->
         <UserToolbar
-          :class="loading && 'hidden'"
+          :class="isLoading && 'hidden'"
           :count="count"
         />
       </template>
@@ -56,28 +56,12 @@ definePageMeta({
   middleware: ["signed-in", "admin"]
 })
 
-const {
-  $socketio: { socket }
-} = useNuxtApp()
+const columns = ["email", "name", "username", "role", "createdAt"]
 
-const { authClient } = useAuthClient()
-const toast = useToast()
-const fields = ["email", "name", "username", "role", "createdAt"]
-const elementHeights = ref("0px")
+const DEFAULT_ELEMENT_HEIGHTS = 109
+const elementHeights = ref(DEFAULT_ELEMENT_HEIGHTS)
 
-const { data: users, pending: loading } = useAsyncData(
-  "user:list",
-
-  async () => {
-    const { data: response } = await socket
-      .timeout(3000)
-      .emitWithAck("user:list")
-
-    return response
-  },
-
-  { transform: deepParseTimestamps }
-)
+const { data: users, isLoading } = useQuery(userListQuery)
 
 const count = computed(() => {
   if (users?.value) {
@@ -89,10 +73,6 @@ const count = computed(() => {
 
 onMounted(() => updateElementHeights())
 onUpdated(() => updateElementHeights())
-
-async function userDetail({ id }) {
-  await navigateTo({ name: "admin:userDetail", params: { id } })
-}
 
 function toNumericDate(date) {
   return new Intl.DateTimeFormat(undefined, {
@@ -112,6 +92,7 @@ function totalElementHeights() {
   // total height of non-datatable elements (in pixels)
   const elements = ["navbar", "datatable_footer"]
 
+  // noinspection JSUnresolvedReference
   let totalHeight = _reduce(
     elements,
     (acc, element) => acc + document?.getElementById(element)?.offsetHeight,
@@ -121,7 +102,7 @@ function totalElementHeights() {
   // plus 16px [--spacing(4)] bottom navbar margin
   totalHeight += 16
 
-  return _isNaN(totalHeight) ? 0 : `${totalHeight}px`
+  return _isNaN(totalHeight) ? DEFAULT_ELEMENT_HEIGHTS : totalHeight
 }
 
 async function showUserEdit({ data: { id: userId } }) {
