@@ -1,7 +1,5 @@
 <template>
-  <Toolbar
-    :pt="{ root: 'min-h-11.5 rounded-b-none' }"
-  >
+  <Toolbar :pt="{ root: 'min-h-11.5 rounded-b-none' }">
     <template #start>
       <div class="ps-6 text-sm whitespace-nowrap text-primary">
         Showing
@@ -47,12 +45,15 @@ const props = defineProps({
 const { isSignedIn } = useAuthClient()
 
 const filteredCountText = computed(() => {
-  if (props.filteredCount === props.count) {
-    return "all"
-  } else if (props.filteredCount === 0) {
-    return "none"
-  } else {
-    return props.filteredCount
+  switch (props.filteredCount) {
+    case props.count:
+      return "all"
+
+    case 0:
+      return "none"
+
+    default:
+      return props.filteredCount
   }
 })
 </script>
