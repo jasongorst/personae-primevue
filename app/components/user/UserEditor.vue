@@ -4,14 +4,14 @@
     :modelId="props.userId"
     :action="props.action"
     :attributes="userAttributes"
-    :initialValue="initialValue"
+    :initialValue="props.initialValue"
     :options="options"
     :isSaved="isSaved"
     :redirectBack="{ name: 'admin:users' }"
     :schema="schema"
-    @create="createUser"
-    @update="updateUser"
-    @delete="deleteUser"
+    @create="create"
+    @update="update"
+    @delete="destroy"
   />
 </template>
 
@@ -19,14 +19,20 @@
 const props = defineProps({
   action: {
     type: String,
-    default: "edit",
-    validator: (value) => _includes(["create", "edit"], value)
+    default: "update",
+    validator: (value) => _includes(["create", "update"], value)
   },
 
   userId: {
     type: String,
     validator: (value, props) =>
       props.action === "create" || (_isString(value) && !_isEmpty(value))
+  },
+
+  initialValue: {
+    type: Object,
+    default: {},
+    required: false
   }
 })
 
@@ -35,124 +41,58 @@ const {
 } = useNuxtApp()
 
 const toast = useToast()
-
-const userAttributes = {
-  email: { type: "text", initialValue: "" },
-  password: { type: "text", initialValue: "" },
-  name: { type: "text", initialValue: "" },
-  username: { type: "text", initialValue: "" },
-
-  role: {
-    type: "select",
-    options: ["user", "admin"],
-    initialValue: "user"
-  }
-}
+const { createUser } = useCreateUser()
+const { updateUser } = useUpdateUser()
+const { deleteUser } = useDeleteUser()
 
 if (props.action !== "create") {
   _unset(userAttributes, "password")
 }
 
-const emptyUser = _mapValues(userAttributes, "initialValue")
-
-async function getUser(userId) {
-  const { data: response } = await useAsyncData(
-    `user:read:${userId}`,
-    async () => {
-      const { data: response } = await socket
-        .timeout(3000)
-        .emitWithAck("user:read", userId)
-      return response
-    },
-    { transform: deepParseTimestamps }
-  )
-
-  return _pick(response.value, _keys(userAttributes))
-}
-
-const initialValue =
-  props.action === "create" ? emptyUser : await getUser(props.userId)
-
 const schema = props.action === "create" ? createUserSchema : updateUserSchema
 const options = _mapValues(userAttributes, "options")
 const isSaved = ref(false)
 
-async function createUser(user) {
-  const { data, error } = await socket
-    .timeout(3000)
-    .emitWithAck("user:create", user)
+async function create(user) {
+  createUser(user)
+  isSaved.value = true
 
-  if (data) {
-    toast.add({
-      severity: "success",
-      summary: "Saved.",
-      detail: "The user is saved.",
-      life: 3000
-    })
+  toast.add({
+    severity: "success",
+    summary: "Saved.",
+    detail: "The user is saved.",
+    life: 3000
+  })
 
-    isSaved.value = true
-    await navigateTo({ name: "admin:users" })
-  } else {
-    console.error(error)
-
-    toast.add({
-      severity: "error",
-      summary: "Create Error.",
-      detail: error
-    })
-  }
+  await navigateTo({ name: "admin:users" })
 }
 
-async function updateUser(editedFields) {
-  const { data, error } = await socket
-    .timeout(3000)
-    .emitWithAck("user:update", props.userId, editedFields)
+async function update(editedFields) {
+  updateUser(props.userId, editedFields)
+  isSaved.value = true
 
-  if (data) {
-    toast.add({
-      severity: "success",
-      summary: "Updated.",
-      detail: "The user is updated.",
-      life: 3000
-    })
+  toast.add({
+    severity: "success",
+    summary: "Updated.",
+    detail: "The user is updated.",
+    life: 3000
+  })
 
-    isSaved.value = true
-    await navigateTo({ name: "admin:users" })
-  } else {
-    console.error(error)
-
-    toast.add({
-      severity: "error",
-      summary: "Update Error.",
-      detail: error
-    })
-  }
+  await navigateTo({ name: "admin:users" })
 }
 
-async function deleteUser() {
-  const { data, error } = await socket
-    .timeout(3000)
-    .emitWithAck("user:delete", props.userId)
+async function destroy() {
+  deleteUser(props.userId)
+  isSaved.value = true
 
-  if (data) {
-    toast.add({
-      severity: "success",
-      summary: "Deleted.",
-      detail: "The user is deleted.",
-      life: 3000
-    })
+  toast.add({
+    severity: "success",
+    summary: "Deleted.",
+    detail: "The user is deleted.",
+    life: 3000
+  })
 
-    isSaved.value = true
-    await navigateTo({ name: "admin:users" })
-  } else {
-    console.error(error)
-
-    toast.add({
-      severity: "error",
-      summary: "Delete Error.",
-      detail: error
-    })
-  }
+  await navigateTo({ name: "admin:users" })
 }
 </script>
 
