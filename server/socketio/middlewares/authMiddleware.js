@@ -6,7 +6,6 @@ export async function authMiddleware(socket, next) {
   })
 
   if (session) {
-    // access the session.session && session.user
     socket.data = {
       session: session.session,
       user: session.user
