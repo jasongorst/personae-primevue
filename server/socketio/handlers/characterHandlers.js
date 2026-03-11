@@ -1,158 +1,95 @@
-// noinspection JSUnusedGlobalSymbols
-export function characterHandlers(io, socket) {
+export function characterHandlers(_io, socket) {
   socket.on("character:read", readCharacter)
   socket.on("character:list", listCharacters)
   socket.on("character:delete", deleteCharacter)
   socket.on("character:create", createCharacter)
   socket.on("character:update", updateCharacter)
+  socket.on("character:options", fetchCharacterOptions)
+
+  const characterHandlerOptions = {
+    user: socket.data?.user,
+    resource: "character",
+    idValidator: characterSchema.shape.id.parse
+  }
 
   async function readCharacter(id, callback) {
-    const query = ({ id }) => prisma.character.findUnique({ where: { id } })
-    await _executeQuery({ id, query, callback })
+    await characterHandler({
+      callback,
+      id,
+      query: ({ id }) => prisma.character.findUnique({ where: { id } })
+    })
   }
 
   async function listCharacters(callback) {
-    const query = () =>
-      prisma.character.findMany({ orderBy: [{ createdAt: "asc" }] })
-
-    const mutator = reshapeCharacters
-    await _executeQuery({ query, mutator, callback })
+    await characterHandler({
+      callback,
+      query: () =>
+        prisma.character.findMany({ orderBy: [{ createdAt: "asc" }] })
+    })
   }
 
   async function deleteCharacter(id, callback) {
-    const query = ({ id }) => prisma.character.delete({ where: { id } })
-    const mutator = (rawResult) => _pick(rawResult, ["id"])
-    const permissions = ["delete"]
-    const { previous, error } = await _executeQuery({
+    await characterHandler({
+      callback,
+      permissions: ["delete"],
       id,
-      query,
-      mutator,
-      permissions,
-      callback
+      mutator: (rawResult) => _pick(rawResult, ["id"]),
+      query: ({ id }) => prisma.character.delete({ where: { id } })
     })
 
-    if (_isUndefined(error)) {
-      broadcastPatch(socket, generateCharacterPatch(previous, {}))
-    }
+    socket.broadcast.emit("character:delete", id)
   }
 
   async function createCharacter(payload, callback) {
-    const data = addPlainTextAttributes(payload)
-    const validator = (character) => createCharacterSchema.parse(character)
-    const query = ({ data }) => prisma.character.create({ data })
-    const permissions = ["create"]
-    const { previous, result, error } = await _executeQuery({
-      data,
-      validator,
-      query,
-      permissions,
-      callback
+    const character = await characterHandler({
+      callback,
+      permissions: ["create"],
+      data: addPlainTextAttributes(payload),
+      validator: createCharacterSchema.parse,
+      query: ({ data }) => prisma.character.create({ data })
     })
 
-    if (_isUndefined(error)) {
-      broadcastPatch(socket, generateCharacterPatch(previous, result))
-    }
+    socket.broadcast.emit("character:create", character)
   }
 
   async function updateCharacter(id, payload, callback) {
-    const data = addPlainTextAttributes(payload)
-    const validator = (character) => updateCharacterSchema.parse(character)
-
-    const query = ({ id, data }) =>
-      prisma.character.update({ where: { id }, data })
-
-    const permissions = ["update"]
-    const { previous, result, error } = await _executeQuery({
+    const character = await characterHandler({
+      callback,
+      permissions: ["update"],
       id,
-      data,
-      validator,
-      query,
-      permissions,
-      callback
+      data: addPlainTextAttributes(payload),
+      validator: updateCharacterSchema.parse,
+      query: ({ id, data }) => prisma.character.update({ where: { id }, data })
     })
 
-    if (_isUndefined(error)) {
-      broadcastPatch(socket, generateCharacterPatch(previous, result))
-    }
+    socket.broadcast.emit("character:update", character)
   }
 
-  async function _executeQuery({
-    id,
-    data,
-    validator,
-    query,
-    mutator = _identity,
-    permissions,
-    callback
-  }) {
-    try {
-      if (permissions) {
-        await _authorize(permissions)
-      }
+  async function fetchCharacterOptions(callback) {
+    const columns = _keys(categoryAttributes)
 
-      const { previous, result: rawResult } = await _validateAndQuery({
-        id,
-        data,
-        validator,
-        query,
-        permissions
+    const fetchColumnOptions = async (column) => {
+      return prisma.character.groupBy({
+        by: column,
+        where: { [column]: { not: "" } },
+        orderBy: { [column]: "asc" }
       })
-      const result = mutator(rawResult)
-      callback({ data: result })
-      return { previous, result }
-    } catch (error) {
-      console.error(error)
-
-      callback({ error })
-      return { error }
     }
+
+    await characterHandler({
+      callback,
+
+      query: () => Promise.all(_map(columns, (column) => fetchColumnOptions(column))),
+
+      mutator: (rawResult) =>
+        _zipObject(
+          columns,
+          _map(rawResult, (group) => _flatMap(group, _values))
+        )
+    })
   }
 
-  async function _authorize(permissions) {
-    if (_isNil(socket.data?.user)) {
-      throw new AuthError("You must be signed in to modify characters.")
-    }
-
-    const permitted = await checkPermission(
-      socket.data.user.id,
-      "character",
-      permissions
-    )
-
-    if (!permitted) {
-      throw new AuthError(
-        `${socket.data.user.username} isn't allowed to modify characters.`,
-        { resource: "character", permissions }
-      )
-    }
-  }
-
-  async function _validateAndQuery({
-    id,
-    data,
-    validator = _identity,
-    query = _noop,
-    permissions
-  }) {
-    let validId, validData
-    let previous = {}
-
-    if (id) {
-      validId = characterSchema.shape.id.parse(id)
-
-      if (
-        permissions &&
-        (_includes(permissions, "update") || _includes(permissions, "delete"))
-      ) {
-        previous = await prisma.character.findUnique({ where: { id: validId } })
-      }
-    }
-
-    if (data) {
-      validData = validator(data)
-    }
-
-    const result = await query({ id: validId, data: validData })
-    return { previous, result }
+  async function characterHandler(options) {
+    return await executeQuery({ ...characterHandlerOptions, ...options })
   }
 }
