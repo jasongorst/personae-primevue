@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row flex-wrap gap-1">
-    <template v-if="hasGlobalFilter">
+    <template v-if="filters.global.value.length > 0">
       <!--suppress JSUnresolvedReference -->
       <Chip
         :label="`Anywhere: &ldquo;${filters.global.value}&rdquo;`"
@@ -40,7 +40,7 @@
 
     <template
       v-if="hasAnyCategoryFilters"
-      v-for="attribute in _keys(datatableCategoryAttributes)"
+      v-for="attribute in _keys(optionsAttributes)"
       :key="attribute"
     >
       <Chip
@@ -63,23 +63,19 @@
 </template>
 
 <script setup>
-const charactersStore = useCharactersStore()
+const filtersStore = useFiltersStore()
 
 const {
+  hasAnyCategoryFilters,
+  hasAnyNameFilters,
   hasFilterFor,
+  hasGlobalFilter,
   removeFilterValueFrom,
   resetFilterFor,
   resetGlobalFilter
-} = charactersStore
+} = filtersStore
 
-const {
-  filters,
-  hasAnyCategoryFilters,
-  hasAnyNameFilters,
-  hasGlobalFilter,
-  nameAttributes,
-  datatableCategoryAttributes
-} = storeToRefs(charactersStore)
+const { filters } = storeToRefs(filtersStore)
 </script>
 
 <style scoped></style>
