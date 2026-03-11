@@ -8,7 +8,6 @@
       aria-controls="user_menu"
       @click="toggleMenu"
     >
-      <!--suppress JSUnresolvedReference -->
       <span class="font-semibold">
         {{ user.username }}
       </span>
@@ -59,8 +58,8 @@
 
         <a
           v-else
-          :href="item.url"
-          :target="item.target"
+          :href="item?.url"
+          :target="item?.target"
           v-bind="props.action"
         >
           {{ item.label }}
@@ -82,7 +81,6 @@ const ChangePasswordDialog = defineLazyHydrationComponent(
 )
 
 const { isSignedIn, signOut, user } = useAuthClient()
-const route = useRoute()
 const dialog = useDialog()
 const toast = useToast()
 const menu = useTemplateRef("menu")
@@ -96,7 +94,7 @@ const model = computed(() => {
   if (isSignedIn.value && user.value.role === "admin") {
     menu.unshift({
       label: "Dashboard",
-      command: () => navigateTo("/admin/users")
+      command: async () => await navigateTo({ name: "admin:users" })
     })
   }
 
