@@ -1,17 +1,38 @@
 <template>
-  <NuxtLayout>
+  <PiniaColadaDevtools />
+
+  <ToastContainer />
+
+  <ConfirmContainer />
+
+  <DynamicDialog />
+
+  <div class="relative">
+    <NavBar />
+
     <NuxtPage />
-  </NuxtLayout>
+  </div>
 </template>
 
 <script setup>
+import { PiniaColadaDevtools } from "@pinia/colada-devtools"
+
 // onMounted(async () => {
 //   if (import.meta.dev) {
 //     await useAutoSignIn()
 //   }
 // })
 
-onUnmounted(() => useRemoveAllListeners())
+onMounted(async () => await usePrefetchCharacters())
+
+onUnmounted(() => {
+  const {
+    $socketio: { socket }
+  } = useNuxtApp()
+
+  socket.removeAllListeners()
+  socket.disconnect()
+})
 </script>
 
 <style scoped></style>
