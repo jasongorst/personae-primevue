@@ -1,6 +1,6 @@
 import { mockNuxtImport } from "@nuxt/test-utils/runtime"
+import { NIL as NIL_UUID } from "uuid"
 
-const emptyUuid = "00000000-0000-0000-0000-000000000000"
 const now = new Date()
 const years = 365 * 24 * 60 * 60 * 1000
 
@@ -9,13 +9,13 @@ const user = {
   email: "test@example.com",
   role: "user",
   username: "test",
-  id: emptyUuid
+  id: NIL_UUID
 }
 
 const session = {
   token: "0".repeat(32),
   userId: user.id,
-  id: emptyUuid,
+  id: NIL_UUID,
   createdAt: now,
   updatedAt: now,
   expiresAt: new Date().setTime(now.getTime() + 20 * years)
