@@ -1,6 +1,4 @@
-// noinspection DuplicatedCode
-
-export function userHandlers(io, socket) {
+export function userHandlers(_io, socket) {
   socket.on("user:read", readUser)
   socket.on("user:list", listUsers)
   socket.on("user:paginate", paginateUsers)
@@ -9,144 +7,94 @@ export function userHandlers(io, socket) {
   socket.on("user:create", createUser)
   socket.on("user:update", updateUser)
 
-  async function readUser(id, callback) {
-    const query = ({ id }) =>
-      prisma.user.findUnique({
-        omit: { banned: true, banReason: true, banExpires: true },
-        where: { id }
-      })
-
-    await _executeQuery({ id, query, callback })
+  const userHandlerOptions = {
+    user: socket.data?.user,
+    resource: "user",
+    idValidator: userSchema.shape.id.parse
   }
 
+  async function readUser(id, callback) {
+    await userHandler({
+      id,
+      callback,
+
+      query: ({ id }) =>
+        prisma.user.findUnique({
+          omit: { banned: true, banReason: true, banExpires: true },
+          where: { id }
+        })
+    })
+  }
 
   async function listUsers(callback) {
-    const query = () =>
-      prisma.user.findMany({
-        omit: { banned: true, banReason: true, banExpires: true },
-        orderBy: [{ createdAt: "asc" }]
-      })
+    await userHandler({
+      callback,
 
-    await _executeQuery({ query, callback })
+      query: () =>
+        prisma.user.findMany({
+          omit: { banned: true, banReason: true, banExpires: true },
+          orderBy: [{ createdAt: "asc" }]
+        })
+    })
   }
 
   async function paginateUsers(skip, take, callback) {
-    const query = () =>
-      prisma.user.findMany({
-        omit: { banned: true, banReason: true, banExpires: true },
-        orderBy: [{ createdAt: "asc" }],
-        skip,
-        take
-      })
+    await userHandler({
+      callback,
 
-    await _executeQuery({ query, callback })
+      query: () =>
+        prisma.user.findMany({
+          omit: { banned: true, banReason: true, banExpires: true },
+          orderBy: [{ createdAt: "asc" }],
+          skip,
+          take
+        })
+    })
   }
 
   async function countUsers(callback) {
-    const query = () => prisma.user.count()
-    await _executeQuery({ query, callback })
+    await userHandler({ callback, query: () => prisma.user.count() })
   }
 
   async function deleteUser(id, callback) {
-    const query = ({ id }) => prisma.user.delete({ where: { id } })
-    const mutator = (rawResult) => _pick(rawResult, ["id"])
-    const permissions = ["delete"]
-    await _executeQuery({ id, query, mutator, permissions, callback })
+    await userHandler({
+      callback,
+      permissions: ["delete"],
+      id,
+      mutator: (rawResult) => _pick(rawResult, ["id"]),
+      query: ({ id }) => prisma.user.delete({ where: { id } })
+    })
   }
 
   async function createUser(data, callback) {
-    const validator = (user) => createUserSchema.parse(user)
-    const permissions = ["create"]
+    await userHandler({
+      callback,
+      permissions: ["create"],
+      data,
+      validator: createUserSchema.parse,
 
-    try {
-      await _authorize(permissions)
-      const validData = validator(data)
-
-      // noinspection JSUnresolvedReference
-      const result = await serverAuth().api.createUser({
-        body: {
-          email: validData.email,
-          password: validData.password,
-          name: validData.name,
-          role: validData.role,
-          data: { username: validData.username }
-        }
-      })
-
-      callback({ data: result })
-      return { result }
-    } catch (error) {
-      console.log(error)
-
-      callback({ error })
-      return { error}
-    }
+      query: ({ data }) =>
+        serverAuth().api.createUser({
+          body: {
+            ..._omit(data, "username"),
+            data: { username: data.username }
+          }
+        })
+    })
   }
 
   async function updateUser(id, data, callback) {
-    const validator = (user) => updateUserSchema.parse(user)
-    const query = ({ id, data }) => prisma.user.update({ where: { id }, data })
-    const permissions = ["update"]
-    await _executeQuery({ id, data, validator, query, permissions, callback })
+    await userHandler({
+      callback,
+      permissions: ["update"],
+      id,
+      data,
+      validator: updateUserSchema.parse,
+      query: ({ id, data }) => prisma.user.update({ where: { id }, data })
+    })
   }
 
-  async function _executeQuery({
-    id,
-    data,
-    validator,
-    query,
-    mutator = _identity,
-    permissions,
-    callback
-  }) {
-    try {
-      if (permissions) {
-        await _authorize(permissions)
-      }
-
-      const { result: rawResult } = await _validateAndQuery({ id, data, validator, query })
-      const result = mutator(rawResult)
-      callback({ data: result })
-      return { result }
-    } catch (error) {
-      console.log(error)
-
-      callback({ error })
-      return { error }
-    }
-  }
-
-  async function _authorize(permissions) {
-    if (_isNil(socket.data?.user)) {
-      throw new AuthError("You must be signed in to modify users.")
-    }
-
-    const permitted = await checkPermission(
-      socket.data.user.id,
-      "user",
-      permissions
-    )
-
-    if (!permitted) {
-      throw new AuthError(
-        `${socket.data.user.username} isn't allowed to modify users.`,
-        { resource: "user", permissions }
-      )
-    }
-  }
-
-  async function _validateAndQuery({ id, data, validator = _identity, query = _noop }) {
-    let validId, validData
-
-    if (id) {
-      validId = userSchema.shape.id.parse(id)
-    }
-
-    if (data) {
-      validData = validator(data)
-    }
-
-    const result = await query({ id: validId, data: validData })
-    return { result }
+  async function userHandler(options) {
+    return await executeQuery({ ...userHandlerOptions, ...options })
   }
 }
