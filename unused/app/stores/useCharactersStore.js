@@ -34,7 +34,6 @@ export const useCharactersStore = defineStore("characters", () => {
   // empty character
   const emptyCharacter = ref(_mapValues(characterAttributes, () => ""))
 
-
   const filters = ref(_cloneDeep(emptyFilters.value))
   const sort = ref({ attribute: "createdAt", order: "asc" })
 
