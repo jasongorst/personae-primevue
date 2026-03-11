@@ -1,18 +1,28 @@
-export default function useAbortableEmit(key, eventName = null, ...params) {
-  const options = { deep: true }
-  const event = eventName || key
+export default async function useAbortableEmit(event, ...params) {
+  let abortSignal
 
-  const handler = () => useEmit(event, ...params)
-
-  const abortableHandler = (_nuxtApp, { signal }) => {
-    return new Promise((resolve, reject) => {
-      signal?.addEventListener("abort", () => {
-        reject(new Error("Request aborted"))
-      })
-
-      return Promise.resolve(callback.call(this, handler)).then(resolve, reject)
-    })
+  if (_has(_last(params), "signal")) {
+    abortSignal = _last(params).signal
+    params = _initial(params)
   }
 
-  return useAsyncData(key, abortableHandler, options)
+  abortSignal?.throwIfAborted()
+
+  abortSignal?.addEventListener("abort", () => {
+    throw new DOMException(abortSignal?.reason, "AbortError" )
+  })
+
+  const {
+    $socketio: { socket }
+  } = useNuxtApp()
+
+  const { data, error } = await socket.emitWithAck(event, ...params)
+
+  if (error) {
+    console.error("[useEmit] [error]", event, params, error)
+
+    throw new Error(error)
+  }
+
+  return data
 }
