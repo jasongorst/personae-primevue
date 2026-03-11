@@ -1,20 +1,23 @@
 // noinspection JSUnresolvedReference
 
 export default function useRevertible(initialValue) {
-  const original = ref(toValue(initialValue))
-  const model = ref(_cloneDeep(original.value))
-  const editedFields = computed(()=> findUpdated(original.value, model.value))
+  const original = readonly(toValue(initialValue))
+  const model = ref()
+  const editedFields = computed(() => findUpdated(original, model.value))
   const isEdited = computed(() => !_isEmpty(editedFields.value))
+  const revert = () => (model.value = original)
 
-  function revert() {
-    model.value = _cloneDeep(original.value)
-  }
+  // watchEffect(() => (model.value = toValue(initialValue)))
 
-  return {
-    original,
-    model,
-    editedFields,
-    isEdited,
-    revert
-  }
+  watch(
+    initialValue,
+    (newValue, oldValue) => {
+      console.log("[useRevertible] [watch] [initialValue]", oldValue, newValue)
+
+      model.value = newValue
+    },
+    { immediate: true}
+  )
+
+  return { original, model, editedFields, isEdited, revert }
 }
