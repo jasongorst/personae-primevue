@@ -37,7 +37,7 @@ export default defineNuxtConfig({
   // future: { compatibilityVersion: 5 },
 
   imports: {
-    dirs: ["mutations", "queries", "stores"],
+    dirs: ["mutations/**", "queries", "stores"],
 
     presets: [{
       from: "tailwind-merge",
@@ -49,7 +49,8 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "@pinia/nuxt",
     "@pinia/colada-nuxt",
-    "@primevue/nuxt-module"
+    "@primevue/nuxt-module",
+    ...(process.env.NODE_ENV === "test" ? ["@nuxt/test-utils/module"] : [])
   ],
 
   nitro: {
