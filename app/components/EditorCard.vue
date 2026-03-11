@@ -17,28 +17,20 @@
           class="group flex flex-col"
         >
           <Swap
+            :class="props.action !== 'view' && 'cursor-pointer'"
             :disabled="props.action === 'view'"
             @active="focusFormControl(attribute, type)"
             @inactive="validate(attribute)"
           >
-            <template #default>
-              <label
-                :for="attribute"
-                class="ml-1 block text-sm text-primary dark:text-primary"
-                :class="props.action !== 'view' && 'cursor-pointer'"
-              >
+            <template #inactive>
+              <div class="ml-1 block text-sm text-primary dark:text-primary">
                 {{ _startCase(attribute) }}
-              </label>
-            </template>
+              </div>
 
-            <template #inactive="{ activate }">
               <div
                 v-if="type === 'richText'"
                 class="trix-content border border-transparent px-3 py-2"
-                :class="
-                  props.action !== 'view' &&
-                  'cursor-pointer group-hover:bg-primary/15'
-                "
+                :class=" props.action !== 'view' && 'group-hover:bg-primary/15'"
                 :tabindex="0"
                 v-html="model?.[attribute] || '&nbsp;'"
               />
@@ -46,10 +38,7 @@
               <div
                 v-else
                 class="border border-transparent px-3 py-2"
-                :class="
-                  props.action !== 'view' &&
-                  'cursor-pointer group-hover:bg-primary/15'
-                "
+                :class=" props.action !== 'view' && 'group-hover:bg-primary/15'"
                 :tabindex="0"
               >
                 {{ model?.[attribute] || "&nbsp;" }}
@@ -57,6 +46,10 @@
             </template>
 
             <template #active="{ deactivate }">
+              <div class="ml-1 block text-sm text-primary dark:text-primary">
+                {{ _startCase(attribute) }}
+              </div>
+
               <TrixEditor
                 v-if="type === 'richText'"
                 v-model="model[attribute]"
@@ -130,7 +123,7 @@
 
         <template v-else>
           <Button
-            v-if="props.action === 'edit'"
+            v-if="props.action === 'update'"
             severity="danger"
             @click="confirmDelete"
           >
@@ -168,8 +161,8 @@ const props = defineProps({
   action: {
     type: String,
     required: false,
-    default: "edit",
-    validator: (value) => _includes(["create", "edit", "view"], value)
+    default: "view",
+    validator: (value) => _includes(["create", "update", "view"], value)
   },
 
   attributes: {
@@ -204,16 +197,16 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(["reset", "back", "delete", "create", "update"])
+const emit = defineEmits(["delete", "create", "update"])
 
 const confirm = useConfirm()
 const toast = useToast()
 
-const { model, editedFields, isEdited, revert } = useRevertible(
-  props.initialValue
+const { original, model, editedFields, isEdited, revert } = useRevertible(
+  () => props.initialValue
 )
 
-const suggestions = ref(_clone(props.options))
+const suggestions = ref(toValue(props.options))
 
 const valid = ref(true)
 const formErrors = ref([])
@@ -228,6 +221,7 @@ onBeforeRouteLeave(async () => {
 async function focusFormControl(attribute, type) {
   await nextTick()
   const control = document.getElementById(attribute)
+  // noinspection JSUnresolvedReference
   control.focus()
 
   switch (type) {
@@ -239,7 +233,9 @@ async function focusFormControl(attribute, type) {
 
     case "richText": {
       await nextTick()
+      // noinspection JSUnresolvedReference
       const length = control.editor.getDocument().getLength()
+      // noinspection JSUnresolvedReference
       control.editor.setSelectedRange(length - 1)
       break
     }
@@ -248,6 +244,7 @@ async function focusFormControl(attribute, type) {
       const length = _isNull(model.value[attribute])
         ? 0
         : model.value[attribute].length
+      // noinspection JSUnresolvedReference
       control.setSelectionRange(length, length)
     }
   }
@@ -270,8 +267,6 @@ async function reset() {
       trixEditors.value[attribute].reset()
     }
   )
-
-  emit("reset")
 }
 
 function validate(attribute = null) {
