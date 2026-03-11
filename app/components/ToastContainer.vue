@@ -1,6 +1,5 @@
 <template>
   <Toast class="top-14!">
-    <!--suppress VueUnrecognizedSlot -->
     <template #messageicon="{ class: messageIconClass }">
       <div :class="messageIconClass">
         <template v-for="{ className, iconName } in messageIcons">
