@@ -4,7 +4,7 @@
     :modelId="props.characterId"
     :action="props.action"
     :attributes="characterAttributes"
-    :initialValue="initialValue"
+    :initialValue="props.initialValue"
     :options="options"
     :isSaved="isSaved"
     :redirectBack="{ name: 'characters' }"
@@ -19,13 +19,19 @@
 const props = defineProps({
   action: {
     type: String,
-    default: "edit",
-    validator: (value) => _includes(["create", "edit", "view"], value)
+    default: "view",
+    validator: (value) => _includes(["create", "update", "view"], value)
   },
 
   characterId: {
     type: Number,
     validator: (value, props) => props.action === "create" || _isInteger(value)
+  },
+
+  initialValue: {
+    type: Object,
+    default: {},
+    required: false
   }
 })
 
@@ -34,14 +40,7 @@ const { createCharacter } = useCreateCharacter()
 const { updateCharacter } = useUpdateCharacter()
 const { deleteCharacter } = useDeleteCharacter()
 
-const charactersStore = useCharactersStore()
-const { getCharacter } = charactersStore
-const { emptyCharacter, options } = storeToRefs(charactersStore)
-
-const initialValue =
-  props.action === "create"
-    ? emptyCharacter.value
-    : getCharacter(props.characterId)
+const { data: options } = useQuery(characterOptionsQuery)
 
 const schema =
   props.action === "create" ? createCharacterSchema : updateCharacterSchema
