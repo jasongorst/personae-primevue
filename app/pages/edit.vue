@@ -1,7 +1,14 @@
 <template>
+  <SpinnerModal
+    v-if="isLoading"
+    :visible="true"
+  />
+
   <CharacterEditor
-    action="edit"
+    v-else
+    action="update"
     :characterId="characterId"
+    :initialValue="character"
   />
 </template>
 
@@ -13,6 +20,8 @@ definePageMeta({
 })
 
 const characterId = _toInteger(useRoute().params?.characterId)
+const { data: characterList, isLoading } = useQuery(characterListQuery)
+const character = _find(characterList.value, { id: characterId })
 </script>
 
 <style scoped></style>
